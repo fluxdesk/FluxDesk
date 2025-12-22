@@ -5,7 +5,7 @@
 <h1 align="center">FluxDesk</h1>
 
 <p align="center">
-  Open-source customer support software built on Laravel and ShadCN.I m
+  Open-source customer support software built on Laravel and ShadCN.
 </p>
 
 <p align="center">
