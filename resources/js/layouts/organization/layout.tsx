@@ -1,0 +1,127 @@
+import { cn } from '@/lib/utils';
+import { index as settingsIndex } from '@/routes/organization/settings';
+import { index as statusesIndex } from '@/routes/organization/statuses';
+import { index as prioritiesIndex } from '@/routes/organization/priorities';
+import { index as tagsIndex } from '@/routes/organization/tags';
+import { index as slasIndex } from '@/routes/organization/slas';
+import { index as membersIndex } from '@/routes/organization/members';
+import { index as emailChannelsIndex } from '@/routes/organization/email-channels';
+import { type NavItem } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
+import { Settings, CircleDot, Flag, Tags, Clock, Users, Mail } from 'lucide-react';
+import { type PropsWithChildren } from 'react';
+
+const sidebarNavItems: NavItem[] = [
+    {
+        title: 'Algemeen',
+        href: settingsIndex(),
+        icon: Settings,
+    },
+    {
+        title: 'Statussen',
+        href: statusesIndex(),
+        icon: CircleDot,
+    },
+    {
+        title: 'Prioriteiten',
+        href: prioritiesIndex(),
+        icon: Flag,
+    },
+    {
+        title: 'Tags',
+        href: tagsIndex(),
+        icon: Tags,
+    },
+    {
+        title: "SLA's",
+        href: slasIndex(),
+        icon: Clock,
+    },
+    {
+        title: 'Team',
+        href: membersIndex(),
+        icon: Users,
+    },
+    {
+        title: 'E-mail',
+        href: emailChannelsIndex(),
+        icon: Mail,
+    },
+];
+
+export default function OrganizationLayout({ children }: PropsWithChildren) {
+    const currentPath = usePage().url;
+
+    const isActive = (href: string) => {
+        const url = typeof href === 'string' ? href : (href as { url: string }).url;
+        return currentPath.startsWith(url);
+    };
+
+    return (
+        <div className="flex h-full flex-col md:flex-row overflow-hidden">
+            {/* Mobile Nav - horizontal scrollable */}
+            <div className="md:hidden border-b bg-muted/30 shrink-0">
+                <div className="p-3 pb-0">
+                    <h2 className="text-lg font-semibold tracking-tight">Organisatie</h2>
+                </div>
+                <nav className="flex overflow-x-auto px-3 pb-2 pt-2 gap-1">
+                    {sidebarNavItems.map((item) => {
+                        const href = typeof item.href === 'string' ? item.href : item.href.url;
+                        const active = isActive(href);
+                        return (
+                            <Link
+                                key={href}
+                                href={href}
+                                className={cn(
+                                    'flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors shrink-0',
+                                    active
+                                        ? 'bg-primary text-primary-foreground'
+                                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                                )}
+                            >
+                                {item.icon && <item.icon className="h-4 w-4" />}
+                                {item.title}
+                            </Link>
+                        );
+                    })}
+                </nav>
+            </div>
+
+            {/* Desktop Sidebar - Fixed, never scrolls */}
+            <aside className="hidden md:flex w-56 shrink-0 border-r border-border/50 bg-muted/30 flex-col h-full overflow-hidden">
+                <div className="p-4">
+                    <h2 className="text-lg font-semibold tracking-tight">Organisatie</h2>
+                    <p className="text-xs text-muted-foreground">Configureer je werkruimte</p>
+                </div>
+                <nav className="flex-1 space-y-1 px-3 pb-4">
+                    {sidebarNavItems.map((item) => {
+                        const href = typeof item.href === 'string' ? item.href : item.href.url;
+                        const active = isActive(href);
+                        return (
+                            <Link
+                                key={href}
+                                href={href}
+                                className={cn(
+                                    'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                                    active
+                                        ? 'bg-primary text-primary-foreground'
+                                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                                )}
+                            >
+                                {item.icon && <item.icon className="h-4 w-4" />}
+                                {item.title}
+                            </Link>
+                        );
+                    })}
+                </nav>
+            </aside>
+
+            {/* Content Area - Only this scrolls */}
+            <div className="flex-1 min-h-0 overflow-auto">
+                <div className="p-4 md:p-8">
+                    {children}
+                </div>
+            </div>
+        </div>
+    );
+}

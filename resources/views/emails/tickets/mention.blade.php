@@ -1,0 +1,73 @@
+@extends('emails.tickets.layout')
+
+@section('title', 'Je bent vermeld - #' . $ticket->ticket_number)
+
+@section('preheader')
+    {{ $mentionedBy->name }} heeft je vermeld in ticket #{{ $ticket->ticket_number }}
+@endsection
+
+@section('header')
+    Je bent vermeld in ticket #{{ $ticket->ticket_number }}
+@endsection
+
+@section('content')
+    <p style="margin: 0 0 24px; font-size: 15px; line-height: 1.6; color: #374151;">
+        <strong>{{ $mentionedBy->name }}</strong> heeft je vermeld in een bericht.
+    </p>
+
+    <!-- Message bubble -->
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+        <tr>
+            <td>
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                        <td style="padding-bottom: 8px;">
+                            <span style="font-size: 13px; font-weight: 600; color: #374151;">{{ $mentionedBy->name }}</span>
+                            <span style="font-size: 12px; color: #9ca3af; margin-left: 8px;">{{ $message->created_at->format('d M, H:i') }}</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: {{ $organization->settings?->primary_color ?? '#000000' }}; border-radius: 12px; border-top-right-radius: 4px; padding: 16px 20px;">
+                            <div style="margin: 0; font-size: 14px; line-height: 1.6; color: #ffffff;">{!! nl2br(e(html_to_text($message->body_html ?? $message->body, 800))) !!}</div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Ticket reference -->
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9fafb; border-radius: 8px; margin-bottom: 24px;">
+        <tr>
+            <td style="padding: 16px 20px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                        <td>
+                            <span style="font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Onderwerp</span>
+                            <p style="margin: 4px 0 0; font-size: 15px; font-weight: 500; color: #111827;">{{ $ticket->subject }}</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding-top: 12px;">
+                            <span style="font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Ticketnummer</span>
+                            <p style="margin: 4px 0 0; font-size: 14px; font-weight: 500; color: #374151;">#{{ $ticket->ticket_number }}</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+@endsection
+
+@section('footer')
+    <!-- CTA Button -->
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+        <tr>
+            <td align="center">
+                <a href="{{ $actionUrl }}" style="display: inline-block; background-color: {{ $organization->settings?->primary_color ?? '#000000' }}; color: #ffffff; font-size: 14px; font-weight: 600; text-decoration: none; padding: 12px 32px; border-radius: 8px;">
+                    Bekijk ticket
+                </a>
+            </td>
+        </tr>
+    </table>
+@endsection
