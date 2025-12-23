@@ -70,7 +70,11 @@ test('getCurrentVersion returns unknown when git fails', function () {
     expect($service->getCurrentVersion())->toBe('unknown');
 });
 
-test('getLatestVersion fetches from GitHub API', function () {
+test('getLatestVersion fetches tags and calls GitHub API', function () {
+    Process::fake([
+        'git fetch --tags --quiet' => Process::result(output: ''),
+    ]);
+
     Http::fake([
         'api.github.com/repos/fluxdesk/FluxDesk/releases/latest' => Http::response([
             'tag_name' => 'v2.0.0',
@@ -84,6 +88,8 @@ test('getLatestVersion fetches from GitHub API', function () {
     $service = new VersionCheckService;
     $latest = $service->getLatestVersion();
 
+    Process::assertRan('git fetch --tags --quiet');
+
     expect($latest)->toBeArray()
         ->and($latest['version'])->toBe('2.0.0')
         ->and($latest['url'])->toBe('https://github.com/fluxdesk/FluxDesk/releases/tag/v2.0.0')
@@ -91,6 +97,10 @@ test('getLatestVersion fetches from GitHub API', function () {
 });
 
 test('getLatestVersion returns null on API failure', function () {
+    Process::fake([
+        'git fetch --tags --quiet' => Process::result(output: ''),
+    ]);
+
     Http::fake([
         'api.github.com/*' => Http::response([], 404),
     ]);
@@ -103,6 +113,7 @@ test('getLatestVersion returns null on API failure', function () {
 test('isOutOfDate returns true when current version is older', function () {
     Process::fake([
         'git describe --tags --abbrev=0' => Process::result(output: 'v1.0.0'),
+        'git fetch --tags --quiet' => Process::result(output: ''),
     ]);
 
     Http::fake([
@@ -122,6 +133,7 @@ test('isOutOfDate returns true when current version is older', function () {
 test('isOutOfDate returns false when current version is latest', function () {
     Process::fake([
         'git describe --tags --abbrev=0' => Process::result(output: 'v2.0.0'),
+        'git fetch --tags --quiet' => Process::result(output: ''),
     ]);
 
     Http::fake([
@@ -141,6 +153,7 @@ test('isOutOfDate returns false when current version is latest', function () {
 test('isOutOfDate returns false when current version is newer', function () {
     Process::fake([
         'git describe --tags --abbrev=0' => Process::result(output: 'v3.0.0'),
+        'git fetch --tags --quiet' => Process::result(output: ''),
     ]);
 
     Http::fake([
@@ -160,6 +173,7 @@ test('isOutOfDate returns false when current version is newer', function () {
 test('isOutOfDate returns false when GitHub API fails', function () {
     Process::fake([
         'git describe --tags --abbrev=0' => Process::result(output: 'v1.0.0'),
+        'git fetch --tags --quiet' => Process::result(output: ''),
     ]);
 
     Http::fake([
@@ -207,6 +221,7 @@ test('flushLatestVersionCache only clears latest version', function () {
 test('getVersionStatus returns complete status array', function () {
     Process::fake([
         'git describe --tags --abbrev=0' => Process::result(output: 'v1.0.0'),
+        'git fetch --tags --quiet' => Process::result(output: ''),
     ]);
 
     Http::fake([
@@ -240,6 +255,7 @@ test('getPhpVersion returns current PHP version', function () {
 test('getFullStatus includes PHP version', function () {
     Process::fake([
         'git describe --tags --abbrev=0' => Process::result(output: 'v1.0.0'),
+        'git fetch --tags --quiet' => Process::result(output: ''),
     ]);
 
     Http::fake([
@@ -261,6 +277,7 @@ test('getFullStatus includes PHP version', function () {
 test('refreshVersionData clears cache and returns fresh data', function () {
     Process::fake([
         'git describe --tags --abbrev=0' => Process::result(output: 'v1.5.0'),
+        'git fetch --tags --quiet' => Process::result(output: ''),
     ]);
 
     Http::fake([

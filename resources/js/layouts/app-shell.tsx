@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/resizable';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AppNav } from '@/components/inbox/app-nav';
+import { UpdateAvailableModal } from '@/components/update-available-modal';
 
 interface AppShellProps {
     children: React.ReactNode;
@@ -31,6 +32,7 @@ export function AppShell({
     if (!resizable) {
         return (
             <TooltipProvider delayDuration={0}>
+                <UpdateAvailableModal />
                 {/* Mobile Layout - Collapsed icon sidebar */}
                 <div className="flex h-screen overflow-hidden md:hidden">
                     <div className="w-[50px] shrink-0 bg-muted/40 border-r overflow-hidden">
@@ -57,6 +59,7 @@ export function AppShell({
     // Resizable layout (for inbox)
     return (
         <TooltipProvider delayDuration={0}>
+            <UpdateAvailableModal />
             <div className="flex h-screen overflow-hidden">
                 {/* Navigation Sidebar - Fixed, never scrolls */}
                 <ResizablePanelGroup

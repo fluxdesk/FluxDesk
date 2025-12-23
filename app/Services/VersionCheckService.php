@@ -85,12 +85,29 @@ class VersionCheckService
     }
 
     /**
+     * Fetch the latest tags from remote to ensure we have up-to-date version info.
+     */
+    private function fetchLatestTags(): void
+    {
+        try {
+            Process::run('git fetch --tags --quiet');
+        } catch (Exception $e) {
+            Log::warning('Failed to fetch latest git tags', [
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
      * Fetch the latest release from GitHub API.
      *
      * @return array{version: string, url: string, published_at: string, body: string}|null
      */
     private function fetchLatestVersionFromGitHub(): ?array
     {
+        // Fetch latest tags from remote before checking
+        $this->fetchLatestTags();
+
         try {
             $repo = $this->getGitHubRepo();
             $response = Http::timeout(10)
