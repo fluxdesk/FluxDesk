@@ -358,7 +358,6 @@ class NotificationService
             try {
                 Log::info('NotificationService: Sending mention notification', [
                     'user_id' => $user->id,
-                    'user_email' => $user->email,
                     'message_id' => $message->id,
                     'ticket_id' => $ticket->id,
                     'mentioned_by' => $mentionedBy->name,
@@ -419,7 +418,6 @@ class NotificationService
         try {
             Log::info('NotificationService: Sending assignment notification', [
                 'assignee_id' => $assignee->id,
-                'assignee_email' => $assignee->email,
                 'ticket_id' => $ticket->id,
                 'assigned_by' => $assignedBy?->name ?? 'System',
             ]);

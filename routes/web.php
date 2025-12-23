@@ -20,6 +20,7 @@ use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\PersonalTagController;
 use App\Http\Controllers\Tickets\MessageController;
 use App\Http\Controllers\Tickets\TicketController;
+use App\Http\Controllers\UpgradeController;
 use Illuminate\Support\Facades\Route;
 
 // Home route - redirects to login (used after logout)
@@ -139,6 +140,16 @@ Route::middleware(['auth', 'verified', 'org.required'])->group(function () {
         Route::get('email-channels/{emailChannel}/oauth/redirect', [EmailChannelOAuthController::class, 'redirect'])->name('email-channels.oauth.redirect');
         Route::get('email-channels/oauth/callback/{provider}', [EmailChannelOAuthController::class, 'callback'])->name('email-channels.oauth.callback');
     });
+});
+
+// Upgrade routes (super admin only)
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('upgrade', [UpgradeController::class, 'index'])
+        ->name('upgrade')
+        ->can('viewUpgrades', App\Models\User::class);
+    Route::post('upgrade/check', [UpgradeController::class, 'check'])
+        ->name('upgrade.check')
+        ->can('viewUpgrades', App\Models\User::class);
 });
 
 // Public invitation routes

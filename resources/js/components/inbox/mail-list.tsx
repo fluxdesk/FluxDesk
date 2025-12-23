@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 import { format, isToday, isYesterday } from 'date-fns';
 import { nl } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -108,10 +109,10 @@ function getMessagePreview(message?: { body?: string; body_html?: string }, maxL
     if (!message) return '';
 
     let text = '';
-    // If there's body_html, strip HTML tags
+    // If there's body_html, strip HTML tags (sanitize first to prevent XSS during parsing)
     if (message.body_html) {
         const div = document.createElement('div');
-        div.innerHTML = message.body_html;
+        div.innerHTML = DOMPurify.sanitize(message.body_html);
         text = div.textContent?.trim() || '';
     } else {
         text = message.body?.trim() || '';

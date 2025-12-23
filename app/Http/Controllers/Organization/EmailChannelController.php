@@ -119,7 +119,12 @@ class EmailChannelController extends Controller
 
             return back()->with('error', "Connection failed: {$result['error']}");
         } catch (\Exception $e) {
-            return back()->with('error', "Connection test failed: {$e->getMessage()}");
+            Log::error('Email channel connection test failed', [
+                'channel_id' => $emailChannel->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with('error', 'Connection test failed. Please check your settings and try again.');
         }
     }
 

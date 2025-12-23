@@ -22,6 +22,16 @@ export interface NavItem {
     isActive?: boolean;
 }
 
+export interface VersionStatus {
+    current: string;
+    latest: string | null;
+    is_outdated: boolean;
+    release_url: string | null;
+    release_notes: string | null;
+    release_name: string | null;
+    published_at: string | null;
+}
+
 export interface SharedData {
     name: string;
     quote: { message: string; author: string };
@@ -34,6 +44,7 @@ export interface SharedData {
     folders: TicketFolder[];
     inboxCount: number;
     tags: Tag[];
+    appVersion: VersionStatus | null;
     [key: string]: unknown;
 }
 

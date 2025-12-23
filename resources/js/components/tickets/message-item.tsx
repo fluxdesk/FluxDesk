@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 import { format } from 'date-fns';
 import { StickyNote, Bot, Eye } from 'lucide-react';
 import { useState } from 'react';
@@ -126,7 +127,7 @@ export function MessageItem({ message }: MessageItemProps) {
                 {message.body_html ? (
                     <div
                         className="email-content"
-                        dangerouslySetInnerHTML={{ __html: message.body_html }}
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(message.body_html) }}
                     />
                 ) : (
                     <p className="whitespace-pre-wrap">{message.body}</p>

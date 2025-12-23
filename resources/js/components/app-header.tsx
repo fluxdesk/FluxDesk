@@ -27,6 +27,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { UserMenuContent } from '@/components/user-menu-content';
+import { VersionBadge } from '@/components/version-alert';
 import { useInitials } from '@/hooks/use-initials';
 import { cn, isSameUrl, resolveUrl } from '@/lib/utils';
 import { dashboard } from '@/routes';
@@ -66,7 +67,7 @@ interface AppHeaderProps {
 
 export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const page = usePage<SharedData>();
-    const { auth } = page.props;
+    const { auth, appVersion } = page.props;
     const getInitials = useInitials();
     return (
         <>
@@ -226,6 +227,14 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 ))}
                             </div>
                         </div>
+                        {/* Version alert for super admins */}
+                        {appVersion && (
+                            <VersionBadge
+                                currentVersion={appVersion.current}
+                                latestVersion={appVersion.latest}
+                                isOutdated={appVersion.is_outdated}
+                            />
+                        )}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button

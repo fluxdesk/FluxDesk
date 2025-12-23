@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -225,7 +226,7 @@ function MessageBubble({ message, isOwn, primaryColor }: MessageBubbleProps) {
                     {message.body_html ? (
                         <div
                             className="text-sm prose prose-sm max-w-none dark:prose-invert [&>*:first-child]:mt-0 [&>*:last-child]:mb-0"
-                            dangerouslySetInnerHTML={{ __html: message.body_html }}
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(message.body_html) }}
                         />
                     ) : (
                         <p className="text-sm whitespace-pre-wrap">{message.body}</p>

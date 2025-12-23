@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 import { Head, useForm } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
@@ -163,7 +164,7 @@ function MessageBubble({
                     {message.body_html ? (
                         <div
                             className="prose prose-sm max-w-none dark:prose-invert"
-                            dangerouslySetInnerHTML={{ __html: message.body_html }}
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(message.body_html) }}
                         />
                     ) : (
                         <p className="whitespace-pre-wrap text-sm">{message.body}</p>

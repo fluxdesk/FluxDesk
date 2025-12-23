@@ -218,7 +218,8 @@ class InstallController extends Controller
                 $sendEvent('complete', '', ['success' => $migrationResult['success']]);
 
             } catch (\Exception $e) {
-                $sendEvent('error', 'Unexpected error: '.$e->getMessage());
+                Log::error('Installation migration error', ['error' => $e->getMessage()]);
+                $sendEvent('error', 'An unexpected error occurred during migration. Please check the logs.');
                 $sendEvent('complete', '', ['success' => false]);
             }
         }, 200, [

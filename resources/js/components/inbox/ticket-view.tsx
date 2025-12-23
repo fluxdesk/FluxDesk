@@ -1,5 +1,6 @@
 'use client';
 
+import DOMPurify from 'dompurify';
 import { ConfirmationDialog } from '@/components/common/confirmation-dialog';
 import { MergeTicketsWizard } from '@/components/tickets/merge-tickets-wizard';
 import * as React from 'react';
@@ -1140,7 +1141,7 @@ function MessageBubble({ message }: { message: Message; ticket: Ticket }) {
                                 {message.body_html ? (
                                     <div
                                         className="email-content prose prose-sm max-w-none dark:prose-invert"
-                                        dangerouslySetInnerHTML={{ __html: message.body_html }}
+                                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(message.body_html) }}
                                     />
                                 ) : (
                                     <p className="whitespace-pre-wrap">{highlightMentions(message.body)}</p>
@@ -1182,7 +1183,7 @@ function MessageBubble({ message }: { message: Message; ticket: Ticket }) {
                         {message.body_html ? (
                             <div
                                 className="email-content prose prose-sm max-w-none dark:prose-invert"
-                                dangerouslySetInnerHTML={{ __html: message.body_html }}
+                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(message.body_html) }}
                             />
                         ) : (
                             <p className="whitespace-pre-wrap">{highlightMentions(message.body)}</p>
