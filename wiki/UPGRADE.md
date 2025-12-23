@@ -2,6 +2,34 @@
 
 This guide explains how FluxDesk handles version management, checking for updates, and performing upgrades.
 
+## GUI Upgrade (Recommended)
+
+FluxDesk now includes a graphical upgrade interface that handles the entire upgrade process automatically.
+
+### How to Use
+
+1. When a new version is available, super admins will see a notification modal
+2. Click "Nu upgraden" to go to the upgrade page
+3. Click "Upgrade starten" to begin the automated upgrade
+
+### What the GUI Upgrade Does
+
+The automated upgrade performs these steps:
+1. Enables maintenance mode (with secret bypass for admins)
+2. Fetches latest tags from GitHub (`git fetch --all --tags`)
+3. Downloads new files (`git pull --ff-only` or checkout to latest tag)
+4. Installs PHP dependencies (`composer install --no-dev --optimize-autoloader`)
+5. Installs Node.js dependencies (`npm install`)
+6. Builds frontend assets (`npm run build`)
+7. Runs database migrations
+8. Clears and rebuilds all caches
+9. Updates version cache
+10. Disables maintenance mode
+
+### Maintenance Mode During Upgrade
+
+During the upgrade, the application is in maintenance mode. The upgrade routes are accessible via a secret bypass cookie, so you can continue to monitor the upgrade progress.
+
 ## Version Management
 
 FluxDesk uses **git tags** for version management instead of hardcoded version numbers. This means:

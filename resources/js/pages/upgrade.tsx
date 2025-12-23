@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { formatDistanceToNow } from 'date-fns';
 import { nl } from 'date-fns/locale';
 import {
@@ -10,6 +10,7 @@ import {
     ExternalLink,
     Github,
     RefreshCw,
+    Rocket,
     Terminal,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -147,18 +148,26 @@ export default function Upgrade({ versionStatus, githubRepo }: Props) {
                                     </div>
                                 </div>
                             )}
-                            {status.release_url && (
-                                <a
-                                    href={status.release_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
-                                >
-                                    <Github className="h-4 w-4" />
-                                    Bekijk release op GitHub
-                                    <ExternalLink className="h-3 w-3" />
-                                </a>
-                            )}
+                            <div className="flex flex-wrap items-center gap-3">
+                                <Button asChild>
+                                    <Link href="/upgrade/run">
+                                        <Rocket className="mr-2 h-4 w-4" />
+                                        Nu upgraden
+                                    </Link>
+                                </Button>
+                                {status.release_url && (
+                                    <a
+                                        href={status.release_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+                                    >
+                                        <Github className="h-4 w-4" />
+                                        Bekijk release op GitHub
+                                        <ExternalLink className="h-3 w-3" />
+                                    </a>
+                                )}
+                            </div>
                         </CardContent>
                     </Card>
                 )}
