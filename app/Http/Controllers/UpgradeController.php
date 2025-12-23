@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Services\VersionCheckService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Process;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -55,155 +54,54 @@ class UpgradeController extends Controller
     }
 
     /**
-     * Execute the upgrade process with streaming output.
+     * Execute the upgrade process by running the Artisan command with streaming output.
      */
     public function execute(): StreamedResponse
     {
         return response()->stream(function () {
             // Disable output buffering
-            if (ob_get_level()) {
+            while (ob_get_level()) {
                 ob_end_clean();
             }
 
-            $this->sendStep('start', 'Upgrade wordt gestart...', 'pending');
+            $this->sendStep('start', 'Upgrade wordt gestart...', 'running');
 
-            // Step 1: Enable maintenance mode
-            $this->sendStep('maintenance', 'Onderhoudsmodus inschakelen...', 'running');
-            try {
-                Artisan::call('down', ['--secret' => 'fluxdesk-upgrade']);
-                $this->sendStep('maintenance', 'Onderhoudsmodus ingeschakeld', 'completed');
-            } catch (\Exception $e) {
-                $this->sendStep('maintenance', 'Onderhoudsmodus kon niet worden ingeschakeld: '.$e->getMessage(), 'warning');
-            }
+            // Get the PHP binary path
+            $phpBinary = PHP_BINARY;
+            $artisanPath = base_path('artisan');
 
-            // Step 2: Fetch latest tags
-            $this->sendStep('fetch', 'Nieuwste versie ophalen van GitHub...', 'running');
-            $result = Process::timeout(120)->run('git fetch --all --tags');
-            if ($result->successful()) {
-                $this->sendStep('fetch', 'Nieuwste versie opgehaald', 'completed');
-            } else {
-                $this->sendStep('fetch', 'Git fetch mislukt: '.$result->errorOutput(), 'error');
-                $this->finishUpgrade(false);
+            // Run the upgrade command with real-time output
+            $process = Process::timeout(1800) // 30 minutes max
+                ->path(base_path())
+                ->env([
+                    'TERM' => 'dumb', // Disable colors/spinners for clean output
+                    'NO_COLOR' => '1',
+                ])
+                ->run("{$phpBinary} {$artisanPath} fluxdesk:upgrade --force --no-ansi 2>&1", function (string $type, string $output) {
+                    // Stream each line of output
+                    $lines = explode("\n", $output);
+                    foreach ($lines as $line) {
+                        $line = trim($line);
+                        if (empty($line)) {
+                            continue;
+                        }
 
-                return;
-            }
-
-            // Step 3: Git pull
-            $this->sendStep('pull', 'Nieuwe bestanden downloaden...', 'running');
-            $result = Process::timeout(300)->run('git pull --ff-only');
-            if ($result->successful()) {
-                $this->sendStep('pull', 'Bestanden gedownload', 'completed');
-                $this->sendOutput($result->output());
-            } else {
-                // Try checkout to latest tag instead
-                $this->sendStep('pull', 'Pull mislukt, probeer checkout naar laatste tag...', 'warning');
-                $latestTag = Process::run('git describe --tags $(git rev-list --tags --max-count=1)');
-                if ($latestTag->successful()) {
-                    $tag = trim($latestTag->output());
-                    $checkout = Process::run("git checkout {$tag}");
-                    if ($checkout->successful()) {
-                        $this->sendStep('pull', "Checkout naar {$tag} gelukt", 'completed');
-                    } else {
-                        $this->sendStep('pull', 'Checkout mislukt: '.$checkout->errorOutput(), 'error');
-                        $this->finishUpgrade(false);
-
-                        return;
+                        // Parse the output and send appropriate events
+                        $this->parseAndSendOutput($line);
                     }
-                } else {
-                    $this->sendStep('pull', 'Kon nieuwste tag niet vinden', 'error');
-                    $this->finishUpgrade(false);
+                });
 
-                    return;
-                }
-            }
+            if ($process->successful()) {
+                // Get the new version
+                $this->versionCheckService->flushVersionCache();
+                $newVersion = $this->versionCheckService->getCurrentVersion();
 
-            // Step 4: Composer install
-            $this->sendStep('composer', 'PHP dependencies installeren...', 'running');
-            $result = Process::timeout(600)->run('composer install --no-dev --optimize-autoloader --no-interaction');
-            if ($result->successful()) {
-                $this->sendStep('composer', 'PHP dependencies geinstalleerd', 'completed');
+                $this->sendStep('complete', "FluxDesk is bijgewerkt naar versie v{$newVersion}!", 'completed');
+                $this->sendEvent('complete', ['version' => $newVersion, 'success' => true]);
             } else {
-                $this->sendStep('composer', 'Composer install mislukt: '.$result->errorOutput(), 'error');
-                $this->finishUpgrade(false);
-
-                return;
+                $this->sendStep('error', 'Upgrade mislukt. Controleer de output hierboven.', 'error');
+                $this->sendEvent('complete', ['success' => false, 'error' => $process->errorOutput()]);
             }
-
-            // Step 5: NPM install
-            $this->sendStep('npm_install', 'Node.js dependencies installeren...', 'running');
-            $result = Process::timeout(600)->run('npm install');
-            if ($result->successful()) {
-                $this->sendStep('npm_install', 'Node.js dependencies geinstalleerd', 'completed');
-            } else {
-                $this->sendStep('npm_install', 'NPM install mislukt: '.$result->errorOutput(), 'error');
-                $this->finishUpgrade(false);
-
-                return;
-            }
-
-            // Step 6: NPM build
-            $this->sendStep('npm_build', 'Frontend bouwen...', 'running');
-            $result = Process::timeout(600)->run('npm run build');
-            if ($result->successful()) {
-                $this->sendStep('npm_build', 'Frontend gebouwd', 'completed');
-            } else {
-                $this->sendStep('npm_build', 'NPM build mislukt: '.$result->errorOutput(), 'error');
-                $this->finishUpgrade(false);
-
-                return;
-            }
-
-            // Step 7: Run migrations
-            $this->sendStep('migrate', 'Database migraties uitvoeren...', 'running');
-            try {
-                Artisan::call('migrate', ['--force' => true]);
-                $this->sendStep('migrate', 'Database migraties voltooid', 'completed');
-                $this->sendOutput(Artisan::output());
-            } catch (\Exception $e) {
-                $this->sendStep('migrate', 'Migraties mislukt: '.$e->getMessage(), 'error');
-                $this->finishUpgrade(false);
-
-                return;
-            }
-
-            // Step 8: Clear caches
-            $this->sendStep('cache_clear', 'Caches legen...', 'running');
-            try {
-                Artisan::call('optimize:clear');
-                $this->sendStep('cache_clear', 'Caches geleegd', 'completed');
-            } catch (\Exception $e) {
-                $this->sendStep('cache_clear', 'Cache legen mislukt: '.$e->getMessage(), 'warning');
-            }
-
-            // Step 9: Rebuild caches
-            $this->sendStep('cache_rebuild', 'Caches opbouwen...', 'running');
-            try {
-                Artisan::call('config:cache');
-                Artisan::call('route:cache');
-                Artisan::call('view:cache');
-                $this->sendStep('cache_rebuild', 'Caches opgebouwd', 'completed');
-            } catch (\Exception $e) {
-                $this->sendStep('cache_rebuild', 'Cache opbouwen mislukt: '.$e->getMessage(), 'warning');
-            }
-
-            // Step 10: Clear version cache
-            $this->sendStep('version', 'Versie cache vernieuwen...', 'running');
-            $this->versionCheckService->flushVersionCache();
-            $newVersion = $this->versionCheckService->getCurrentVersion();
-            $this->sendStep('version', "Versie bijgewerkt naar v{$newVersion}", 'completed');
-
-            // Step 11: Disable maintenance mode
-            $this->sendStep('maintenance_off', 'Onderhoudsmodus uitschakelen...', 'running');
-            try {
-                Artisan::call('up');
-                $this->sendStep('maintenance_off', 'Onderhoudsmodus uitgeschakeld', 'completed');
-            } catch (\Exception $e) {
-                $this->sendStep('maintenance_off', 'Kon onderhoudsmodus niet uitschakelen: '.$e->getMessage(), 'warning');
-            }
-
-            // Complete
-            $this->sendStep('complete', "FluxDesk is bijgewerkt naar versie {$newVersion}!", 'completed');
-            $this->sendEvent('complete', ['version' => $newVersion, 'success' => true]);
         }, 200, [
             'Content-Type' => 'text/event-stream',
             'Cache-Control' => 'no-cache',
@@ -213,10 +111,96 @@ class UpgradeController extends Controller
     }
 
     /**
+     * Parse command output and send appropriate SSE events.
+     */
+    private function parseAndSendOutput(string $line): void
+    {
+        // Map common output patterns to step IDs
+        $stepPatterns = [
+            'Onderhoudsmodus inschakelen' => ['id' => 'maintenance', 'status' => 'running'],
+            'Onderhoudsmodus ingeschakeld' => ['id' => 'maintenance', 'status' => 'completed'],
+            'Nieuwste versie ophalen' => ['id' => 'fetch', 'status' => 'running'],
+            'Git fetch voltooid' => ['id' => 'fetch', 'status' => 'completed'],
+            'Nieuwe bestanden downloaden' => ['id' => 'pull', 'status' => 'running'],
+            'Git pull voltooid' => ['id' => 'pull', 'status' => 'completed'],
+            'Checkout naar' => ['id' => 'pull', 'status' => 'completed'],
+            'PHP dependencies installeren' => ['id' => 'composer', 'status' => 'running'],
+            'Composer install voltooid' => ['id' => 'composer', 'status' => 'completed'],
+            'Node.js dependencies installeren' => ['id' => 'npm_install', 'status' => 'running'],
+            'NPM install voltooid' => ['id' => 'npm_install', 'status' => 'completed'],
+            'Frontend bouwen' => ['id' => 'npm_build', 'status' => 'running'],
+            'NPM build voltooid' => ['id' => 'npm_build', 'status' => 'completed'],
+            'Database migraties uitvoeren' => ['id' => 'migrate', 'status' => 'running'],
+            'Database migraties voltooid' => ['id' => 'migrate', 'status' => 'completed'],
+            'Caches legen' => ['id' => 'cache_clear', 'status' => 'running'],
+            'Caches geleegd' => ['id' => 'cache_clear', 'status' => 'completed'],
+            'Caches opbouwen' => ['id' => 'cache_rebuild', 'status' => 'running'],
+            'Caches opgebouwd' => ['id' => 'cache_rebuild', 'status' => 'completed'],
+            'Versie cache vernieuwen' => ['id' => 'version', 'status' => 'running'],
+            'Versie bijgewerkt naar' => ['id' => 'version', 'status' => 'completed'],
+            'Onderhoudsmodus uitgeschakeld' => ['id' => 'maintenance_off', 'status' => 'completed'],
+            'is bijgewerkt naar versie' => ['id' => 'complete', 'status' => 'completed'],
+        ];
+
+        // Error patterns
+        $errorPatterns = [
+            'mislukt' => 'error',
+            'error' => 'error',
+            'failed' => 'error',
+        ];
+
+        // Warning patterns
+        $warningPatterns = [
+            'warning' => 'warning',
+            'probeer' => 'warning',
+        ];
+
+        // Check for step patterns
+        foreach ($stepPatterns as $pattern => $info) {
+            if (stripos($line, $pattern) !== false) {
+                $this->sendStep($info['id'], $line, $info['status']);
+
+                return;
+            }
+        }
+
+        // Check for errors
+        foreach ($errorPatterns as $pattern => $status) {
+            if (stripos($line, $pattern) !== false) {
+                $this->sendStep('error', $line, 'error');
+
+                return;
+            }
+        }
+
+        // Check for warnings
+        foreach ($warningPatterns as $pattern => $status) {
+            if (stripos($line, $pattern) !== false) {
+                $this->sendStep('warning', $line, 'warning');
+
+                return;
+            }
+        }
+
+        // Send as general output if not matched
+        if (! empty($line) && ! preg_match('/^[\s\-_═─│┌┐└┘├┤┬┴┼]+$/', $line)) {
+            $this->sendOutput($line);
+        }
+    }
+
+    /**
      * Send a step update via SSE.
      */
     private function sendStep(string $id, string $message, string $status): void
     {
+        // Clean ANSI codes from message
+        $message = preg_replace('/\x1B\[[0-9;]*[A-Za-z]/', '', $message);
+        $message = trim($message);
+
+        if (empty($message)) {
+            return;
+        }
+
         $this->sendEvent('step', [
             'id' => $id,
             'message' => $message,
@@ -230,7 +214,11 @@ class UpgradeController extends Controller
      */
     private function sendOutput(string $output): void
     {
-        if (trim($output)) {
+        // Clean ANSI codes
+        $output = preg_replace('/\x1B\[[0-9;]*[A-Za-z]/', '', $output);
+        $output = trim($output);
+
+        if (! empty($output)) {
             $this->sendEvent('output', ['text' => $output]);
         }
     }
@@ -247,22 +235,5 @@ class UpgradeController extends Controller
             ob_flush();
         }
         flush();
-    }
-
-    /**
-     * Finish upgrade and restore if failed.
-     */
-    private function finishUpgrade(bool $success): void
-    {
-        if (! $success) {
-            // Try to disable maintenance mode on failure
-            try {
-                Artisan::call('up');
-                $this->sendStep('maintenance_off', 'Onderhoudsmodus uitgeschakeld na fout', 'completed');
-            } catch (\Exception $e) {
-                $this->sendStep('maintenance_off', 'Kon onderhoudsmodus niet uitschakelen', 'warning');
-            }
-            $this->sendEvent('complete', ['success' => false]);
-        }
     }
 }
