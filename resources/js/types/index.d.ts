@@ -44,7 +44,6 @@ export interface SharedData {
     folders: TicketFolder[];
     inboxCount: number;
     tags: Tag[];
-    appVersion: VersionStatus | null;
     [key: string]: unknown;
 }
 

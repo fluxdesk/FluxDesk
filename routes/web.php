@@ -169,6 +169,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('upgrade/check', [UpgradeController::class, 'check'])
         ->name('upgrade.check')
         ->can('viewUpgrades', App\Models\User::class);
+    Route::get('upgrade/status', [UpgradeController::class, 'status'])
+        ->name('upgrade.status')
+        ->can('viewUpgrades', App\Models\User::class);
     Route::post('upgrade/execute', [UpgradeController::class, 'execute'])
         ->name('upgrade.execute')
         ->can('viewUpgrades', App\Models\User::class);

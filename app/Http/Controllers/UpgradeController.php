@@ -43,11 +43,23 @@ class UpgradeController extends Controller
     }
 
     /**
-     * Check for updates (AJAX endpoint).
+     * Check for updates (AJAX endpoint) - forces refresh from GitHub.
      */
     public function check(): JsonResponse
     {
         $this->versionCheckService->refreshVersionData();
+        $status = $this->versionCheckService->getVersionStatus();
+
+        return response()->json($status);
+    }
+
+    /**
+     * Get current version status (AJAX endpoint) - non-blocking.
+     * Uses cached data if available, fetches from GitHub otherwise.
+     * Designed to be called asynchronously after page load.
+     */
+    public function status(): JsonResponse
+    {
         $status = $this->versionCheckService->getVersionStatus();
 
         return response()->json($status);

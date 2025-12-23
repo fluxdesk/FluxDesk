@@ -6,7 +6,6 @@ use App\Models\Tag;
 use App\Models\Ticket;
 use App\Models\TicketFolder;
 use App\Services\OrganizationContext;
-use App\Services\VersionCheckService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -15,7 +14,6 @@ class HandleInertiaRequests extends Middleware
 {
     public function __construct(
         protected OrganizationContext $organizationContext,
-        protected VersionCheckService $versionCheckService,
     ) {}
 
     /**
@@ -73,10 +71,6 @@ class HandleInertiaRequests extends Middleware
             'tags' => fn () => $user && $this->organizationContext->get()
                 ? Tag::where(fn ($q) => $q->whereNull('user_id')->orWhere('user_id', $user->id))->orderBy('name')->get()
                 : [],
-            // Version info for super admins only
-            'appVersion' => fn () => $user?->isSuperAdmin()
-                ? $this->versionCheckService->getVersionStatus()
-                : null,
         ];
     }
 }

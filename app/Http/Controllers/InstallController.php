@@ -35,11 +35,11 @@ class InstallController extends Controller
     /**
      * Step 1: Welcome & Requirements
      */
-    public function welcome(): Response
+    public function welcome(): Response|RedirectResponse
     {
         // If welcome is already complete, redirect to current step
         if ($this->installationService->isStepComplete('welcome')) {
-            return Inertia::location($this->redirectToCurrentStep()->getTargetUrl());
+            return $this->redirectToCurrentStep();
         }
 
         $this->installationService->ensureEnvFile();
@@ -122,12 +122,12 @@ class InstallController extends Controller
     /**
      * Show the database setup progress page
      */
-    public function runDatabase(): Response
+    public function runDatabase(): Response|RedirectResponse
     {
         $config = session('install_db_config');
 
         if (! $config) {
-            return Inertia::location(route('install.database'));
+            return redirect()->route('install.database');
         }
 
         return Inertia::render('install/database-setup', [

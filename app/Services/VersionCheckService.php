@@ -240,4 +240,33 @@ class VersionCheckService
             'php_version' => $this->getPhpVersion(),
         ]);
     }
+
+    /**
+     * Get cached version status without making external requests.
+     * Returns null if no cached data is available.
+     *
+     * This is safe to call on every request as it never blocks on external services.
+     *
+     * @return array{current: string, latest: string|null, is_outdated: bool, release_url: string|null, release_notes: string|null, published_at: string|null}|null
+     */
+    public function getCachedVersionStatus(): ?array
+    {
+        $current = Cache::get(self::CACHE_KEY_CURRENT);
+        $latest = Cache::get(self::CACHE_KEY_LATEST);
+
+        // If we don't have current version cached, get it (this is fast, just local git)
+        if ($current === null) {
+            $current = $this->getVersionFromGitTag();
+        }
+
+        return [
+            'current' => $current,
+            'latest' => $latest['version'] ?? null,
+            'is_outdated' => $latest ? version_compare($current, $latest['version'], '<') : false,
+            'release_url' => $latest['url'] ?? null,
+            'release_notes' => $latest['body'] ?? null,
+            'release_name' => $latest['name'] ?? null,
+            'published_at' => $latest['published_at'] ?? null,
+        ];
+    }
 }
