@@ -2,25 +2,66 @@
 
 namespace App\Services;
 
+use Exception;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Process;
 
 /**
  * Check for application updates from GitHub releases.
  */
 class VersionCheckService
 {
-    private const CACHE_KEY = 'fluxdesk_latest_version';
+    private const CACHE_KEY_LATEST = 'fluxdesk_latest_version';
+
+    private const CACHE_KEY_CURRENT = 'fluxdesk_current_version';
 
     private const CACHE_TTL = 3600; // 1 hour
 
+    private const CACHE_TTL_CURRENT = 86400; // 24 hours for current version
+
     /**
-     * Get the current application version.
+     * Get the current application version from git tag.
      */
     public function getCurrentVersion(): string
     {
-        return config('app.version', '1.0.0');
+        return Cache::remember(self::CACHE_KEY_CURRENT, self::CACHE_TTL_CURRENT, function () {
+            return $this->getVersionFromGitTag();
+        });
+    }
+
+    /**
+     * Get the version from the current git tag.
+     */
+    private function getVersionFromGitTag(): string
+    {
+        try {
+            $result = Process::run('git describe --tags --abbrev=0');
+
+            if ($result->successful()) {
+                $version = trim($result->output());
+
+                // Remove 'v' prefix if present and return
+                return ltrim($version, 'v');
+            }
+
+            Log::warning('Failed to get git tag', [
+                'error' => $result->errorOutput(),
+            ]);
+        } catch (Exception $e) {
+            Log::warning('Exception while getting git tag', [
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        // Fallback: try to read from .version file if it exists
+        $versionFile = base_path('.version');
+        if (file_exists($versionFile)) {
+            return trim(file_get_contents($versionFile));
+        }
+
+        return 'unknown';
     }
 
     /**
@@ -38,7 +79,7 @@ class VersionCheckService
      */
     public function getLatestVersion(): ?array
     {
-        return Cache::remember(self::CACHE_KEY, self::CACHE_TTL, function () {
+        return Cache::remember(self::CACHE_KEY_LATEST, self::CACHE_TTL, function () {
             return $this->fetchLatestVersionFromGitHub();
         });
     }
@@ -124,22 +165,62 @@ class VersionCheckService
     }
 
     /**
-     * Flush the version cache.
+     * Flush the version cache (both current and latest).
      */
     public function flushVersionCache(): void
     {
-        Cache::forget(self::CACHE_KEY);
+        Cache::forget(self::CACHE_KEY_LATEST);
+        Cache::forget(self::CACHE_KEY_CURRENT);
+    }
+
+    /**
+     * Flush only the current version cache.
+     */
+    public function flushCurrentVersionCache(): void
+    {
+        Cache::forget(self::CACHE_KEY_CURRENT);
+    }
+
+    /**
+     * Flush only the latest version cache.
+     */
+    public function flushLatestVersionCache(): void
+    {
+        Cache::forget(self::CACHE_KEY_LATEST);
     }
 
     /**
      * Force refresh the version data.
      *
-     * @return array{version: string, url: string, published_at: string, body: string}|null
+     * @return array{current: string, latest: array{version: string, url: string, published_at: string, body: string}|null}
      */
-    public function refreshVersionData(): ?array
+    public function refreshVersionData(): array
     {
         $this->flushVersionCache();
 
-        return $this->getLatestVersion();
+        return [
+            'current' => $this->getCurrentVersion(),
+            'latest' => $this->getLatestVersion(),
+        ];
+    }
+
+    /**
+     * Get PHP version.
+     */
+    public function getPhpVersion(): string
+    {
+        return phpversion();
+    }
+
+    /**
+     * Get the full version status including environment info.
+     *
+     * @return array{current: string, latest: string|null, is_outdated: bool, release_url: string|null, release_notes: string|null, published_at: string|null, php_version: string}
+     */
+    public function getFullStatus(): array
+    {
+        return array_merge($this->getVersionStatus(), [
+            'php_version' => $this->getPhpVersion(),
+        ]);
     }
 }

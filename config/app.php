@@ -56,19 +56,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Application Version
-    |--------------------------------------------------------------------------
-    |
-    | This value is the current version of the application. It is used for
-    | version checking and upgrade notifications. Update this value with
-    | each release to match the GitHub release tag.
-    |
-    */
-
-    'version' => '1.0.1',
-
-    /*
-    |--------------------------------------------------------------------------
     | GitHub Repository
     |--------------------------------------------------------------------------
     |

@@ -57,7 +57,9 @@ class UpgradeCommand extends Command
         $this->line('');
         $this->line('');
 
-        $version = config('app.version', '1.0.0');
+        // Get fresh version after upgrade
+        $versionCheckService->flushCurrentVersionCache();
+        $version = $versionCheckService->getCurrentVersion();
         info("FluxDesk has been upgraded to version {$version}!");
 
         $this->line('');

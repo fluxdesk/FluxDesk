@@ -35,3 +35,5 @@ yarn-error.log
 /.aider*
 _ide_helper*.php
 .phpstorm.meta.php
+/package-lock.json
+/composer.lock
