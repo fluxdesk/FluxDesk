@@ -21,7 +21,7 @@ export default function Complete({ appName }: Props) {
 
     return (
         <InstallLayout
-            currentStep={4}
+            currentStep={6}
             stepTitle="Installation Complete!"
             stepDescription="Your help desk is ready to go."
             appName={appName}

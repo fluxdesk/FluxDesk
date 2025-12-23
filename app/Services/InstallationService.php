@@ -356,10 +356,223 @@ class InstallationService
     }
 
     /**
+     * Save mail configuration to .env file.
+     */
+    public function saveMailConfig(array $config): void
+    {
+        $mailer = $config['mailer'] ?? 'log';
+
+        $envVars = ['MAIL_MAILER' => $mailer];
+
+        if ($mailer === 'smtp') {
+            $envVars['MAIL_HOST'] = $config['host'] ?? '127.0.0.1';
+            $envVars['MAIL_PORT'] = $config['port'] ?? '587';
+            $envVars['MAIL_USERNAME'] = $config['username'] ?? '';
+            $envVars['MAIL_PASSWORD'] = $config['password'] ?? '';
+            $envVars['MAIL_ENCRYPTION'] = $config['encryption'] ?? 'tls';
+        }
+
+        $envVars['MAIL_FROM_ADDRESS'] = $config['from_address'] ?? 'hello@example.com';
+        $envVars['MAIL_FROM_NAME'] = '${APP_NAME}';
+
+        $this->writeEnvVariables($envVars);
+
+        // Clear config cache and update runtime config
+        Artisan::call('config:clear');
+
+        config()->set('mail.default', $mailer);
+        if ($mailer === 'smtp') {
+            config()->set('mail.mailers.smtp.host', $config['host'] ?? '127.0.0.1');
+            config()->set('mail.mailers.smtp.port', $config['port'] ?? '587');
+            config()->set('mail.mailers.smtp.username', $config['username'] ?? '');
+            config()->set('mail.mailers.smtp.password', $config['password'] ?? '');
+            config()->set('mail.mailers.smtp.encryption', $config['encryption'] ?? 'tls');
+        }
+    }
+
+    /**
+     * Test mail configuration by sending a test email.
+     *
+     * @return array{success: bool, message: string}
+     */
+    public function testMailConnection(array $config): array
+    {
+        try {
+            $mailer = $config['mailer'] ?? 'log';
+
+            if ($mailer === 'log') {
+                return ['success' => true, 'message' => 'Log mailer is always available'];
+            }
+
+            if ($mailer === 'smtp') {
+                $host = $config['host'] ?? '127.0.0.1';
+                $port = (int) ($config['port'] ?? 587);
+                $encryption = $config['encryption'] ?? 'tls';
+
+                // Determine if we should use TLS
+                // "null" or empty means no encryption (for local dev like Mailpit)
+                $useTls = $encryption === 'tls';
+
+                // Create the appropriate transport
+                if ($encryption === 'ssl') {
+                    // SSL on port 465 typically
+                    $transport = new \Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport($host, $port, true);
+                } elseif ($useTls) {
+                    // TLS (STARTTLS) on port 587 typically
+                    $transport = new \Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport($host, $port, false);
+                } else {
+                    // No encryption - for local development (Mailpit, MailHog, etc.)
+                    $transport = new \Symfony\Component\Mailer\Transport\Smtp\SmtpTransport($host, $port);
+                }
+
+                // Only set credentials if provided
+                if (! empty($config['username']) && $transport instanceof \Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport) {
+                    $transport->setUsername($config['username']);
+                }
+                if (! empty($config['password']) && $transport instanceof \Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport) {
+                    $transport->setPassword($config['password']);
+                }
+
+                // Try to start the transport (this tests the connection)
+                $transport->start();
+                $transport->stop();
+            }
+
+            return ['success' => true, 'message' => 'Mail connection successful'];
+        } catch (\Exception $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Save cache configuration to .env file.
+     */
+    public function saveCacheConfig(array $config): void
+    {
+        $store = $config['store'] ?? 'database';
+
+        $envVars = [
+            'CACHE_STORE' => $store,
+            'SESSION_DRIVER' => $config['session_driver'] ?? 'database',
+            'QUEUE_CONNECTION' => $config['queue_connection'] ?? 'database',
+        ];
+
+        if ($store === 'redis' || $config['session_driver'] === 'redis' || $config['queue_connection'] === 'redis') {
+            $envVars['REDIS_HOST'] = $config['redis_host'] ?? '127.0.0.1';
+            $envVars['REDIS_PASSWORD'] = $config['redis_password'] ?? 'null';
+            $envVars['REDIS_PORT'] = $config['redis_port'] ?? '6379';
+        }
+
+        $this->writeEnvVariables($envVars);
+
+        // Clear config cache
+        Artisan::call('config:clear');
+
+        // Update runtime config
+        config()->set('cache.default', $store);
+        config()->set('session.driver', $config['session_driver'] ?? 'database');
+        config()->set('queue.default', $config['queue_connection'] ?? 'database');
+    }
+
+    /**
+     * Test Redis connection.
+     *
+     * @return array{success: bool, message: string}
+     */
+    public function testRedisConnection(array $config): array
+    {
+        try {
+            $redis = new \Redis;
+            $connected = $redis->connect(
+                $config['redis_host'] ?? '127.0.0.1',
+                (int) ($config['redis_port'] ?? 6379),
+                2.0 // timeout
+            );
+
+            if (! $connected) {
+                return ['success' => false, 'message' => 'Could not connect to Redis server'];
+            }
+
+            $password = $config['redis_password'] ?? null;
+            if ($password && $password !== 'null') {
+                if (! $redis->auth($password)) {
+                    return ['success' => false, 'message' => 'Redis authentication failed'];
+                }
+            }
+
+            $redis->ping();
+            $redis->close();
+
+            return ['success' => true, 'message' => 'Redis connection successful'];
+        } catch (\Exception $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Mark a specific installation step as complete.
+     */
+    public function markStepComplete(string $step): void
+    {
+        $completedSteps = $this->getCompletedSteps();
+        if (! in_array($step, $completedSteps)) {
+            $completedSteps[] = $step;
+            $this->writeEnvVariables(['INSTALL_COMPLETED_STEPS' => implode(',', $completedSteps)]);
+        }
+    }
+
+    /**
+     * Get list of completed installation steps.
+     *
+     * @return array<string>
+     */
+    public function getCompletedSteps(): array
+    {
+        $steps = env('INSTALL_COMPLETED_STEPS', '');
+
+        return $steps ? explode(',', $steps) : [];
+    }
+
+    /**
+     * Check if a specific step is complete.
+     */
+    public function isStepComplete(string $step): bool
+    {
+        return in_array($step, $this->getCompletedSteps());
+    }
+
+    /**
+     * Get the current step number based on completed steps.
+     */
+    public function getCurrentStep(): int
+    {
+        $completedSteps = $this->getCompletedSteps();
+
+        if (in_array('admin', $completedSteps)) {
+            return 6; // Complete
+        }
+        if (in_array('cache', $completedSteps)) {
+            return 5; // Admin
+        }
+        if (in_array('mail', $completedSteps)) {
+            return 4; // Cache
+        }
+        if (in_array('database', $completedSteps)) {
+            return 3; // Mail
+        }
+        if (in_array('welcome', $completedSteps)) {
+            return 2; // Database
+        }
+
+        return 1; // Welcome
+    }
+
+    /**
      * Mark installation as complete.
      */
     public function markAsInstalled(): void
     {
+        $this->markStepComplete('admin');
         $this->writeEnvVariables(['APP_INSTALLED' => 'true']);
         Artisan::call('config:clear');
     }
@@ -386,11 +599,11 @@ class InstallationService
                 $escapedValue = '"'.addslashes((string) $value).'"';
             }
 
-            // Check if key exists
-            if (preg_match("/^{$key}=/m", $envContent)) {
-                // Replace existing value
+            // Check if key exists (including commented out versions like "# DB_HOST=" or "#DB_HOST=")
+            if (preg_match("/^#?\s*{$key}=/m", $envContent)) {
+                // Replace existing value (uncomment if commented)
                 $envContent = preg_replace(
-                    "/^{$key}=.*/m",
+                    "/^#?\s*{$key}=.*/m",
                     "{$key}={$escapedValue}",
                     $envContent
                 );

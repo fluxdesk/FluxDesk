@@ -1,5 +1,5 @@
 import AppLogoIcon from '@/components/app-logo-icon';
-import { Check, Database, Rocket, Settings, Sparkles } from 'lucide-react';
+import { Check, Database, HardDrive, Mail, Rocket, Settings, Sparkles } from 'lucide-react';
 import { type PropsWithChildren } from 'react';
 
 interface InstallLayoutProps {
@@ -12,8 +12,10 @@ interface InstallLayoutProps {
 const steps = [
     { number: 1, title: 'Welcome', description: 'System requirements', icon: Sparkles },
     { number: 2, title: 'Database', description: 'Configure connection', icon: Database },
-    { number: 3, title: 'Setup', description: 'Admin & organization', icon: Settings },
-    { number: 4, title: 'Complete', description: 'Ready to launch', icon: Rocket },
+    { number: 3, title: 'Mail', description: 'Email settings', icon: Mail },
+    { number: 4, title: 'Cache', description: 'Performance & services', icon: HardDrive },
+    { number: 5, title: 'Setup', description: 'Admin & organization', icon: Settings },
+    { number: 6, title: 'Complete', description: 'Ready to launch', icon: Rocket },
 ];
 
 export default function InstallLayout({

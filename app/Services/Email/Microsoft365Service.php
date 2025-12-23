@@ -67,9 +67,8 @@ class Microsoft365Service implements EmailProviderInterface
         if ($response->failed()) {
             Log::error('Microsoft 365 OAuth token exchange failed', [
                 'status' => $response->status(),
-                'body' => $response->json(),
             ]);
-            throw new \Exception('Failed to exchange authorization code for tokens: '.$response->body());
+            throw new \Exception('Failed to exchange authorization code for tokens');
         }
 
         $data = $response->json();
@@ -156,9 +155,8 @@ class Microsoft365Service implements EmailProviderInterface
             Log::error('Microsoft 365 fetch messages failed', [
                 'channel_id' => $channel->id,
                 'status' => $response->status(),
-                'body' => $response->json(),
             ]);
-            throw new \Exception('Failed to fetch messages: '.$response->body());
+            throw new \Exception('Failed to fetch messages from Microsoft 365');
         }
 
         $messages = collect($response->json('value', []));
@@ -259,9 +257,8 @@ class Microsoft365Service implements EmailProviderInterface
                 'channel_id' => $channel->id,
                 'message_id' => $message->id,
                 'status' => $response->status(),
-                'body' => $response->json(),
             ]);
-            throw new \Exception('Failed to send email: '.$response->body());
+            throw new \Exception('Failed to send email via Microsoft 365');
         }
 
         // Microsoft doesn't return the sent message ID directly from sendMail
@@ -368,9 +365,8 @@ class Microsoft365Service implements EmailProviderInterface
             Log::error('Microsoft 365 get mail folders failed', [
                 'channel_id' => $channel->id,
                 'status' => $response->status(),
-                'body' => $response->json(),
             ]);
-            throw new \Exception('Failed to get mail folders: '.$response->body());
+            throw new \Exception('Failed to get Microsoft 365 mail folders');
         }
 
         $folders = $response->json('value', []);
@@ -399,9 +395,8 @@ class Microsoft365Service implements EmailProviderInterface
                 'channel_id' => $channel->id,
                 'message_id' => $messageId,
                 'status' => $response->status(),
-                'body' => $response->json(),
             ]);
-            throw new \Exception('Failed to delete message: '.$response->body());
+            throw new \Exception('Failed to delete Microsoft 365 message');
         }
     }
 
@@ -453,9 +448,8 @@ class Microsoft365Service implements EmailProviderInterface
                 'message_id' => $messageId,
                 'folder_id' => $folderId,
                 'status' => $response->status(),
-                'body' => $response->json(),
             ]);
-            throw new \Exception('Failed to move message: '.$response->body());
+            throw new \Exception('Failed to move Microsoft 365 message');
         }
 
         // Microsoft returns the moved message with its NEW ID

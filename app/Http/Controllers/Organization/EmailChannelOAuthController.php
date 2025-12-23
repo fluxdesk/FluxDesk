@@ -56,7 +56,7 @@ class EmailChannelOAuthController extends Controller
             ]);
 
             return redirect()->route('organization.email-channels.index')
-                ->with('error', 'Failed to start authentication: '.$e->getMessage());
+                ->with('error', 'Failed to start authentication. Please try again.');
         }
     }
 
@@ -85,10 +85,7 @@ class EmailChannelOAuthController extends Controller
         $storedState = session('oauth_state');
 
         if (! $state || $state !== $storedState) {
-            Log::warning('OAuth state mismatch', [
-                'received' => $state,
-                'expected' => $storedState,
-            ]);
+            Log::warning('OAuth state mismatch detected');
 
             return redirect()->route('organization.email-channels.index')
                 ->with('error', 'Invalid state parameter. Please try again.');
@@ -137,7 +134,6 @@ class EmailChannelOAuthController extends Controller
 
             Log::info('OAuth authentication successful for email channel', [
                 'channel_id' => $emailChannel->id,
-                'email' => $emailChannel->email_address,
             ]);
 
             // Redirect to configuration page to select folder and post-import actions
@@ -150,7 +146,7 @@ class EmailChannelOAuthController extends Controller
             ]);
 
             return redirect()->route('organization.email-channels.index')
-                ->with('error', 'Failed to complete authentication: '.$e->getMessage());
+                ->with('error', 'Failed to complete authentication. Please try again.');
         }
     }
 }

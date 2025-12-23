@@ -14,6 +14,7 @@ use App\Services\Email\EmailProviderFactory;
 use App\Services\OrganizationContext;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -212,7 +213,12 @@ class EmailChannelController extends Controller
 
             return response()->json(['folders' => $folders]);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            Log::error('Failed to get email folders', [
+                'channel_id' => $emailChannel->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json(['error' => 'Failed to retrieve email folders'], 500);
         }
     }
 

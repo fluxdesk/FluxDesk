@@ -57,3 +57,6 @@ Head over to the [Discussions](https://github.com/FluxDesk/FluxDesk/discussions)
 ## License
 
 MIT License. See [LICENSE](LICENSE) for details.
+
+#!/bin/bash
+vendor/bin/pint --test && npm run lint && ./vendor/bin/pest

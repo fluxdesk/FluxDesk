@@ -107,7 +107,7 @@ export default function DatabaseSetup({ appName, dbConfig }: Props) {
     };
 
     const handleContinue = () => {
-        router.visit('/install/admin');
+        router.visit('/install/mail');
     };
 
     const handleRetry = () => {
@@ -217,7 +217,7 @@ export default function DatabaseSetup({ appName, dbConfig }: Props) {
                                 <div>
                                     <p className="font-medium text-emerald-300">Database configured successfully!</p>
                                     <p className="mt-0.5 text-xs text-zinc-400">
-                                        All migrations have been executed. Continue to create your admin account.
+                                        All migrations have been executed. Continue to configure mail settings.
                                     </p>
                                 </div>
                             </>
@@ -244,7 +244,7 @@ export default function DatabaseSetup({ appName, dbConfig }: Props) {
                             onClick={handleContinue}
                             className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700"
                         >
-                            Continue to Admin Setup
+                            Continue to Mail Setup
                             <ArrowRight className="ml-2 size-4" />
                         </Button>
                     ) : (

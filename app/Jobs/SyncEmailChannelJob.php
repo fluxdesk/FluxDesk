@@ -161,7 +161,6 @@ class SyncEmailChannelJob implements ShouldQueue
             Log::error('Email sync failed for channel', [
                 'channel_id' => $channel->id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
             ]);
 
             // Log sync failure

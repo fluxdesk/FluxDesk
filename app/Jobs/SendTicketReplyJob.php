@@ -109,7 +109,7 @@ class SendTicketReplyJob implements ShouldQueue
             'ticket_id' => $ticket->id,
             'ticket_number' => $ticket->ticket_number,
             'message_id' => $message->id,
-            'to' => $contact->email,
+            'contact_id' => $contact->id,
         ]);
 
         try {

@@ -29,7 +29,7 @@ export default function AdminSetup({ appName, appUrl }: Props) {
 
     return (
         <InstallLayout
-            currentStep={3}
+            currentStep={5}
             stepTitle="Create Your Account"
             stepDescription="Set up your administrator account and organization."
             appName={data.app_name}
@@ -183,7 +183,7 @@ export default function AdminSetup({ appName, appUrl }: Props) {
                         asChild
                         className="border-zinc-700 bg-transparent text-zinc-400 hover:bg-zinc-800 hover:text-white"
                     >
-                        <a href="/install/database">
+                        <a href="/install/cache">
                             <ArrowLeft className="mr-2 size-4" />
                             Back
                         </a>

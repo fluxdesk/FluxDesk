@@ -29,10 +29,20 @@ Route::middleware([EnsureNotInstalled::class])
         Route::get('/database/run', [InstallController::class, 'runDatabase'])->name('database.run');
         Route::get('/database/stream', [InstallController::class, 'streamDatabaseSetup'])->name('database.stream');
 
-        // Step 3: Admin & Organization
+        // Step 3: Mail Configuration
+        Route::get('/mail', [InstallController::class, 'mail'])->name('mail');
+        Route::post('/mail', [InstallController::class, 'storeMail'])->name('mail.store');
+        Route::post('/mail/test', [InstallController::class, 'testMail'])->name('mail.test');
+
+        // Step 4: Cache & Services Configuration
+        Route::get('/cache', [InstallController::class, 'cache'])->name('cache');
+        Route::post('/cache', [InstallController::class, 'storeCache'])->name('cache.store');
+        Route::post('/cache/test-redis', [InstallController::class, 'testRedis'])->name('cache.test-redis');
+
+        // Step 5: Admin & Organization
         Route::get('/admin', [InstallController::class, 'admin'])->name('admin');
         Route::post('/admin', [InstallController::class, 'storeAdmin'])->name('admin.store');
 
-        // Step 4: Complete
+        // Step 6: Complete
         Route::get('/complete', [InstallController::class, 'complete'])->name('complete');
     });

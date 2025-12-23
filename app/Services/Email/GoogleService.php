@@ -63,9 +63,8 @@ class GoogleService implements EmailProviderInterface
         if ($response->failed()) {
             Log::error('Google OAuth token exchange failed', [
                 'status' => $response->status(),
-                'body' => $response->json(),
             ]);
-            throw new \Exception('Failed to exchange authorization code for tokens: '.$response->body());
+            throw new \Exception('Failed to exchange authorization code for tokens');
         }
 
         $data = $response->json();
@@ -137,9 +136,8 @@ class GoogleService implements EmailProviderInterface
             Log::error('Google fetch messages failed', [
                 'channel_id' => $channel->id,
                 'status' => $response->status(),
-                'body' => $response->json(),
             ]);
-            throw new \Exception('Failed to fetch messages: '.$response->body());
+            throw new \Exception('Failed to fetch messages from Gmail');
         }
 
         $messageIds = collect($response->json('messages', []));
@@ -234,9 +232,8 @@ class GoogleService implements EmailProviderInterface
                 'channel_id' => $channel->id,
                 'message_id' => $message->id,
                 'status' => $response->status(),
-                'body' => $response->json(),
             ]);
-            throw new \Exception('Failed to send email: '.$response->body());
+            throw new \Exception('Failed to send email via Gmail');
         }
 
         return $headers['message_id'];
@@ -312,9 +309,8 @@ class GoogleService implements EmailProviderInterface
             Log::error('Google get labels failed', [
                 'channel_id' => $channel->id,
                 'status' => $response->status(),
-                'body' => $response->json(),
             ]);
-            throw new \Exception('Failed to get labels: '.$response->body());
+            throw new \Exception('Failed to get Gmail labels');
         }
 
         $labels = $response->json('labels', []);
@@ -343,9 +339,8 @@ class GoogleService implements EmailProviderInterface
                 'channel_id' => $channel->id,
                 'message_id' => $messageId,
                 'status' => $response->status(),
-                'body' => $response->json(),
             ]);
-            throw new \Exception('Failed to delete message: '.$response->body());
+            throw new \Exception('Failed to delete Gmail message');
         }
     }
 
@@ -366,9 +361,8 @@ class GoogleService implements EmailProviderInterface
                 'channel_id' => $channel->id,
                 'message_id' => $messageId,
                 'status' => $response->status(),
-                'body' => $response->json(),
             ]);
-            throw new \Exception('Failed to archive message: '.$response->body());
+            throw new \Exception('Failed to archive Gmail message');
         }
 
         // Gmail doesn't change message ID on label modification
@@ -398,9 +392,8 @@ class GoogleService implements EmailProviderInterface
                 'message_id' => $messageId,
                 'label_id' => $folderId,
                 'status' => $response->status(),
-                'body' => $response->json(),
             ]);
-            throw new \Exception('Failed to move message: '.$response->body());
+            throw new \Exception('Failed to move Gmail message');
         }
 
         return $messageId;
@@ -440,9 +433,8 @@ class GoogleService implements EmailProviderInterface
             Log::error('Google send notification failed', [
                 'channel_id' => $channel->id,
                 'status' => $response->status(),
-                'body' => $response->json(),
             ]);
-            throw new \Exception('Failed to send notification: '.$response->body());
+            throw new \Exception('Failed to send Gmail notification');
         }
 
         // Log Gmail's response to verify threading
@@ -810,12 +802,6 @@ class GoogleService implements EmailProviderInterface
 
         $raw .= "Content-Type: text/html; charset=UTF-8\r\n";
         $raw .= "Content-Transfer-Encoding: base64\r\n";
-
-        // Log the raw headers for debugging threading issues
-        Log::debug('Gmail notification raw', [
-            'headers' => str_replace("\r\n", ' | ', rtrim($raw)),
-        ]);
-
         $raw .= "\r\n";
         $raw .= chunk_split(base64_encode($data['html']));
 
