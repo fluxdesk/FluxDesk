@@ -11,7 +11,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/php-8.2+-777BB4?style=flat-square&logo=php" alt="PHP 8.2+">
   <img src="https://img.shields.io/badge/laravel-12-FF2D20?style=flat-square&logo=laravel" alt="Laravel 12">
-  <a href="https://github.com/FluxDesk/FluxDesk/blob/main/LICENSE"><img src="https://img.shields.io/github/license/FluxDesk/FluxDesk?style=flat-square" alt="License"></a>
+  <a href="https://github.com/FluxDesk/FluxDesk/blob/main/LICENSE"><img src="https://img.shields.io/github/license/fluxdesk/fluxdesk" alt="License"></a>
 </p>
 
 ---
@@ -57,6 +57,3 @@ Head over to the [Discussions](https://github.com/FluxDesk/FluxDesk/discussions)
 ## License
 
 MIT License. See [LICENSE](LICENSE) for details.
-
-#!/bin/bash
-vendor/bin/pint --test && npm run lint && ./vendor/bin/pest
