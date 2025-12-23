@@ -132,6 +132,7 @@ class UpgradeController extends Controller
             'NPM install voltooid' => ['id' => 'npm_install', 'status' => 'completed'],
             'Frontend bouwen' => ['id' => 'npm_build', 'status' => 'running'],
             'NPM build voltooid' => ['id' => 'npm_build', 'status' => 'completed'],
+            'Caches legen voor build' => ['id' => 'cache_prebuild', 'status' => 'running'],
             'Database migraties uitvoeren' => ['id' => 'migrate', 'status' => 'running'],
             'Database migraties voltooid' => ['id' => 'migrate', 'status' => 'completed'],
             'Caches legen' => ['id' => 'cache_clear', 'status' => 'running'],

@@ -135,7 +135,12 @@ class UpgradeCommand extends Command
             $this->line('');
         }
 
-        // Step 4: NPM install and build
+        // Step 4: Clear caches before npm build (required for wayfinder plugin)
+        spin(fn () => $this->callSilently('optimize:clear'), 'Caches legen voor build...');
+        info('Caches geleegd.');
+        $this->line('');
+
+        // Step 5: NPM install and build
         if (! $this->option('skip-npm')) {
             // NPM install
             $result = spin(function () {
@@ -168,14 +173,9 @@ class UpgradeCommand extends Command
             $this->line('');
         }
 
-        // Step 5: Run migrations
+        // Step 6: Run migrations
         spin(fn () => $this->callSilently('migrate', ['--force' => true]), 'Database migraties uitvoeren...');
         info('Database migraties voltooid.');
-        $this->line('');
-
-        // Step 6: Clear caches
-        spin(fn () => $this->callSilently('optimize:clear'), 'Caches legen...');
-        info('Caches geleegd.');
         $this->line('');
 
         // Step 7: Rebuild caches
@@ -187,7 +187,7 @@ class UpgradeCommand extends Command
         info('Caches opgebouwd.');
         $this->line('');
 
-        // Step 8: Clear version cache
+        // Step 8: Refresh version cache
         spin(fn () => $versionCheckService->flushVersionCache(), 'Versie cache vernieuwen...');
         $newVersion = $versionCheckService->getCurrentVersion();
         info("Versie bijgewerkt naar v{$newVersion}.");

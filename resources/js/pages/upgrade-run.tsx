@@ -76,6 +76,43 @@ export default function UpgradeRun({ currentVersion, targetVersion }: Props) {
         }
     }, [steps]);
 
+    const handleEvent = useCallback((event: string, data: Record<string, unknown>) => {
+        switch (event) {
+            case 'step':
+                setSteps((prev) => {
+                    const existing = prev.findIndex((s) => s.id === data.id);
+                    const step: Step = {
+                        id: data.id as string,
+                        message: data.message as string,
+                        status: data.status as Step['status'],
+                        timestamp: data.timestamp as string,
+                    };
+
+                    if (existing >= 0) {
+                        const updated = [...prev];
+                        updated[existing] = step;
+                        return updated;
+                    }
+                    return [...prev, step];
+                });
+                break;
+
+            case 'output':
+                setLogs((prev) => [...prev, data.text as string]);
+                break;
+
+            case 'complete':
+                if (data.success) {
+                    setState('completed');
+                    setNewVersion(data.version as string);
+                    setCurrentStep(6);
+                } else {
+                    setState('failed');
+                }
+                break;
+        }
+    }, []);
+
     const startUpgrade = useCallback(() => {
         setState('running');
         setSteps([]);
@@ -150,44 +187,7 @@ export default function UpgradeRun({ currentVersion, targetVersion }: Props) {
         return () => {
             eventSource.close();
         };
-    }, []);
-
-    const handleEvent = (event: string, data: Record<string, unknown>) => {
-        switch (event) {
-            case 'step':
-                setSteps((prev) => {
-                    const existing = prev.findIndex((s) => s.id === data.id);
-                    const step: Step = {
-                        id: data.id as string,
-                        message: data.message as string,
-                        status: data.status as Step['status'],
-                        timestamp: data.timestamp as string,
-                    };
-
-                    if (existing >= 0) {
-                        const updated = [...prev];
-                        updated[existing] = step;
-                        return updated;
-                    }
-                    return [...prev, step];
-                });
-                break;
-
-            case 'output':
-                setLogs((prev) => [...prev, data.text as string]);
-                break;
-
-            case 'complete':
-                if (data.success) {
-                    setState('completed');
-                    setNewVersion(data.version as string);
-                    setCurrentStep(6);
-                } else {
-                    setState('failed');
-                }
-                break;
-        }
-    };
+    }, [handleEvent]);
 
     const getStepIcon = (status: Step['status']) => {
         switch (status) {

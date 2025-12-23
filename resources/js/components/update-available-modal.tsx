@@ -1,5 +1,5 @@
 import { usePage, Link } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ArrowUpCircle, ExternalLink, Rocket } from 'lucide-react';
 import {
     Dialog,
@@ -14,24 +14,27 @@ import { type SharedData } from '@/types';
 
 const DISMISS_KEY = 'fluxdesk_update_dismissed';
 
-export function UpdateAvailableModal() {
-    const { appVersion } = usePage<SharedData>().props;
-    const [open, setOpen] = useState(false);
+function getInitialOpenState(appVersion: SharedData['appVersion']): boolean {
+    if (!appVersion?.is_outdated || !appVersion?.latest) {
+        return false;
+    }
 
-    useEffect(() => {
-        if (!appVersion?.is_outdated || !appVersion?.latest) {
-            return;
-        }
-
-        // Check if this version was already dismissed
+    // Check if this version was already dismissed
+    if (typeof window !== 'undefined') {
         const dismissedVersion = localStorage.getItem(DISMISS_KEY);
         if (dismissedVersion === appVersion.latest) {
-            return;
+            return false;
         }
+    }
 
-        // Show the modal
-        setOpen(true);
-    }, [appVersion]);
+    return true;
+}
+
+export function UpdateAvailableModal() {
+    const { appVersion } = usePage<SharedData>().props;
+
+    const initialOpen = useMemo(() => getInitialOpenState(appVersion), [appVersion]);
+    const [open, setOpen] = useState(initialOpen);
 
     const handleDismiss = () => {
         if (appVersion?.latest) {
