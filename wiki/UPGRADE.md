@@ -44,6 +44,25 @@ php artisan fluxdesk:version --refresh
 
 Navigate to the upgrade page in your FluxDesk admin panel to see version status and available updates.
 
+### Automatic Update Notifications
+
+Super admin users will automatically see a modal notification when a new version is available. This modal:
+
+- Appears immediately upon login when an update is available
+- Shows current version vs. latest version comparison
+- Links directly to the GitHub release notes
+- Can be dismissed with "Remind me later" (dismissal persists in browser localStorage)
+- Will reappear when a newer version becomes available
+
+To reset the dismissal (useful for testing):
+
+```javascript
+// In browser developer console
+localStorage.removeItem('fluxdesk_update_dismissed');
+```
+
+Then refresh the page to see the modal again.
+
 ## Performing an Upgrade
 
 ### Step 1: Backup Your Data
@@ -203,6 +222,36 @@ var_dump($service->isOutOfDate());
 // Get full status
 print_r($service->getVersionStatus());
 ```
+
+### Testing the Update Modal
+
+To test the update notification modal locally:
+
+1. **Create a fake outdated version:**
+   ```bash
+   # Create a tag with a lower version than what's on GitHub
+   git tag -a v0.0.1 -m "Test old version"
+
+   # Clear the cache
+   php artisan fluxdesk:version --refresh
+   ```
+
+2. **Login as a super admin** and you should see the modal appear
+
+3. **Test dismissal:**
+   - Click "Remind me later" - modal should close
+   - Refresh the page - modal should NOT appear
+   - Open browser console and run: `localStorage.removeItem('fluxdesk_update_dismissed')`
+   - Refresh - modal should appear again
+
+4. **Clean up:**
+   ```bash
+   # Remove the test tag
+   git tag -d v0.0.1
+
+   # Restore correct version
+   php artisan fluxdesk:version --refresh
+   ```
 
 ## API Reference
 

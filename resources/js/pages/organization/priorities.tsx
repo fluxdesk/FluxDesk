@@ -21,9 +21,14 @@ import { store, update, destroy } from '@/routes/organization/priorities';
 import { type Priority } from '@/types';
 import { Head, useForm, router } from '@inertiajs/react';
 import { ColorPicker } from '@/components/common/color-picker';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { Flag, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface Props {
     priorities: Priority[];
@@ -35,6 +40,11 @@ export default function Priorities({ priorities: initialPriorities }: Props) {
     const [priorities, setPriorities] = useState(initialPriorities);
     const [deletingPriority, setDeletingPriority] = useState<Priority | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+
+    // Sync local state when Inertia refreshes page data
+    useEffect(() => {
+        setPriorities(initialPriorities);
+    }, [initialPriorities]);
 
     const handleDelete = () => {
         if (!deletingPriority) return;
@@ -72,17 +82,22 @@ export default function Priorities({ priorities: initialPriorities }: Props) {
                     <Card>
                         <CardHeader>
                             <div className="flex items-center justify-between">
-                                <div>
-                                    <CardTitle className="text-lg">Prioriteiten</CardTitle>
-                                    <CardDescription>
-                                        Configureer prioriteitsniveaus. Sleep om te herschikken.
-                                    </CardDescription>
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                                        <Flag className="h-5 w-5 text-primary" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-lg">Prioriteiten</CardTitle>
+                                        <CardDescription>
+                                            Sleep om te herschikken
+                                        </CardDescription>
+                                    </div>
                                 </div>
                                 <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                                     <DialogTrigger asChild>
                                         <Button size="sm">
                                             <Plus className="mr-2 h-4 w-4" />
-                                            Prioriteit toevoegen
+                                            Toevoegen
                                         </Button>
                                     </DialogTrigger>
                                     <PriorityFormDialog onClose={() => setIsCreateOpen(false)} />
@@ -90,19 +105,29 @@ export default function Priorities({ priorities: initialPriorities }: Props) {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <SortableList
-                                items={priorities}
-                                onReorder={handleReorder}
-                                renderItem={(priority) => (
-                                    <PriorityItem
-                                        priority={priority}
-                                        isEditing={editingPriority?.id === priority.id}
-                                        onEdit={() => setEditingPriority(priority)}
-                                        onEditClose={() => setEditingPriority(null)}
-                                        onDelete={() => setDeletingPriority(priority)}
-                                    />
-                                )}
-                            />
+                            {priorities.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-12 text-center">
+                                    <Flag className="h-12 w-12 text-muted-foreground/50" />
+                                    <h3 className="mt-4 text-lg font-semibold">Geen prioriteiten</h3>
+                                    <p className="mt-2 text-sm text-muted-foreground">
+                                        Voeg een prioriteit toe om tickets te classificeren.
+                                    </p>
+                                </div>
+                            ) : (
+                                <SortableList
+                                    items={priorities}
+                                    onReorder={handleReorder}
+                                    renderItem={(priority) => (
+                                        <PriorityItem
+                                            priority={priority}
+                                            isEditing={editingPriority?.id === priority.id}
+                                            onEdit={() => setEditingPriority(priority)}
+                                            onEditClose={() => setEditingPriority(null)}
+                                            onDelete={() => setDeletingPriority(priority)}
+                                        />
+                                    )}
+                                />
+                            )}
                         </CardContent>
                     </Card>
                 </div>
@@ -137,20 +162,20 @@ function PriorityItem({
     return (
         <>
             <div
-                className="h-4 w-4 rounded-full"
+                className="h-5 w-5 rounded-full ring-2 ring-background shadow-sm"
                 style={{ backgroundColor: priority.color }}
             />
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                    <span className="font-medium">{priority.name}</span>
+                    <span className="font-medium truncate">{priority.name}</span>
                     {priority.is_default && (
-                        <span className="rounded bg-primary/10 px-1.5 py-0.5 text-xs text-primary">
+                        <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                             Standaard
                         </span>
                     )}
                 </div>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 shrink-0">
                 <Dialog open={isEditing} onOpenChange={(open) => (open ? onEdit() : onEditClose())}>
                     <DialogTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -159,15 +184,26 @@ function PriorityItem({
                     </DialogTrigger>
                     <PriorityFormDialog priority={priority} onClose={onEditClose} />
                 </Dialog>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={onDelete}
-                    disabled={priority.is_default}
-                >
-                    <Trash2 className="h-4 w-4" />
-                </Button>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <span>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={onDelete}
+                                disabled={priority.is_default}
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        </span>
+                    </TooltipTrigger>
+                    {priority.is_default && (
+                        <TooltipContent>
+                            Standaardprioriteit kan niet verwijderd worden
+                        </TooltipContent>
+                    )}
+                </Tooltip>
             </div>
         </>
     );
@@ -210,10 +246,10 @@ function PriorityFormDialog({
     }
 
     return (
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
             <form onSubmit={handleSubmit}>
                 <DialogHeader>
-                    <DialogTitle>{priority ? 'Prioriteit bewerken' : 'Prioriteit aanmaken'}</DialogTitle>
+                    <DialogTitle>{priority ? 'Prioriteit bewerken' : 'Prioriteit toevoegen'}</DialogTitle>
                     <DialogDescription>
                         {priority ? 'Werk de prioriteitsdetails bij.' : 'Voeg een nieuw prioriteitsniveau toe voor tickets.'}
                     </DialogDescription>
@@ -227,6 +263,7 @@ function PriorityFormDialog({
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
                             placeholder="bijv. Laag, Normaal, Hoog, Urgent"
+                            autoFocus
                         />
                         <InputError message={errors.name} />
                     </div>
@@ -237,15 +274,21 @@ function PriorityFormDialog({
                         <InputError message={errors.color} />
                     </div>
 
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-start space-x-3 rounded-lg border p-3">
                         <Checkbox
                             id="is_default"
                             checked={data.is_default}
                             onCheckedChange={(checked) => setData('is_default', checked === true)}
+                            className="mt-0.5"
                         />
-                        <Label htmlFor="is_default" className="font-normal">
-                            Instellen als standaardprioriteit voor nieuwe tickets
-                        </Label>
+                        <div className="space-y-1">
+                            <Label htmlFor="is_default" className="font-medium cursor-pointer">
+                                Standaardprioriteit
+                            </Label>
+                            <p className="text-xs text-muted-foreground">
+                                Nieuwe tickets krijgen automatisch deze prioriteit
+                            </p>
+                        </div>
                     </div>
                 </div>
 
@@ -253,8 +296,8 @@ function PriorityFormDialog({
                     <Button type="button" variant="outline" onClick={onClose}>
                         Annuleren
                     </Button>
-                    <Button type="submit" disabled={processing}>
-                        {priority ? 'Wijzigingen opslaan' : 'Prioriteit aanmaken'}
+                    <Button type="submit" disabled={processing || !data.name.trim()}>
+                        {priority ? 'Opslaan' : 'Toevoegen'}
                     </Button>
                 </DialogFooter>
             </form>

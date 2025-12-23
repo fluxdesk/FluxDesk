@@ -24,9 +24,28 @@ class Tag extends Model
     {
         static::creating(function (Tag $tag) {
             if (empty($tag->slug)) {
-                $tag->slug = Str::slug($tag->name);
+                $tag->slug = static::generateUniqueSlug($tag->name, $tag->organization_id);
             }
         });
+    }
+
+    protected static function generateUniqueSlug(string $name, int $organizationId, ?int $excludeId = null): string
+    {
+        $baseSlug = Str::slug($name);
+        $slug = $baseSlug;
+        $counter = 2;
+
+        while (static::withoutGlobalScopes()
+            ->where('organization_id', $organizationId)
+            ->where('slug', $slug)
+            ->when($excludeId, fn ($q) => $q->where('id', '!=', $excludeId))
+            ->exists()
+        ) {
+            $slug = $baseSlug.'-'.$counter;
+            $counter++;
+        }
+
+        return $slug;
     }
 
     public function tickets(): BelongsToMany

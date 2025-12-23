@@ -26,9 +26,28 @@ class Department extends Model
     {
         static::creating(function (Department $department) {
             if (empty($department->slug)) {
-                $department->slug = Str::slug($department->name);
+                $department->slug = static::generateUniqueSlug($department->name, $department->organization_id);
             }
         });
+    }
+
+    protected static function generateUniqueSlug(string $name, int $organizationId, ?int $excludeId = null): string
+    {
+        $baseSlug = Str::slug($name);
+        $slug = $baseSlug;
+        $counter = 2;
+
+        while (static::withoutGlobalScopes()
+            ->where('organization_id', $organizationId)
+            ->where('slug', $slug)
+            ->when($excludeId, fn ($q) => $q->where('id', '!=', $excludeId))
+            ->exists()
+        ) {
+            $slug = $baseSlug.'-'.$counter;
+            $counter++;
+        }
+
+        return $slug;
     }
 
     /**

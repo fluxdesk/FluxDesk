@@ -22,9 +22,14 @@ import { store, update, destroy } from '@/routes/organization/departments';
 import { type Department } from '@/types';
 import { Head, useForm, router } from '@inertiajs/react';
 import { ColorPicker } from '@/components/common/color-picker';
-import { Pencil, Plus, Trash2, Mail, Ticket } from 'lucide-react';
-import { useState } from 'react';
+import { Building2, Pencil, Plus, Trash2, Mail, Ticket, Info } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface Props {
     departments: Department[];
@@ -36,6 +41,11 @@ export default function Departments({ departments: initialDepartments }: Props) 
     const [departments, setDepartments] = useState(initialDepartments);
     const [deletingDepartment, setDeletingDepartment] = useState<Department | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+
+    // Sync local state when Inertia refreshes page data
+    useEffect(() => {
+        setDepartments(initialDepartments);
+    }, [initialDepartments]);
 
     const handleDelete = () => {
         if (!deletingDepartment) return;
@@ -70,20 +80,45 @@ export default function Departments({ departments: initialDepartments }: Props) 
 
             <OrganizationLayout>
                 <div className="mx-auto max-w-4xl space-y-6">
+                    {/* Info Card */}
+                    <Card className="border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/20">
+                        <CardContent className="py-4">
+                            <div className="flex gap-3">
+                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/20">
+                                    <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                </div>
+                                <div className="text-sm">
+                                    <p className="font-medium text-blue-900 dark:text-blue-100">
+                                        Afdelingen voor ticketrouting
+                                    </p>
+                                    <p className="text-blue-700 dark:text-blue-300">
+                                        Elk e-mailkanaal is gekoppeld aan een afdeling. Tickets worden automatisch toegewezen aan de afdeling van het e-mailkanaal.
+                                    </p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Departments Card */}
                     <Card>
                         <CardHeader>
                             <div className="flex items-center justify-between">
-                                <div>
-                                    <CardTitle className="text-lg">Afdelingen</CardTitle>
-                                    <CardDescription>
-                                        Configureer afdelingen voor ticketrouting en e-mailkanalen. Sleep om te herschikken.
-                                    </CardDescription>
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                                        <Building2 className="h-5 w-5 text-primary" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-lg">Afdelingen</CardTitle>
+                                        <CardDescription>
+                                            Sleep om te herschikken
+                                        </CardDescription>
+                                    </div>
                                 </div>
                                 <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                                     <DialogTrigger asChild>
                                         <Button size="sm">
                                             <Plus className="mr-2 h-4 w-4" />
-                                            Afdeling toevoegen
+                                            Toevoegen
                                         </Button>
                                     </DialogTrigger>
                                     <DepartmentFormDialog onClose={() => setIsCreateOpen(false)} />
@@ -91,19 +126,29 @@ export default function Departments({ departments: initialDepartments }: Props) 
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <SortableList
-                                items={departments}
-                                onReorder={handleReorder}
-                                renderItem={(department) => (
-                                    <DepartmentItem
-                                        department={department}
-                                        isEditing={editingDepartment?.id === department.id}
-                                        onEdit={() => setEditingDepartment(department)}
-                                        onEditClose={() => setEditingDepartment(null)}
-                                        onDelete={() => setDeletingDepartment(department)}
-                                    />
-                                )}
-                            />
+                            {departments.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-12 text-center">
+                                    <Building2 className="h-12 w-12 text-muted-foreground/50" />
+                                    <h3 className="mt-4 text-lg font-semibold">Geen afdelingen</h3>
+                                    <p className="mt-2 text-sm text-muted-foreground">
+                                        Voeg een afdeling toe om tickets te organiseren.
+                                    </p>
+                                </div>
+                            ) : (
+                                <SortableList
+                                    items={departments}
+                                    onReorder={handleReorder}
+                                    renderItem={(department) => (
+                                        <DepartmentItem
+                                            department={department}
+                                            isEditing={editingDepartment?.id === department.id}
+                                            onEdit={() => setEditingDepartment(department)}
+                                            onEditClose={() => setEditingDepartment(null)}
+                                            onDelete={() => setDeletingDepartment(department)}
+                                        />
+                                    )}
+                                />
+                            )}
                         </CardContent>
                     </Card>
                 </div>
@@ -142,33 +187,43 @@ function DepartmentItem({
     return (
         <>
             <div
-                className="h-4 w-4 rounded-full"
+                className="h-5 w-5 rounded-full ring-2 ring-background shadow-sm"
                 style={{ backgroundColor: department.color }}
             />
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                    <span className="font-medium">{department.name}</span>
+                    <span className="font-medium truncate">{department.name}</span>
                     {department.is_default && (
-                        <span className="rounded bg-primary/10 px-1.5 py-0.5 text-xs text-primary">
+                        <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                             Standaard
                         </span>
                     )}
                 </div>
                 {department.description && (
-                    <p className="text-sm text-muted-foreground">{department.description}</p>
+                    <p className="text-sm text-muted-foreground truncate mt-0.5">{department.description}</p>
                 )}
-                <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                        <Ticket className="h-3 w-3" />
-                        {department.tickets_count ?? 0} tickets
-                    </span>
-                    <span className="flex items-center gap-1">
-                        <Mail className="h-3 w-3" />
-                        {department.email_channels_count ?? 0} e-mailkanalen
-                    </span>
+                <div className="mt-1.5 flex items-center gap-4 text-xs text-muted-foreground">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <span className="flex items-center gap-1.5 cursor-default">
+                                <Ticket className="h-3.5 w-3.5" />
+                                <span>{department.tickets_count ?? 0}</span>
+                            </span>
+                        </TooltipTrigger>
+                        <TooltipContent>Tickets in deze afdeling</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <span className="flex items-center gap-1.5 cursor-default">
+                                <Mail className="h-3.5 w-3.5" />
+                                <span>{department.email_channels_count ?? 0}</span>
+                            </span>
+                        </TooltipTrigger>
+                        <TooltipContent>Gekoppelde e-mailkanalen</TooltipContent>
+                    </Tooltip>
                 </div>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 shrink-0">
                 <Dialog open={isEditing} onOpenChange={(open) => (open ? onEdit() : onEditClose())}>
                     <DialogTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -177,16 +232,28 @@ function DepartmentItem({
                     </DialogTrigger>
                     <DepartmentFormDialog department={department} onClose={onEditClose} />
                 </Dialog>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={onDelete}
-                    disabled={!canDelete}
-                    title={!canDelete ? 'Kan niet verwijderen: afdeling is in gebruik' : undefined}
-                >
-                    <Trash2 className="h-4 w-4" />
-                </Button>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <span>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={onDelete}
+                                disabled={!canDelete}
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        </span>
+                    </TooltipTrigger>
+                    {!canDelete && (
+                        <TooltipContent>
+                            {department.is_default
+                                ? 'Standaardafdeling kan niet verwijderd worden'
+                                : 'Afdeling is nog in gebruik'}
+                        </TooltipContent>
+                    )}
+                </Tooltip>
             </div>
         </>
     );
@@ -230,10 +297,10 @@ function DepartmentFormDialog({
     }
 
     return (
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
             <form onSubmit={handleSubmit}>
                 <DialogHeader>
-                    <DialogTitle>{department ? 'Afdeling bewerken' : 'Afdeling aanmaken'}</DialogTitle>
+                    <DialogTitle>{department ? 'Afdeling bewerken' : 'Afdeling toevoegen'}</DialogTitle>
                     <DialogDescription>
                         {department ? 'Werk de afdelingsdetails bij.' : 'Voeg een nieuwe afdeling toe voor ticketrouting.'}
                     </DialogDescription>
@@ -247,12 +314,15 @@ function DepartmentFormDialog({
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
                             placeholder="bijv. Support, Verkoop, Facturatie"
+                            autoFocus
                         />
                         <InputError message={errors.name} />
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="description">Beschrijving (optioneel)</Label>
+                        <Label htmlFor="description">
+                            Beschrijving <span className="text-muted-foreground font-normal">(optioneel)</span>
+                        </Label>
                         <Textarea
                             id="description"
                             value={data.description}
@@ -269,15 +339,21 @@ function DepartmentFormDialog({
                         <InputError message={errors.color} />
                     </div>
 
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-start space-x-3 rounded-lg border p-3">
                         <Checkbox
                             id="is_default"
                             checked={data.is_default}
                             onCheckedChange={(checked) => setData('is_default', checked === true)}
+                            className="mt-0.5"
                         />
-                        <Label htmlFor="is_default" className="font-normal">
-                            Instellen als standaardafdeling voor nieuwe tickets
-                        </Label>
+                        <div className="space-y-1">
+                            <Label htmlFor="is_default" className="font-medium cursor-pointer">
+                                Standaardafdeling
+                            </Label>
+                            <p className="text-xs text-muted-foreground">
+                                Nieuwe tickets worden automatisch aan deze afdeling toegewezen
+                            </p>
+                        </div>
                     </div>
                 </div>
 
@@ -285,8 +361,8 @@ function DepartmentFormDialog({
                     <Button type="button" variant="outline" onClick={onClose}>
                         Annuleren
                     </Button>
-                    <Button type="submit" disabled={processing}>
-                        {department ? 'Wijzigingen opslaan' : 'Afdeling aanmaken'}
+                    <Button type="submit" disabled={processing || !data.name.trim()}>
+                        {department ? 'Opslaan' : 'Toevoegen'}
                     </Button>
                 </DialogFooter>
             </form>

@@ -45,6 +45,7 @@ import {
     Settings,
     Trash2,
     XCircle,
+    Inbox,
 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -134,20 +135,20 @@ export default function EmailChannels({ channels, providers, systemEmailChannelI
             <OrganizationLayout>
                 <div className="mx-auto max-w-4xl space-y-6">
                     {/* System Emails Toggle - Migration Mode */}
-                    <Card className={!isSystemEmailsEnabled ? 'border-amber-500 bg-amber-50/50 dark:border-amber-600 dark:bg-amber-950/20' : ''}>
+                    <Card className={!isSystemEmailsEnabled ? 'border-amber-200 bg-amber-50/50 dark:border-amber-900 dark:bg-amber-950/20' : ''}>
                         <CardContent className="py-4">
                             <div className="flex items-center justify-between gap-4">
                                 <div className="flex items-center gap-3">
-                                    <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${!isSystemEmailsEnabled ? 'bg-amber-500/20' : 'bg-muted'}`}>
+                                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${!isSystemEmailsEnabled ? 'bg-amber-500/20' : 'bg-muted'}`}>
                                         {!isSystemEmailsEnabled ? (
-                                            <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                                            <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                                         ) : (
-                                            <Mail className="h-4 w-4 text-muted-foreground" />
+                                            <Mail className="h-5 w-5 text-muted-foreground" />
                                         )}
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium">Alle uitgaande e-mails</p>
-                                        <p className="text-xs text-muted-foreground">
+                                        <p className="font-medium">Alle uitgaande e-mails</p>
+                                        <p className="text-sm text-muted-foreground">
                                             {!isSystemEmailsEnabled
                                                 ? 'Uitgeschakeld - er worden geen e-mails verzonden'
                                                 : 'Schakel uit tijdens migratie om duplicaten te voorkomen'}
@@ -162,17 +163,17 @@ export default function EmailChannels({ channels, providers, systemEmailChannelI
                         </CardContent>
                     </Card>
 
-                    {/* System Email Card - Compact inline design */}
+                    {/* System Email Card */}
                     <Card>
                         <CardContent className="py-4">
                             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                                 <div className="flex items-center gap-3 shrink-0">
-                                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-                                        <Send className="h-4 w-4 text-primary" />
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                                        <Send className="h-5 w-5 text-primary" />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium">Systeem e-mails</p>
-                                        <p className="text-xs text-muted-foreground">Uitnodigingen & notificaties</p>
+                                        <p className="font-medium">Systeem e-mails</p>
+                                        <p className="text-sm text-muted-foreground">Uitnodigingen & notificaties</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2 flex-1 sm:justify-end">
@@ -206,20 +207,26 @@ export default function EmailChannels({ channels, providers, systemEmailChannelI
                         </CardContent>
                     </Card>
 
+                    {/* Email Accounts Card */}
                     <Card>
                         <CardHeader>
                             <div className="flex items-center justify-between">
-                                <div>
-                                    <CardTitle className="text-lg">E-mailaccounts</CardTitle>
-                                    <CardDescription>
-                                        Koppel e-mailaccounts om automatisch tickets aan te maken uit inkomende e-mails.
-                                    </CardDescription>
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                                        <Inbox className="h-5 w-5 text-primary" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-lg">E-mailaccounts</CardTitle>
+                                        <CardDescription>
+                                            E-mails worden automatisch omgezet naar tickets
+                                        </CardDescription>
+                                    </div>
                                 </div>
                                 <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                                     <DialogTrigger asChild>
                                         <Button size="sm">
                                             <Plus className="mr-2 h-4 w-4" />
-                                            Account toevoegen
+                                            Toevoegen
                                         </Button>
                                     </DialogTrigger>
                                     <EmailChannelFormDialog
@@ -239,7 +246,7 @@ export default function EmailChannels({ channels, providers, systemEmailChannelI
                                     </p>
                                 </div>
                             ) : (
-                                <div className="space-y-4">
+                                <div className="divide-y">
                                     {channels.map((channel) => (
                                         <EmailChannelItem
                                             key={channel.id}
@@ -323,46 +330,56 @@ function EmailChannelItem({
 
     const providerLabel = providers.find((p) => p.value === channel.provider)?.label || channel.provider;
 
+    const getStatusBadge = () => {
+        if (channel.is_active) {
+            return (
+                <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-400">
+                    <CheckCircle2 className="mr-1 h-3 w-3" />
+                    Actief
+                </Badge>
+            );
+        }
+        if (channel.email_address && !channel.fetch_folder) {
+            return (
+                <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-400">
+                    <Settings className="mr-1 h-3 w-3" />
+                    Configuratie nodig
+                </Badge>
+            );
+        }
+        return (
+            <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-400">
+                <AlertCircle className="mr-1 h-3 w-3" />
+                Wacht op koppeling
+            </Badge>
+        );
+    };
+
     return (
-        <div className="flex items-center justify-between rounded-lg border p-4">
-            <div className="flex items-center gap-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                    <Mail className="h-5 w-5 text-primary" />
+        <div className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
+            <div className="flex items-center gap-4 min-w-0">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted">
+                    <Mail className="h-5 w-5 text-muted-foreground" />
                 </div>
-                <div>
-                    <div className="flex items-center gap-2">
-                        <span className="font-medium">{channel.name}</span>
+                <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-medium truncate">{channel.name}</span>
                         {channel.is_default && (
-                            <Badge variant="secondary" className="text-xs">
+                            <Badge variant="secondary" className="shrink-0 text-xs">
                                 Standaard
                             </Badge>
                         )}
-                        {channel.is_active ? (
-                            <Badge variant="outline" className="border-green-500 text-green-600 text-xs">
-                                <CheckCircle2 className="mr-1 h-3 w-3" />
-                                Actief
-                            </Badge>
-                        ) : channel.email_address && !channel.fetch_folder ? (
-                            <Badge variant="outline" className="border-blue-500 text-blue-600 text-xs">
-                                <Settings className="mr-1 h-3 w-3" />
-                                Configuratie nodig
-                            </Badge>
-                        ) : (
-                            <Badge variant="outline" className="border-yellow-500 text-yellow-600 text-xs">
-                                <AlertCircle className="mr-1 h-3 w-3" />
-                                Wacht op koppeling
-                            </Badge>
-                        )}
+                        {getStatusBadge()}
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span>{channel.email_address || 'Niet gekoppeld'}</span>
-                        <span>•</span>
-                        <span>{providerLabel}</span>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-0.5">
+                        <span className="truncate">{channel.email_address || 'Niet gekoppeld'}</span>
+                        <span className="shrink-0">•</span>
+                        <span className="shrink-0">{providerLabel}</span>
                         {channel.last_sync_at && (
                             <>
-                                <span>•</span>
-                                <span>
-                                    Laatste sync:{' '}
+                                <span className="shrink-0">•</span>
+                                <span className="shrink-0">
+                                    Sync{' '}
                                     {formatDistanceToNow(new Date(channel.last_sync_at), {
                                         addSuffix: true,
                                         locale: nl,
@@ -373,14 +390,14 @@ function EmailChannelItem({
                     </div>
                     {channel.last_sync_error && (
                         <div className="mt-1 flex items-center gap-1 text-xs text-destructive">
-                            <XCircle className="h-3 w-3" />
-                            <span>{channel.last_sync_error}</span>
+                            <XCircle className="h-3 w-3 shrink-0" />
+                            <span className="truncate">{channel.last_sync_error}</span>
                         </div>
                     )}
                 </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0 ml-4">
                 {channel.is_active && (
                     <Button
                         variant="outline"
@@ -389,7 +406,7 @@ function EmailChannelItem({
                         disabled={isSyncing}
                     >
                         <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-                        Sync nu
+                        Sync
                     </Button>
                 )}
 
@@ -447,7 +464,7 @@ function EmailChannelItem({
                         <DropdownMenuSeparator />
 
                         <DropdownMenuItem
-                            className="text-destructive"
+                            className="text-destructive focus:text-destructive"
                             onClick={onDelete}
                             disabled={channel.is_default}
                         >
@@ -502,7 +519,7 @@ function EmailChannelFormDialog({
     }
 
     return (
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-md">
             <form onSubmit={handleSubmit}>
                 <DialogHeader>
                     <DialogTitle>
@@ -523,6 +540,7 @@ function EmailChannelFormDialog({
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
                             placeholder="bijv. Support, Sales, Info"
+                            autoFocus
                         />
                         <InputError message={errors.name} />
                     </div>
@@ -549,27 +567,39 @@ function EmailChannelFormDialog({
                         </div>
                     )}
 
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-start space-x-3 rounded-lg border p-3">
                         <Checkbox
                             id="is_default"
                             checked={data.is_default}
                             onCheckedChange={(checked) => setData('is_default', checked === true)}
+                            className="mt-0.5"
                         />
-                        <Label htmlFor="is_default" className="font-normal">
-                            Instellen als standaard e-mailaccount
-                        </Label>
+                        <div className="space-y-1">
+                            <Label htmlFor="is_default" className="font-medium cursor-pointer">
+                                Standaard e-mailaccount
+                            </Label>
+                            <p className="text-xs text-muted-foreground">
+                                Wordt gebruikt voor nieuwe tickets zonder specifiek e-mailkanaal
+                            </p>
+                        </div>
                     </div>
 
                     {channel && (
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-start space-x-3 rounded-lg border p-3">
                             <Checkbox
                                 id="is_active"
                                 checked={data.is_active}
                                 onCheckedChange={(checked) => setData('is_active', checked === true)}
+                                className="mt-0.5"
                             />
-                            <Label htmlFor="is_active" className="font-normal">
-                                Account is actief
-                            </Label>
+                            <div className="space-y-1">
+                                <Label htmlFor="is_active" className="font-medium cursor-pointer">
+                                    Account is actief
+                                </Label>
+                                <p className="text-xs text-muted-foreground">
+                                    Deactiveer om tijdelijk geen e-mails te ontvangen
+                                </p>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -578,8 +608,8 @@ function EmailChannelFormDialog({
                     <Button type="button" variant="outline" onClick={onClose}>
                         Annuleren
                     </Button>
-                    <Button type="submit" disabled={processing}>
-                        {channel ? 'Wijzigingen opslaan' : 'Account toevoegen'}
+                    <Button type="submit" disabled={processing || !data.name.trim()}>
+                        {channel ? 'Opslaan' : 'Toevoegen'}
                     </Button>
                 </DialogFooter>
             </form>

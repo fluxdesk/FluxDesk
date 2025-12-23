@@ -21,9 +21,14 @@ import { store, update, destroy } from '@/routes/organization/statuses';
 import { type Status } from '@/types';
 import { Head, useForm, router } from '@inertiajs/react';
 import { ColorPicker } from '@/components/common/color-picker';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { CircleDot, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface Props {
     statuses: Status[];
@@ -35,6 +40,11 @@ export default function Statuses({ statuses: initialStatuses }: Props) {
     const [statuses, setStatuses] = useState(initialStatuses);
     const [deletingStatus, setDeletingStatus] = useState<Status | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+
+    // Sync local state when Inertia refreshes page data
+    useEffect(() => {
+        setStatuses(initialStatuses);
+    }, [initialStatuses]);
 
     const handleDelete = () => {
         if (!deletingStatus) return;
@@ -72,17 +82,22 @@ export default function Statuses({ statuses: initialStatuses }: Props) {
                     <Card>
                         <CardHeader>
                             <div className="flex items-center justify-between">
-                                <div>
-                                    <CardTitle className="text-lg">Statussen</CardTitle>
-                                    <CardDescription>
-                                        Configureer ticketstatussen. Sleep om te herschikken.
-                                    </CardDescription>
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                                        <CircleDot className="h-5 w-5 text-primary" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-lg">Statussen</CardTitle>
+                                        <CardDescription>
+                                            Sleep om te herschikken
+                                        </CardDescription>
+                                    </div>
                                 </div>
                                 <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                                     <DialogTrigger asChild>
                                         <Button size="sm">
                                             <Plus className="mr-2 h-4 w-4" />
-                                            Status toevoegen
+                                            Toevoegen
                                         </Button>
                                     </DialogTrigger>
                                     <StatusFormDialog onClose={() => setIsCreateOpen(false)} />
@@ -90,19 +105,29 @@ export default function Statuses({ statuses: initialStatuses }: Props) {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <SortableList
-                                items={statuses}
-                                onReorder={handleReorder}
-                                renderItem={(status) => (
-                                    <StatusItem
-                                        status={status}
-                                        isEditing={editingStatus?.id === status.id}
-                                        onEdit={() => setEditingStatus(status)}
-                                        onEditClose={() => setEditingStatus(null)}
-                                        onDelete={() => setDeletingStatus(status)}
-                                    />
-                                )}
-                            />
+                            {statuses.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-12 text-center">
+                                    <CircleDot className="h-12 w-12 text-muted-foreground/50" />
+                                    <h3 className="mt-4 text-lg font-semibold">Geen statussen</h3>
+                                    <p className="mt-2 text-sm text-muted-foreground">
+                                        Voeg een status toe om tickets te organiseren.
+                                    </p>
+                                </div>
+                            ) : (
+                                <SortableList
+                                    items={statuses}
+                                    onReorder={handleReorder}
+                                    renderItem={(status) => (
+                                        <StatusItem
+                                            status={status}
+                                            isEditing={editingStatus?.id === status.id}
+                                            onEdit={() => setEditingStatus(status)}
+                                            onEditClose={() => setEditingStatus(null)}
+                                            onDelete={() => setDeletingStatus(status)}
+                                        />
+                                    )}
+                                />
+                            )}
                         </CardContent>
                     </Card>
                 </div>
@@ -137,25 +162,25 @@ function StatusItem({
     return (
         <>
             <div
-                className="h-4 w-4 rounded-full"
+                className="h-5 w-5 rounded-full ring-2 ring-background shadow-sm"
                 style={{ backgroundColor: status.color }}
             />
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                    <span className="font-medium">{status.name}</span>
+                    <span className="font-medium truncate">{status.name}</span>
                     {status.is_default && (
-                        <span className="rounded bg-primary/10 px-1.5 py-0.5 text-xs text-primary">
+                        <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                             Standaard
                         </span>
                     )}
                     {status.is_closed && (
-                        <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+                        <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
                             Gesloten
                         </span>
                     )}
                 </div>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 shrink-0">
                 <Dialog open={isEditing} onOpenChange={(open) => (open ? onEdit() : onEditClose())}>
                     <DialogTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -164,15 +189,26 @@ function StatusItem({
                     </DialogTrigger>
                     <StatusFormDialog status={status} onClose={onEditClose} />
                 </Dialog>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={onDelete}
-                    disabled={status.is_default}
-                >
-                    <Trash2 className="h-4 w-4" />
-                </Button>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <span>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={onDelete}
+                                disabled={status.is_default}
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        </span>
+                    </TooltipTrigger>
+                    {status.is_default && (
+                        <TooltipContent>
+                            Standaardstatus kan niet verwijderd worden
+                        </TooltipContent>
+                    )}
+                </Tooltip>
             </div>
         </>
     );
@@ -216,10 +252,10 @@ function StatusFormDialog({
     }
 
     return (
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
             <form onSubmit={handleSubmit}>
                 <DialogHeader>
-                    <DialogTitle>{status ? 'Status bewerken' : 'Status aanmaken'}</DialogTitle>
+                    <DialogTitle>{status ? 'Status bewerken' : 'Status toevoegen'}</DialogTitle>
                     <DialogDescription>
                         {status ? 'Werk de statusdetails bij.' : 'Voeg een nieuwe statusoptie toe voor tickets.'}
                     </DialogDescription>
@@ -233,6 +269,7 @@ function StatusFormDialog({
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
                             placeholder="bijv. Open, In behandeling, Gesloten"
+                            autoFocus
                         />
                         <InputError message={errors.name} />
                     </div>
@@ -243,26 +280,38 @@ function StatusFormDialog({
                         <InputError message={errors.color} />
                     </div>
 
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-start space-x-3 rounded-lg border p-3">
                         <Checkbox
                             id="is_default"
                             checked={data.is_default}
                             onCheckedChange={(checked) => setData('is_default', checked === true)}
+                            className="mt-0.5"
                         />
-                        <Label htmlFor="is_default" className="font-normal">
-                            Instellen als standaardstatus voor nieuwe tickets
-                        </Label>
+                        <div className="space-y-1">
+                            <Label htmlFor="is_default" className="font-medium cursor-pointer">
+                                Standaardstatus
+                            </Label>
+                            <p className="text-xs text-muted-foreground">
+                                Nieuwe tickets krijgen automatisch deze status
+                            </p>
+                        </div>
                     </div>
 
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-start space-x-3 rounded-lg border p-3">
                         <Checkbox
                             id="is_closed"
                             checked={data.is_closed}
                             onCheckedChange={(checked) => setData('is_closed', checked === true)}
+                            className="mt-0.5"
                         />
-                        <Label htmlFor="is_closed" className="font-normal">
-                            Markeert ticket als gesloten/opgelost
-                        </Label>
+                        <div className="space-y-1">
+                            <Label htmlFor="is_closed" className="font-medium cursor-pointer">
+                                Gesloten status
+                            </Label>
+                            <p className="text-xs text-muted-foreground">
+                                Markeert ticket als afgehandeld
+                            </p>
+                        </div>
                     </div>
                 </div>
 
@@ -270,8 +319,8 @@ function StatusFormDialog({
                     <Button type="button" variant="outline" onClick={onClose}>
                         Annuleren
                     </Button>
-                    <Button type="submit" disabled={processing}>
-                        {status ? 'Wijzigingen opslaan' : 'Status aanmaken'}
+                    <Button type="submit" disabled={processing || !data.name.trim()}>
+                        {status ? 'Opslaan' : 'Toevoegen'}
                     </Button>
                 </DialogFooter>
             </form>

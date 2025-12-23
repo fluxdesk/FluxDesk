@@ -27,9 +27,28 @@ class Status extends Model
     {
         static::creating(function (Status $status) {
             if (empty($status->slug)) {
-                $status->slug = Str::slug($status->name);
+                $status->slug = static::generateUniqueSlug($status->name, $status->organization_id);
             }
         });
+    }
+
+    protected static function generateUniqueSlug(string $name, int $organizationId, ?int $excludeId = null): string
+    {
+        $baseSlug = Str::slug($name);
+        $slug = $baseSlug;
+        $counter = 2;
+
+        while (static::withoutGlobalScopes()
+            ->where('organization_id', $organizationId)
+            ->where('slug', $slug)
+            ->when($excludeId, fn ($q) => $q->where('id', '!=', $excludeId))
+            ->exists()
+        ) {
+            $slug = $baseSlug.'-'.$counter;
+            $counter++;
+        }
+
+        return $slug;
     }
 
     /**
