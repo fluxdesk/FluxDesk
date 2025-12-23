@@ -108,17 +108,30 @@ class UpgradeCommand extends Command
         // Step 3: Composer install
         if (! $this->option('skip-composer')) {
             $result = spin(function () {
-                return Process::timeout(600)->run('composer install --no-dev --optimize-autoloader --no-interaction');
+                // Use --no-scripts to avoid post-update scripts failing when dev packages are removed
+                return Process::timeout(600)->run('composer install --no-dev --optimize-autoloader --no-interaction --no-scripts');
             }, 'PHP dependencies installeren...');
 
             if ($result->successful()) {
                 info('Composer install voltooid.');
             } else {
-                error('Composer install mislukt: '.$result->errorOutput());
-                $this->disableMaintenanceMode();
+                // Check if it's just a script error (packages were still installed)
+                if (str_contains($result->output(), 'Generating optimized autoload files')) {
+                    warning('Composer install voltooid met waarschuwingen.');
+                } else {
+                    error('Composer install mislukt: '.$result->errorOutput());
+                    $this->disableMaintenanceMode();
 
-                return Command::FAILURE;
+                    return Command::FAILURE;
+                }
             }
+            $this->line('');
+
+            // Run composer dump-autoload separately to ensure autoloading is correct
+            spin(function () {
+                return Process::timeout(120)->run('composer dump-autoload --optimize --no-interaction');
+            }, 'Autoloader optimaliseren...');
+            info('Autoloader geoptimaliseerd.');
             $this->line('');
         }
 

@@ -126,6 +126,8 @@ class UpgradeController extends Controller
             'Checkout naar' => ['id' => 'pull', 'status' => 'completed'],
             'PHP dependencies installeren' => ['id' => 'composer', 'status' => 'running'],
             'Composer install voltooid' => ['id' => 'composer', 'status' => 'completed'],
+            'Autoloader optimaliseren' => ['id' => 'composer', 'status' => 'running'],
+            'Autoloader geoptimaliseerd' => ['id' => 'composer', 'status' => 'completed'],
             'Node.js dependencies installeren' => ['id' => 'npm_install', 'status' => 'running'],
             'NPM install voltooid' => ['id' => 'npm_install', 'status' => 'completed'],
             'Frontend bouwen' => ['id' => 'npm_build', 'status' => 'running'],
