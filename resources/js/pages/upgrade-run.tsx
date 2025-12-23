@@ -119,18 +119,20 @@ export default function UpgradeRun({ currentVersion, targetVersion }: Props) {
         setLogs([]);
         setCurrentStep(1);
 
-        const eventSource = new EventSource('/upgrade/execute', {
-            withCredentials: true,
-        });
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-        // For POST request, we need to use fetch with ReadableStream
+        // Use fetch with ReadableStream for SSE over POST
         fetch('/upgrade/execute', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                'Accept': 'text/event-stream',
+                'X-CSRF-TOKEN': csrfToken || '',
+                'X-Requested-With': 'XMLHttpRequest',
             },
         }).then(async (response) => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
             const reader = response.body?.getReader();
             const decoder = new TextDecoder();
 
@@ -183,10 +185,6 @@ export default function UpgradeRun({ currentVersion, targetVersion }: Props) {
                 },
             ]);
         });
-
-        return () => {
-            eventSource.close();
-        };
     }, [handleEvent]);
 
     const getStepIcon = (status: Step['status']) => {
