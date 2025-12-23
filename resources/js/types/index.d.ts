@@ -361,6 +361,8 @@ export interface EmailChannel {
 export interface EmailProviderOption {
     value: EmailProvider;
     label: string;
+    available: boolean;
+    hint: string | null;
 }
 
 export interface PostImportActionOption {

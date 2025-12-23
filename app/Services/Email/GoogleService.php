@@ -3,8 +3,10 @@
 namespace App\Services\Email;
 
 use App\Contracts\EmailProviderInterface;
+use App\Integrations\Contracts\Integration;
 use App\Models\EmailChannel;
 use App\Models\Message;
+use App\Models\OrganizationIntegration;
 use App\Models\Ticket;
 use Carbon\Carbon;
 use Illuminate\Http\Client\PendingRequest;
@@ -21,8 +23,6 @@ use Illuminate\Support\Facades\Log;
  */
 class GoogleService implements EmailProviderInterface
 {
-    private const AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
-
     private const TOKEN_URL = 'https://oauth2.googleapis.com/token';
 
     private const GMAIL_URL = 'https://gmail.googleapis.com/gmail/v1';
@@ -30,21 +30,34 @@ class GoogleService implements EmailProviderInterface
     private const USERINFO_URL = 'https://www.googleapis.com/oauth2/v2/userinfo';
 
     /**
+     * The organization's integration configuration.
+     */
+    private ?OrganizationIntegration $orgIntegration = null;
+
+    /**
+     * The integration class instance.
+     */
+    private ?Integration $integration = null;
+
+    /**
+     * Set the organization integration to use for OAuth operations.
+     */
+    public function setIntegration(OrganizationIntegration $orgIntegration): self
+    {
+        $this->orgIntegration = $orgIntegration;
+        $this->integration = $orgIntegration->getIntegrationInstance();
+
+        return $this;
+    }
+
+    /**
      * Get the OAuth authorization URL to start the authentication flow.
      */
     public function getAuthorizationUrl(string $state): string
     {
-        $params = [
-            'client_id' => config('services.google.client_id'),
-            'redirect_uri' => url(config('services.google.redirect_uri')),
-            'response_type' => 'code',
-            'scope' => implode(' ', config('services.google.scopes', [])),
-            'state' => $state,
-            'access_type' => 'offline',
-            'prompt' => 'consent',
-        ];
+        $this->ensureIntegration();
 
-        return self::AUTH_URL.'?'.http_build_query($params);
+        return $this->integration->authorizationUrl($this->orgIntegration->credentials ?? [], $state);
     }
 
     /**
@@ -52,11 +65,15 @@ class GoogleService implements EmailProviderInterface
      */
     public function handleCallback(string $code, EmailChannel $channel): void
     {
+        $this->ensureIntegration();
+
+        $credentials = $this->orgIntegration->credentials ?? [];
+
         $response = Http::asForm()->post(self::TOKEN_URL, [
-            'client_id' => config('services.google.client_id'),
-            'client_secret' => config('services.google.client_secret'),
+            'client_id' => $credentials['client_id'] ?? '',
+            'client_secret' => $credentials['client_secret'] ?? '',
             'code' => $code,
-            'redirect_uri' => url(config('services.google.redirect_uri')),
+            'redirect_uri' => $this->integration->redirectUri(),
             'grant_type' => 'authorization_code',
         ]);
 
@@ -91,9 +108,13 @@ class GoogleService implements EmailProviderInterface
             throw new \Exception('No refresh token available');
         }
 
+        $this->ensureIntegration();
+
+        $credentials = $this->orgIntegration->credentials ?? [];
+
         $response = Http::asForm()->post(self::TOKEN_URL, [
-            'client_id' => config('services.google.client_id'),
-            'client_secret' => config('services.google.client_secret'),
+            'client_id' => $credentials['client_id'] ?? '',
+            'client_secret' => $credentials['client_secret'] ?? '',
             'refresh_token' => $channel->oauth_refresh_token,
             'grant_type' => 'refresh_token',
         ]);
@@ -451,6 +472,22 @@ class GoogleService implements EmailProviderInterface
 
         // Return the sent message ID for threading
         return $responseData['id'] ?? null;
+    }
+
+    /**
+     * Ensure the integration is set before OAuth operations.
+     *
+     * @throws \RuntimeException
+     */
+    private function ensureIntegration(): void
+    {
+        if (! $this->orgIntegration || ! $this->integration) {
+            throw new \RuntimeException('Integration must be set before OAuth operations. Call setIntegration() first.');
+        }
+
+        if (! $this->orgIntegration->isConfigured()) {
+            throw new \RuntimeException('Integration credentials are not properly configured.');
+        }
     }
 
     /**

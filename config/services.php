@@ -37,56 +37,16 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Microsoft 365 OAuth Configuration
+    | Email Provider Integrations (Per-Organization)
     |--------------------------------------------------------------------------
     |
-    | Configuration for Microsoft Graph API integration for email channels.
-    | Register an application in Azure AD to get these credentials.
+    | Microsoft 365 and Google Workspace OAuth credentials are now stored
+    | per-organization in the database. Configure them via:
+    | Organization Settings → Integraties
+    |
+    | This allows each organization to use their own OAuth application
+    | credentials for email channel integration.
     |
     */
-
-    'microsoft' => [
-        'client_id' => env('MICROSOFT_CLIENT_ID'),
-        'client_secret' => env('MICROSOFT_CLIENT_SECRET'),
-        'tenant' => env('MICROSOFT_TENANT_ID', 'common'),
-        'redirect_uri' => env('MICROSOFT_REDIRECT_URI', '/organization/email-channels/oauth/callback/microsoft365'),
-        'scopes' => [
-            // Exact scopes from working implementation
-            'https://graph.microsoft.com/Mail.ReadWrite',
-            'https://graph.microsoft.com/Mail.ReadWrite.Shared',
-            'https://graph.microsoft.com/Mail.Send',
-            'https://graph.microsoft.com/Mail.Send.Shared',
-            'https://graph.microsoft.com/MailboxSettings.Read',
-            'https://graph.microsoft.com/User.Read',
-            'openid',
-            'profile',
-            'offline_access',
-        ],
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Google Workspace OAuth Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Configuration for Gmail API integration for email channels.
-    | Register an application in Google Cloud Console to get these credentials.
-    |
-    */
-
-    'google' => [
-        'client_id' => env('GOOGLE_CLIENT_ID'),
-        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        'redirect_uri' => env('GOOGLE_REDIRECT_URI', '/organization/email-channels/oauth/callback/google'),
-        'scopes' => [
-            'openid',
-            'profile',
-            'email',
-            'https://www.googleapis.com/auth/gmail.readonly',
-            'https://www.googleapis.com/auth/gmail.send',
-            'https://www.googleapis.com/auth/gmail.modify',
-            'https://www.googleapis.com/auth/gmail.labels',
-        ],
-    ],
 
 ];

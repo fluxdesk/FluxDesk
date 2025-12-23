@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Organization\ConfigureEmailChannelRequest;
 use App\Http\Requests\Organization\StoreEmailChannelRequest;
 use App\Http\Requests\Organization\UpdateEmailChannelRequest;
+use App\Integrations\IntegrationManager;
 use App\Jobs\SyncEmailChannelJob;
 use App\Models\Department;
 use App\Models\EmailChannel;
@@ -24,6 +25,7 @@ class EmailChannelController extends Controller
     public function __construct(
         private OrganizationContext $organizationContext,
         private EmailProviderFactory $providerFactory,
+        private IntegrationManager $integrationManager,
     ) {}
 
     public function index(): Response
@@ -31,13 +33,35 @@ class EmailChannelController extends Controller
         $organization = $this->organizationContext->organization();
         $channels = EmailChannel::orderBy('name')->get();
 
-        // Get supported providers from factory
+        // Get supported providers from factory with availability based on integration status
         $providers = collect(EmailProvider::cases())
             ->filter(fn ($provider) => $this->providerFactory->isSupported($provider))
-            ->map(fn ($provider) => [
-                'value' => $provider->value,
-                'label' => $provider->label(),
-            ])
+            ->map(function ($provider) use ($organization) {
+                $integrationId = $this->getIntegrationIdForProvider($provider);
+                $isAvailable = true;
+                $hint = null;
+
+                // Check if this provider requires an integration to be configured
+                if ($integrationId) {
+                    $integration = $organization->integration($integrationId);
+                    $isAvailable = $integration?->is_verified && $integration?->is_active;
+
+                    if (! $integration) {
+                        $hint = 'Configureer eerst de integratie in Instellingen';
+                    } elseif (! $integration->is_verified) {
+                        $hint = 'Integratie is nog niet geverifieerd';
+                    } elseif (! $integration->is_active) {
+                        $hint = 'Integratie is niet actief';
+                    }
+                }
+
+                return [
+                    'value' => $provider->value,
+                    'label' => $provider->label(),
+                    'available' => $isAvailable,
+                    'hint' => $hint,
+                ];
+            })
             ->values()
             ->all();
 
@@ -47,6 +71,18 @@ class EmailChannelController extends Controller
             'systemEmailChannelId' => $organization->settings->system_email_channel_id,
             'systemEmailsEnabled' => $organization->settings->system_emails_enabled ?? true,
         ]);
+    }
+
+    /**
+     * Get the integration identifier for a given email provider.
+     */
+    private function getIntegrationIdForProvider(EmailProvider $provider): ?string
+    {
+        return match ($provider) {
+            EmailProvider::Microsoft365 => 'microsoft365',
+            EmailProvider::Google => 'google',
+            default => null,
+        };
     }
 
     public function store(StoreEmailChannelRequest $request): RedirectResponse|\Illuminate\Http\Response

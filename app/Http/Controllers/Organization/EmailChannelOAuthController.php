@@ -33,6 +33,14 @@ class EmailChannelOAuthController extends Controller
                 ->with('error', 'This email channel does not use OAuth authentication.');
         }
 
+        // Check if the organization has the integration configured and active
+        $orgIntegration = $emailChannel->organization->integration($emailChannel->provider->value);
+
+        if (! $orgIntegration || ! $orgIntegration->is_active) {
+            return redirect()->route('organization.integrations.index')
+                ->with('error', 'Configureer eerst de '.ucfirst($emailChannel->provider->value).' integratie voordat je een e-mailkanaal kunt verbinden.');
+        }
+
         // Generate a state token with channel ID for callback verification
         $state = base64_encode(json_encode([
             'channel_id' => $emailChannel->id,

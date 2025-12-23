@@ -10,6 +10,7 @@ use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\Organization\DepartmentController;
 use App\Http\Controllers\Organization\EmailChannelController;
 use App\Http\Controllers\Organization\EmailChannelOAuthController;
+use App\Http\Controllers\Organization\IntegrationController;
 use App\Http\Controllers\Organization\InvitationController;
 use App\Http\Controllers\Organization\MemberController;
 use App\Http\Controllers\Organization\PriorityController;
@@ -147,6 +148,13 @@ Route::middleware(['auth', 'verified', 'org.required'])->group(function () {
         // Email Channel OAuth
         Route::get('email-channels/{emailChannel}/oauth/redirect', [EmailChannelOAuthController::class, 'redirect'])->name('email-channels.oauth.redirect');
         Route::get('email-channels/oauth/callback/{provider}', [EmailChannelOAuthController::class, 'callback'])->name('email-channels.oauth.callback');
+
+        // Integrations
+        Route::get('integrations', [IntegrationController::class, 'index'])->name('integrations.index');
+        Route::post('integrations', [IntegrationController::class, 'store'])->name('integrations.store');
+        Route::post('integrations/{integration}/test', [IntegrationController::class, 'test'])->name('integrations.test');
+        Route::post('integrations/{integration}/toggle', [IntegrationController::class, 'toggle'])->name('integrations.toggle');
+        Route::delete('integrations/{integration}', [IntegrationController::class, 'destroy'])->name('integrations.destroy');
     });
 });
 

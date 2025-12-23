@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Integrations\IntegrationManager;
 use App\Models\Message;
 use App\Models\Organization;
 use App\Models\Ticket;
@@ -21,6 +22,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(OrganizationContext::class);
         $this->app->scoped(PortalOrganizationContext::class);
+        $this->app->singleton(IntegrationManager::class);
     }
 
     /**

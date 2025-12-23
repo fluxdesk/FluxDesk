@@ -3,8 +3,10 @@
 namespace App\Services\Email;
 
 use App\Contracts\EmailProviderInterface;
+use App\Integrations\Contracts\Integration;
 use App\Models\EmailChannel;
 use App\Models\Message;
+use App\Models\OrganizationIntegration;
 use App\Models\Ticket;
 use Carbon\Carbon;
 use Illuminate\Http\Client\PendingRequest;
@@ -21,31 +23,37 @@ use Illuminate\Support\Facades\Log;
  */
 class Microsoft365Service implements EmailProviderInterface
 {
-    private const AUTH_URL = 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/authorize';
-
-    private const TOKEN_URL = 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token';
-
     private const GRAPH_URL = 'https://graph.microsoft.com/v1.0';
+
+    /**
+     * The organization's integration configuration.
+     */
+    private ?OrganizationIntegration $orgIntegration = null;
+
+    /**
+     * The integration class instance.
+     */
+    private ?Integration $integration = null;
+
+    /**
+     * Set the organization integration to use for OAuth operations.
+     */
+    public function setIntegration(OrganizationIntegration $orgIntegration): self
+    {
+        $this->orgIntegration = $orgIntegration;
+        $this->integration = $orgIntegration->getIntegrationInstance();
+
+        return $this;
+    }
 
     /**
      * Get the OAuth authorization URL to start the authentication flow.
      */
     public function getAuthorizationUrl(string $state): string
     {
-        $tenant = config('services.microsoft.tenant', 'common');
-        $baseUrl = str_replace('{tenant}', $tenant, self::AUTH_URL);
+        $this->ensureIntegration();
 
-        $params = [
-            'client_id' => config('services.microsoft.client_id'),
-            'response_type' => 'code',
-            'redirect_uri' => url(config('services.microsoft.redirect_uri')),
-            'response_mode' => 'query',
-            'scope' => implode(' ', config('services.microsoft.scopes', [])),
-            'state' => $state,
-            'prompt' => 'select_account',
-        ];
-
-        return $baseUrl.'?'.http_build_query($params);
+        return $this->integration->authorizationUrl($this->orgIntegration->credentials ?? [], $state);
     }
 
     /**
@@ -53,14 +61,16 @@ class Microsoft365Service implements EmailProviderInterface
      */
     public function handleCallback(string $code, EmailChannel $channel): void
     {
-        $tenant = config('services.microsoft.tenant', 'common');
-        $tokenUrl = str_replace('{tenant}', $tenant, self::TOKEN_URL);
+        $this->ensureIntegration();
+
+        $credentials = $this->orgIntegration->credentials ?? [];
+        $tokenUrl = $this->integration->tokenUrl($credentials);
 
         $response = Http::asForm()->post($tokenUrl, [
-            'client_id' => config('services.microsoft.client_id'),
-            'client_secret' => config('services.microsoft.client_secret'),
+            'client_id' => $credentials['client_id'] ?? '',
+            'client_secret' => $credentials['client_secret'] ?? '',
             'code' => $code,
-            'redirect_uri' => url(config('services.microsoft.redirect_uri')),
+            'redirect_uri' => $this->integration->redirectUri(),
             'grant_type' => 'authorization_code',
         ]);
 
@@ -95,12 +105,14 @@ class Microsoft365Service implements EmailProviderInterface
             throw new \Exception('No refresh token available');
         }
 
-        $tenant = config('services.microsoft.tenant', 'common');
-        $tokenUrl = str_replace('{tenant}', $tenant, self::TOKEN_URL);
+        $this->ensureIntegration();
+
+        $credentials = $this->orgIntegration->credentials ?? [];
+        $tokenUrl = $this->integration->tokenUrl($credentials);
 
         $response = Http::asForm()->post($tokenUrl, [
-            'client_id' => config('services.microsoft.client_id'),
-            'client_secret' => config('services.microsoft.client_secret'),
+            'client_id' => $credentials['client_id'] ?? '',
+            'client_secret' => $credentials['client_secret'] ?? '',
             'refresh_token' => $channel->oauth_refresh_token,
             'grant_type' => 'refresh_token',
         ]);
@@ -591,6 +603,22 @@ class Microsoft365Service implements EmailProviderInterface
         }
 
         return null;
+    }
+
+    /**
+     * Ensure the integration is set before OAuth operations.
+     *
+     * @throws \RuntimeException
+     */
+    private function ensureIntegration(): void
+    {
+        if (! $this->orgIntegration || ! $this->integration) {
+            throw new \RuntimeException('Integration must be set before OAuth operations. Call setIntegration() first.');
+        }
+
+        if (! $this->orgIntegration->isConfigured()) {
+            throw new \RuntimeException('Integration credentials are not properly configured.');
+        }
     }
 
     /**

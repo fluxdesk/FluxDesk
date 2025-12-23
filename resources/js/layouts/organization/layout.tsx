@@ -7,9 +7,10 @@ import { index as slasIndex } from '@/routes/organization/slas';
 import { index as membersIndex } from '@/routes/organization/members';
 import { index as emailChannelsIndex } from '@/routes/organization/email-channels';
 import { index as departmentsIndex } from '@/routes/organization/departments';
+import { index as integrationsIndex } from '@/routes/organization/integrations';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { Settings, CircleDot, Flag, Tags, Clock, Users, Mail, Building2 } from 'lucide-react';
+import { Settings, CircleDot, Flag, Tags, Clock, Users, Mail, Building2, Plug } from 'lucide-react';
 import { type PropsWithChildren } from 'react';
 
 const sidebarNavItems: NavItem[] = [
@@ -52,6 +53,11 @@ const sidebarNavItems: NavItem[] = [
         title: 'E-mail',
         href: emailChannelsIndex(),
         icon: Mail,
+    },
+    {
+        title: 'Integraties',
+        href: integrationsIndex(),
+        icon: Plug,
     },
 ];
 

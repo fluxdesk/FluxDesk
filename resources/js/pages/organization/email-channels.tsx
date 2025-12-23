@@ -487,13 +487,21 @@ function EmailChannelFormDialog({
     providers: EmailProviderOption[];
     onClose: () => void;
 }) {
+    // Default to first available provider, or microsoft365 if editing
+    const defaultProvider = channel?.provider
+        || providers.find((p) => p.available)?.value
+        || 'microsoft365';
+
     const { data, setData, post, patch, processing, errors, reset } = useForm({
         name: channel?.name || '',
-        provider: channel?.provider || 'microsoft365',
+        provider: defaultProvider,
         is_default: channel?.is_default || false,
         is_active: channel?.is_active ?? true,
         auto_reply_enabled: channel?.auto_reply_enabled || false,
     });
+
+    // Check if the currently selected provider is available
+    const selectedProviderAvailable = providers.find((p) => p.value === data.provider)?.available ?? true;
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -557,8 +565,19 @@ function EmailChannelFormDialog({
                                 </SelectTrigger>
                                 <SelectContent>
                                     {providers.map((provider) => (
-                                        <SelectItem key={provider.value} value={provider.value}>
-                                            {provider.label}
+                                        <SelectItem
+                                            key={provider.value}
+                                            value={provider.value}
+                                            disabled={!provider.available}
+                                        >
+                                            <div className="flex flex-col">
+                                                <span>{provider.label}</span>
+                                                {!provider.available && provider.hint && (
+                                                    <span className="text-xs text-muted-foreground">
+                                                        {provider.hint}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -604,11 +623,14 @@ function EmailChannelFormDialog({
                     )}
                 </div>
 
-                <DialogFooter>
+                <DialogFooter className="flex-col gap-3 sm:flex-row sm:justify-end">
                     <Button type="button" variant="outline" onClick={onClose}>
                         Annuleren
                     </Button>
-                    <Button type="submit" disabled={processing || !data.name.trim()}>
+                    <Button
+                        type="submit"
+                        disabled={processing || !data.name.trim() || (!channel && !selectedProviderAvailable)}
+                    >
                         {channel ? 'Opslaan' : 'Toevoegen'}
                     </Button>
                 </DialogFooter>

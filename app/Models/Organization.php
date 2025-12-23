@@ -120,6 +120,31 @@ class Organization extends Model
         return $this->invitations()->pending();
     }
 
+    public function integrations(): HasMany
+    {
+        return $this->hasMany(OrganizationIntegration::class);
+    }
+
+    /**
+     * Get a specific integration configuration by identifier.
+     */
+    public function integration(string $identifier): ?OrganizationIntegration
+    {
+        return $this->integrations()->where('integration', $identifier)->first();
+    }
+
+    /**
+     * Check if the organization has an active and verified integration.
+     */
+    public function hasActiveIntegration(string $identifier): bool
+    {
+        return $this->integrations()
+            ->where('integration', $identifier)
+            ->where('is_active', true)
+            ->where('is_verified', true)
+            ->exists();
+    }
+
     public function getRouteKeyName(): string
     {
         return 'slug';

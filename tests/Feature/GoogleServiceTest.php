@@ -4,6 +4,7 @@ use App\Enums\EmailProvider;
 use App\Enums\UserRole;
 use App\Models\EmailChannel;
 use App\Models\Organization;
+use App\Models\OrganizationIntegration;
 use App\Models\User;
 use App\Services\Email\EmailProviderFactory;
 use App\Services\Email\GoogleService;
@@ -19,17 +20,25 @@ beforeEach(function () {
         'role' => UserRole::Admin->value,
         'is_default' => true,
     ]);
+
+    // Create an active Google integration for the organization
+    $this->googleIntegration = OrganizationIntegration::create([
+        'organization_id' => $this->organization->id,
+        'integration' => 'google',
+        'credentials' => [
+            'client_id' => 'test-client-id',
+            'client_secret' => 'test-secret',
+        ],
+        'is_verified' => true,
+        'verified_at' => now(),
+        'is_active' => true,
+    ]);
 });
 
 describe('GoogleService', function () {
     it('generates correct authorization URL', function () {
-        config([
-            'services.google.client_id' => 'test-client-id',
-            'services.google.redirect_uri' => '/oauth/callback/google',
-            'services.google.scopes' => ['openid', 'profile', 'email'],
-        ]);
-
         $service = app(GoogleService::class);
+        $service->setIntegration($this->googleIntegration);
         $url = $service->getAuthorizationUrl('test-state');
 
         expect($url)->toContain('https://accounts.google.com/o/oauth2/v2/auth');
@@ -40,12 +49,6 @@ describe('GoogleService', function () {
     });
 
     it('handles OAuth callback successfully', function () {
-        config([
-            'services.google.client_id' => 'test-client-id',
-            'services.google.client_secret' => 'test-secret',
-            'services.google.redirect_uri' => '/oauth/callback/google',
-        ]);
-
         Http::fake([
             'oauth2.googleapis.com/token' => Http::response([
                 'access_token' => 'new-access-token',
@@ -63,6 +66,7 @@ describe('GoogleService', function () {
         ]);
 
         $service = app(GoogleService::class);
+        $service->setIntegration($this->googleIntegration);
         $service->handleCallback('auth-code', $channel);
 
         $channel->refresh();
@@ -73,11 +77,6 @@ describe('GoogleService', function () {
     });
 
     it('refreshes token successfully', function () {
-        config([
-            'services.google.client_id' => 'test-client-id',
-            'services.google.client_secret' => 'test-secret',
-        ]);
-
         Http::fake([
             'oauth2.googleapis.com/token' => Http::response([
                 'access_token' => 'refreshed-access-token',
@@ -93,6 +92,7 @@ describe('GoogleService', function () {
         ]);
 
         $service = app(GoogleService::class);
+        $service->setIntegration($this->googleIntegration);
         $service->refreshToken($channel);
 
         $channel->refresh();
@@ -380,6 +380,20 @@ describe('EmailProviderFactory with Google', function () {
         $factory = app(EmailProviderFactory::class);
 
         expect($factory->isSupported(EmailProvider::Google))->toBeTrue();
+    });
+
+    it('throws exception when integration is not configured', function () {
+        // Create organization without Google integration
+        $org = Organization::factory()->create();
+        $channel = EmailChannel::factory()->create([
+            'organization_id' => $org->id,
+            'provider' => EmailProvider::Google,
+        ]);
+
+        $factory = app(EmailProviderFactory::class);
+
+        expect(fn () => $factory->make($channel))
+            ->toThrow(RuntimeException::class, 'not configured or not active');
     });
 });
 
