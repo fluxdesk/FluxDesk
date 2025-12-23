@@ -26,7 +26,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { CreateTicketDialog } from '@/components/tickets/create-ticket-dialog';
-import type { Status, Priority, User, Contact, InboxFilters, EmailChannel } from '@/types';
+import type { Status, Priority, User, Contact, InboxFilters, EmailChannel, Department } from '@/types';
 
 interface InboxListHeaderProps {
     statuses: Status[];
@@ -34,6 +34,7 @@ interface InboxListHeaderProps {
     agents: User[];
     contacts: Contact[];
     emailChannels: EmailChannel[];
+    departments: Department[];
     filters: InboxFilters;
     totalCount?: number;
     unreadCount?: number;
@@ -45,6 +46,7 @@ export function InboxListHeader({
     agents,
     contacts,
     emailChannels,
+    departments,
     filters,
     totalCount,
     unreadCount = 0,
@@ -330,6 +332,7 @@ export function InboxListHeader({
                 priorities={priorities}
                 agents={agents}
                 emailChannels={emailChannels}
+                departments={departments}
             />
         </div>
     );

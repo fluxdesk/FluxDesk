@@ -7,6 +7,7 @@ use App\Http\Controllers\InvitationAcceptController;
 use App\Http\Controllers\MagicLinkController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\Organization\DepartmentController;
 use App\Http\Controllers\Organization\EmailChannelController;
 use App\Http\Controllers\Organization\EmailChannelOAuthController;
 use App\Http\Controllers\Organization\InvitationController;
@@ -110,6 +111,13 @@ Route::middleware(['auth', 'verified', 'org.required'])->group(function () {
         Route::patch('slas/{sla}', [SlaController::class, 'update'])->name('slas.update');
         Route::delete('slas/{sla}', [SlaController::class, 'destroy'])->name('slas.destroy');
         Route::patch('sla-settings', [SlaController::class, 'updateSettings'])->name('sla-settings.update');
+
+        // Departments
+        Route::get('departments', [DepartmentController::class, 'index'])->name('departments.index');
+        Route::post('departments', [DepartmentController::class, 'store'])->name('departments.store');
+        Route::patch('departments/{department}', [DepartmentController::class, 'update'])->name('departments.update');
+        Route::delete('departments/{department}', [DepartmentController::class, 'destroy'])->name('departments.destroy');
+        Route::post('departments/reorder', [DepartmentController::class, 'reorder'])->name('departments.reorder');
 
         // Members
         Route::get('members', [MemberController::class, 'index'])->name('members.index');

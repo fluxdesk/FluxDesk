@@ -29,7 +29,7 @@ import { AppNav } from '@/components/inbox/app-nav';
 import { MailList, type ListDensity } from '@/components/inbox/mail-list';
 import { TicketView } from '@/components/inbox/ticket-view';
 import { CreateTicketDialog } from '@/components/tickets/create-ticket-dialog';
-import type { Ticket, Status, Priority, User, Contact, InboxFilters, PaginatedData, SharedData, TicketFolder, Tag, EmailChannel } from '@/types';
+import type { Ticket, Status, Priority, User, Contact, InboxFilters, PaginatedData, SharedData, TicketFolder, Tag, EmailChannel, Department } from '@/types';
 import { router, usePage } from '@inertiajs/react';
 import { useState, useCallback } from 'react';
 
@@ -42,6 +42,7 @@ interface MailProps {
     folders: TicketFolder[];
     tags: Tag[];
     emailChannels: EmailChannel[];
+    departments: Department[];
     filters: InboxFilters;
     selectedTicket?: Ticket;
     defaultLayout?: number[];
@@ -58,6 +59,7 @@ export function Mail({
     folders,
     tags,
     emailChannels,
+    departments,
     filters,
     selectedTicket,
     defaultLayout = [12, 22, 66],
@@ -283,6 +285,7 @@ export function Mail({
                 priorities={priorities}
                 agents={agents}
                 emailChannels={emailChannels}
+                departments={departments}
             />
         </TooltipProvider>
     );

@@ -4,6 +4,7 @@ namespace App\Http\Requests\Tickets;
 
 use App\Http\Requests\Concerns\AuthorizesOrganizationRequests;
 use App\Models\Contact;
+use App\Models\Department;
 use App\Models\EmailChannel;
 use App\Models\Priority;
 use App\Models\Status;
@@ -32,6 +33,7 @@ class StoreTicketRequest extends FormRequest
             'contact_name' => ['nullable', 'string', 'max:255'],
             'status_id' => ['nullable', 'integer', Rule::exists(Status::class, 'id')],
             'priority_id' => ['nullable', 'integer', Rule::exists(Priority::class, 'id')],
+            'department_id' => ['required', 'integer', Rule::exists(Department::class, 'id')],
             'assigned_to' => ['nullable', 'integer', 'exists:users,id'],
             'email_channel_id' => ['nullable', 'integer', Rule::exists(EmailChannel::class, 'id')],
             'message' => ['required', 'string', 'min:1'],

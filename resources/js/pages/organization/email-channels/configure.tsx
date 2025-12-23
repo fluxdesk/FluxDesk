@@ -13,22 +13,24 @@ import {
 } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import OrganizationLayout from '@/layouts/organization/layout';
-import { type EmailChannel, type MailFolder, type PostImportActionOption } from '@/types';
+import { type EmailChannel, type MailFolder, type PostImportActionOption, type Department } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { update } from '@/routes/organization/email-channels/configure';
-import { ArrowLeft, Calendar, FolderInput, Loader2, Mail, Settings } from 'lucide-react';
+import { ArrowLeft, Building2, Calendar, FolderInput, Loader2, Mail, Settings } from 'lucide-react';
 import { Link } from '@inertiajs/react';
 import { index } from '@/routes/organization/email-channels';
 
 interface Props {
-    channel: EmailChannel;
+    channel: EmailChannel & { department_id?: number };
     mailFolders: MailFolder[];
     postImportActions: PostImportActionOption[];
+    departments: Department[];
     defaultImportSince: string;
 }
 
-export default function Configure({ channel, mailFolders, postImportActions, defaultImportSince }: Props) {
+export default function Configure({ channel, mailFolders, postImportActions, departments, defaultImportSince }: Props) {
     const { data, setData, patch, processing, errors } = useForm({
+        department_id: channel.department_id?.toString() || departments.find((d) => d.is_default)?.id.toString() || '',
         fetch_folder: channel.fetch_folder || '',
         post_import_action: channel.post_import_action || 'nothing',
         post_import_folder: channel.post_import_folder || '',
@@ -66,6 +68,45 @@ export default function Configure({ channel, mailFolders, postImportActions, def
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-base">
+                                    <Building2 className="h-5 w-5" />
+                                    Afdeling koppelen
+                                </CardTitle>
+                                <CardDescription>
+                                    Tickets van dit e-mailkanaal worden automatisch aan deze afdeling toegewezen.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="department_id">Afdeling</Label>
+                                    <Select
+                                        value={data.department_id}
+                                        onValueChange={(value) => setData('department_id', value)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Selecteer een afdeling" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {departments.map((department) => (
+                                                <SelectItem key={department.id} value={department.id.toString()}>
+                                                    <div className="flex items-center gap-2">
+                                                        <div
+                                                            className="h-2 w-2 rounded-full"
+                                                            style={{ backgroundColor: department.color }}
+                                                        />
+                                                        {department.name}
+                                                    </div>
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <InputError message={errors.department_id} />
+                                </div>
+                            </CardContent>
+                        </Card>
+
                         <Card>
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-base">
@@ -281,7 +322,7 @@ export default function Configure({ channel, mailFolders, postImportActions, def
                             <Button type="button" variant="outline" asChild>
                                 <Link href={index().url}>Annuleren</Link>
                             </Button>
-                            <Button type="submit" disabled={processing || !data.fetch_folder}>
+                            <Button type="submit" disabled={processing || !data.fetch_folder || !data.department_id}>
                                 {processing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 Activeren
                             </Button>

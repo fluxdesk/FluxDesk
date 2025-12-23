@@ -176,6 +176,7 @@ class EmailParser
             'contact_id' => $contact->id,
             'status_id' => $defaultStatus?->id,
             'priority_id' => $priority?->id,
+            'department_id' => $channel->department_id,
             'channel' => TicketChannel::Email,
             'email_channel_id' => $channel->id,
             'email_thread_id' => $threadId,

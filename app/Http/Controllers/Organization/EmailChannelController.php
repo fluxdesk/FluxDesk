@@ -9,6 +9,7 @@ use App\Http\Requests\Organization\ConfigureEmailChannelRequest;
 use App\Http\Requests\Organization\StoreEmailChannelRequest;
 use App\Http\Requests\Organization\UpdateEmailChannelRequest;
 use App\Jobs\SyncEmailChannelJob;
+use App\Models\Department;
 use App\Models\EmailChannel;
 use App\Services\Email\EmailProviderFactory;
 use App\Services\OrganizationContext;
@@ -168,10 +169,13 @@ class EmailChannelController extends Controller
             ->values()
             ->all();
 
+        $departments = Department::orderBy('sort_order')->get();
+
         return Inertia::render('organization/email-channels/configure', [
             'channel' => $emailChannel,
             'mailFolders' => $mailFolders,
             'postImportActions' => $postImportActions,
+            'departments' => $departments,
             'defaultImportSince' => now()->toDateString(),
         ]);
     }
@@ -192,6 +196,7 @@ class EmailChannelController extends Controller
         // If import_old_emails is true but no date, leave null (import all available)
 
         $emailChannel->update([
+            'department_id' => $request->department_id,
             'fetch_folder' => $request->fetch_folder,
             'post_import_action' => $request->post_import_action,
             'post_import_folder' => $request->post_import_action === PostImportAction::MoveToFolder->value

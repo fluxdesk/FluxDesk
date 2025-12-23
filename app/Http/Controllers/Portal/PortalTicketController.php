@@ -6,6 +6,7 @@ use App\Enums\MessageType;
 use App\Enums\TicketChannel;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Portal\PortalStoreTicketRequest;
+use App\Models\Department;
 use App\Models\Message;
 use App\Models\Organization;
 use App\Models\Priority;
@@ -78,7 +79,13 @@ class PortalTicketController extends Controller
      */
     public function create(Organization $organization): Response
     {
-        return Inertia::render('portal/tickets/create');
+        $departments = Department::where('organization_id', $organization->id)
+            ->orderBy('sort_order')
+            ->get();
+
+        return Inertia::render('portal/tickets/create', [
+            'departments' => $departments,
+        ]);
     }
 
     /**
@@ -103,6 +110,7 @@ class PortalTicketController extends Controller
             'contact_id' => $contact->id,
             'status_id' => $defaultStatus?->id,
             'priority_id' => $defaultPriority?->id,
+            'department_id' => $request->department_id,
             'channel' => TicketChannel::Web,
         ]);
 

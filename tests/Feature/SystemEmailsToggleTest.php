@@ -2,6 +2,7 @@
 
 use App\Enums\UserRole;
 use App\Models\Contact;
+use App\Models\Department;
 use App\Models\Organization;
 use App\Models\Priority;
 use App\Models\Status;
@@ -161,9 +162,11 @@ describe('Email Import Date Filter', function () {
         ]);
 
         $this->actingAs($user);
+        $department = Department::where('organization_id', $organization->id)->where('is_default', true)->first();
 
         // Configure with "only new emails" (no old import)
         $response = $this->patch(route('organization.email-channels.configure.update', $channel), [
+            'department_id' => $department->id,
             'fetch_folder' => 'INBOX',
             'post_import_action' => 'nothing',
             'sync_interval_minutes' => 5,
@@ -195,10 +198,12 @@ describe('Email Import Date Filter', function () {
         ]);
 
         $this->actingAs($user);
+        $department = Department::where('organization_id', $organization->id)->where('is_default', true)->first();
 
         $importDate = now()->subDays(7)->toDateString();
 
         $response = $this->patch(route('organization.email-channels.configure.update', $channel), [
+            'department_id' => $department->id,
             'fetch_folder' => 'INBOX',
             'post_import_action' => 'nothing',
             'sync_interval_minutes' => 5,

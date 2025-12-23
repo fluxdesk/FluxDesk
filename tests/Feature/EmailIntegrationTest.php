@@ -8,6 +8,7 @@ use App\Enums\UserRole;
 use App\Jobs\SendTicketReplyJob;
 use App\Jobs\SyncEmailChannelJob;
 use App\Models\Contact;
+use App\Models\Department;
 use App\Models\EmailChannel;
 use App\Models\Message;
 use App\Models\Organization;
@@ -748,9 +749,11 @@ describe('EmailChannel Controller', function () {
         $channel = EmailChannel::factory()->needsConfiguration()->create([
             'organization_id' => $this->organization->id,
         ]);
+        $department = Department::where('organization_id', $this->organization->id)->where('is_default', true)->first();
 
         $response = $this->actingAs($this->adminUser)
             ->patch("/organization/email-channels/{$channel->id}/configure", [
+                'department_id' => $department->id,
                 'fetch_folder' => 'INBOX',
                 'post_import_action' => 'archive',
                 'sync_interval_minutes' => 10,

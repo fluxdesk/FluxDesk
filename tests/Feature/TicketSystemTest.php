@@ -3,6 +3,7 @@
 use App\Enums\MessageType;
 use App\Enums\TicketChannel;
 use App\Models\Contact;
+use App\Models\Department;
 use App\Models\Message;
 use App\Models\Organization;
 use App\Models\Priority;
@@ -54,6 +55,19 @@ describe('Organization Defaults', function () {
         expect($sla->is_system)->toBeTrue();
         expect($sla->first_response_hours)->toBe(48);
         expect($sla->resolution_hours)->toBe(168);
+    });
+
+    it('creates default department when organization is created', function () {
+        $organization = Organization::factory()->create();
+
+        $department = Department::withoutGlobalScopes()
+            ->where('organization_id', $organization->id)
+            ->where('is_default', true)
+            ->first();
+
+        expect($department)->not->toBeNull();
+        expect($department->name)->toBe('Algemeen');
+        expect($department->slug)->toBe('algemeen');
     });
 });
 
@@ -495,6 +509,7 @@ describe('Ticket Creation with Email', function () {
         $this->organization->users()->attach($this->user, ['role' => 'admin', 'is_default' => true]);
         app(OrganizationContext::class)->set($this->organization);
         $this->actingAs($this->user);
+        $this->department = Department::where('organization_id', $this->organization->id)->where('is_default', true)->first();
     });
 
     it('creates new contact when email is provided', function () {
@@ -502,6 +517,7 @@ describe('Ticket Creation with Email', function () {
             'subject' => 'Test Ticket',
             'contact_email' => 'newcontact@example.com',
             'message' => 'This is a test message.',
+            'department_id' => $this->department->id,
         ]);
 
         $response->assertRedirect();
@@ -526,6 +542,7 @@ describe('Ticket Creation with Email', function () {
             'subject' => 'Test Ticket',
             'contact_email' => 'existing@example.com',
             'message' => 'This is a test message.',
+            'department_id' => $this->department->id,
         ]);
 
         $response->assertRedirect();
@@ -542,6 +559,7 @@ describe('Ticket Creation with Email', function () {
         $response = $this->post('/inbox', [
             'subject' => 'Test Ticket',
             'message' => 'This is a test message.',
+            'department_id' => $this->department->id,
         ]);
 
         $response->assertSessionHasErrors('contact_id');
@@ -552,6 +570,7 @@ describe('Ticket Creation with Email', function () {
             'subject' => 'Test Ticket',
             'contact_email' => 'john.doe@example.com',
             'message' => 'This is a test message.',
+            'department_id' => $this->department->id,
         ]);
 
         $response->assertRedirect();

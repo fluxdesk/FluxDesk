@@ -23,6 +23,7 @@ class Ticket extends Model
         'status_id',
         'priority_id',
         'sla_id',
+        'department_id',
         'assigned_to',
         'channel',
         'email_channel_id',
@@ -73,6 +74,11 @@ class Ticket extends Model
     public function sla(): BelongsTo
     {
         return $this->belongsTo(Sla::class);
+    }
+
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
     }
 
     public function assignee(): BelongsTo

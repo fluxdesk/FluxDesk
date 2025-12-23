@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests\Portal;
 
+use App\Models\Department;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class PortalStoreTicketRequest extends FormRequest
 {
@@ -19,6 +21,7 @@ class PortalStoreTicketRequest extends FormRequest
     {
         return [
             'subject' => ['required', 'string', 'max:255'],
+            'department_id' => ['required', 'integer', Rule::exists(Department::class, 'id')],
             'message' => ['required', 'string', 'min:1'],
         ];
     }
@@ -30,6 +33,7 @@ class PortalStoreTicketRequest extends FormRequest
     {
         return [
             'subject.required' => 'Vul een onderwerp in.',
+            'department_id.required' => 'Selecteer een afdeling.',
             'message.required' => 'Vul een bericht in.',
         ];
     }

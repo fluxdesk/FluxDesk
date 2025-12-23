@@ -2,19 +2,38 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import PortalLayout from '@/layouts/portal/portal-layout';
 import { type PortalSharedData } from '@/types/portal';
+import { type Department } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, Loader2, Send } from 'lucide-react';
+import { useMemo } from 'react';
 
-export default function PortalTicketCreate() {
+interface Props {
+    departments: Department[];
+}
+
+export default function PortalTicketCreate({ departments }: Props) {
     const { organization } = usePage<PortalSharedData>().props;
     const primaryColor = organization?.settings?.primary_color ?? '#18181b';
     const orgSlug = organization?.slug ?? '';
 
+    // Find the default department
+    const defaultDepartment = useMemo(() => {
+        return departments.find((d) => d.is_default) || departments[0];
+    }, [departments]);
+
     const form = useForm({
         subject: '',
+        department_id: defaultDepartment?.id.toString() || '',
         message: '',
     });
 
@@ -62,6 +81,40 @@ export default function PortalTicketCreate() {
                                 <p className="text-sm text-destructive">{form.errors.subject}</p>
                             )}
                         </div>
+
+                        {departments.length > 1 && (
+                            <div className="space-y-2">
+                                <Label htmlFor="department_id">Afdeling</Label>
+                                <Select
+                                    value={form.data.department_id}
+                                    onValueChange={(value) => form.setData('department_id', value)}
+                                    disabled={form.processing}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecteer een afdeling" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {departments.map((department) => (
+                                            <SelectItem
+                                                key={department.id}
+                                                value={department.id.toString()}
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <div
+                                                        className="h-2 w-2 rounded-full"
+                                                        style={{ backgroundColor: department.color }}
+                                                    />
+                                                    {department.name}
+                                                </div>
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {form.errors.department_id && (
+                                    <p className="text-sm text-destructive">{form.errors.department_id}</p>
+                                )}
+                            </div>
+                        )}
 
                         <div className="space-y-2">
                             <Label htmlFor="message">Bericht</Label>

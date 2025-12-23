@@ -23,6 +23,7 @@ class ConfigureEmailChannelRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'department_id' => ['required', 'exists:departments,id'],
             'fetch_folder' => ['required', 'string', 'max:255'],
             'post_import_action' => ['required', Rule::enum(PostImportAction::class)],
             'post_import_folder' => ['nullable', 'required_if:post_import_action,move_to_folder', 'string', 'max:255'],
@@ -38,6 +39,8 @@ class ConfigureEmailChannelRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'department_id.required' => 'Selecteer een afdeling.',
+            'department_id.exists' => 'De geselecteerde afdeling bestaat niet.',
             'fetch_folder.required' => 'Please select a folder to import emails from.',
             'post_import_action.required' => 'Please select what to do with emails after importing.',
             'post_import_folder.required_if' => 'Please select a folder to move emails to.',

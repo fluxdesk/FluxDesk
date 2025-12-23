@@ -105,6 +105,11 @@ class Organization extends Model
         return $this->hasMany(EmailChannel::class);
     }
 
+    public function departments(): HasMany
+    {
+        return $this->hasMany(Department::class);
+    }
+
     public function invitations(): HasMany
     {
         return $this->hasMany(OrganizationInvitation::class);

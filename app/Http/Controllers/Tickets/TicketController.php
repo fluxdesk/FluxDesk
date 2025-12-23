@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Tickets\StoreTicketRequest;
 use App\Http\Requests\Tickets\UpdateTicketRequest;
 use App\Models\Contact;
+use App\Models\Department;
 use App\Models\EmailChannel;
 use App\Models\Message;
 use App\Models\Priority;
@@ -105,6 +106,9 @@ class TicketController extends Controller
         // Get email channels for ticket creation
         $emailChannels = EmailChannel::where('is_active', true)->orderBy('name')->get();
 
+        // Get departments
+        $departments = Department::orderBy('sort_order')->get();
+
         return Inertia::render('inbox/index', [
             'tickets' => $tickets,
             'statuses' => $statuses,
@@ -114,6 +118,7 @@ class TicketController extends Controller
             'folders' => $folders,
             'tags' => $tags,
             'emailChannels' => $emailChannels,
+            'departments' => $departments,
             'filters' => $request->only(['status', 'priority', 'assigned_to', 'search', 'unread', 'folder', 'sort']),
         ]);
     }
@@ -214,6 +219,9 @@ class TicketController extends Controller
         // Get email channels for ticket creation
         $emailChannels = EmailChannel::where('is_active', true)->orderBy('name')->get();
 
+        // Get departments
+        $departments = Department::orderBy('sort_order')->get();
+
         return Inertia::render('inbox/show', [
             'ticket' => $ticket,
             'tickets' => $tickets,
@@ -224,6 +232,7 @@ class TicketController extends Controller
             'folders' => $folders,
             'tags' => $tags,
             'emailChannels' => $emailChannels,
+            'departments' => $departments,
             'filters' => $request->only(['status', 'priority', 'assigned_to', 'search', 'unread', 'folder', 'sort']),
         ]);
     }
@@ -275,6 +284,7 @@ class TicketController extends Controller
             'contact_id' => $contactId,
             'status_id' => $request->status_id,
             'priority_id' => $request->priority_id,
+            'department_id' => $request->department_id,
             'assigned_to' => $request->assigned_to,
             'email_channel_id' => $request->email_channel_id,
             'channel' => TicketChannel::Web,

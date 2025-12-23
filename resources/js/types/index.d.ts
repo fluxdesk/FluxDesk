@@ -100,6 +100,18 @@ export interface Tag {
     user_id: number | null; // null = organization tag, number = personal tag
 }
 
+export interface Department {
+    id: number;
+    name: string;
+    slug: string;
+    description: string | null;
+    color: string;
+    is_default: boolean;
+    sort_order: number;
+    tickets_count?: number;
+    email_channels_count?: number;
+}
+
 export interface Sla {
     id: number;
     name: string;

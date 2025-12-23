@@ -29,9 +29,9 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { store } from '@/routes/inbox';
-import type { Contact, Status, Priority, User, EmailChannel } from '@/types';
+import type { Contact, Status, Priority, User, EmailChannel, Department } from '@/types';
 import { useForm } from '@inertiajs/react';
-import { Check, ChevronDown, Plus, Mail } from 'lucide-react';
+import { Check, ChevronDown, Plus, Mail, Building2 } from 'lucide-react';
 import { useState, useMemo } from 'react';
 
 interface CreateTicketDialogProps {
@@ -42,6 +42,7 @@ interface CreateTicketDialogProps {
     priorities: Priority[];
     agents: User[];
     emailChannels: EmailChannel[];
+    departments: Department[];
 }
 
 function isValidEmail(email: string): boolean {
@@ -56,6 +57,7 @@ export function CreateTicketDialog({
     priorities,
     agents,
     emailChannels,
+    departments,
 }: CreateTicketDialogProps) {
     const [contactOpen, setContactOpen] = useState(false);
     const [contactSearch, setContactSearch] = useState('');
@@ -65,6 +67,11 @@ export function CreateTicketDialog({
         return emailChannels.find((c) => c.is_default) || emailChannels[0];
     }, [emailChannels]);
 
+    // Find the default department
+    const defaultDepartment = useMemo(() => {
+        return departments.find((d) => d.is_default) || departments[0];
+    }, [departments]);
+
     const { data, setData, post, processing, errors, reset } = useForm({
         subject: '',
         contact_id: '',
@@ -72,6 +79,7 @@ export function CreateTicketDialog({
         contact_name: '',
         status_id: '',
         priority_id: '',
+        department_id: defaultDepartment?.id.toString() || '',
         assigned_to: '',
         email_channel_id: defaultEmailChannel?.id.toString() || '',
         message: '',
@@ -338,28 +346,59 @@ export function CreateTicketDialog({
                             </div>
                         </div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="assigned_to">Toewijzen aan</Label>
-                            <Select
-                                value={data.assigned_to || 'unassigned'}
-                                onValueChange={(value) => setData('assigned_to', value === 'unassigned' ? '' : value)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Niet toegewezen" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="unassigned">Niet toegewezen</SelectItem>
-                                    {agents.map((agent) => (
-                                        <SelectItem
-                                            key={agent.id}
-                                            value={agent.id.toString()}
-                                        >
-                                            {agent.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <InputError message={errors.assigned_to} />
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="department_id">Afdeling</Label>
+                                <Select
+                                    value={data.department_id}
+                                    onValueChange={(value) => setData('department_id', value)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecteer afdeling" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {departments.map((department) => (
+                                            <SelectItem
+                                                key={department.id}
+                                                value={department.id.toString()}
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <div
+                                                        className="h-2 w-2 rounded-full"
+                                                        style={{ backgroundColor: department.color }}
+                                                    />
+                                                    {department.name}
+                                                </div>
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <InputError message={errors.department_id} />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="assigned_to">Toewijzen aan</Label>
+                                <Select
+                                    value={data.assigned_to || 'unassigned'}
+                                    onValueChange={(value) => setData('assigned_to', value === 'unassigned' ? '' : value)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Niet toegewezen" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="unassigned">Niet toegewezen</SelectItem>
+                                        {agents.map((agent) => (
+                                            <SelectItem
+                                                key={agent.id}
+                                                value={agent.id.toString()}
+                                            >
+                                                {agent.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <InputError message={errors.assigned_to} />
+                            </div>
                         </div>
 
                         {emailChannels.length > 0 && (

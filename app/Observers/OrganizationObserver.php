@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Models\Department;
 use App\Models\Organization;
 use App\Models\OrganizationSettings;
 use App\Models\Priority;
@@ -35,6 +36,9 @@ class OrganizationObserver
 
         // Create default folders
         $this->createDefaultFolders($organization);
+
+        // Create default department
+        $this->createDefaultDepartment($organization);
     }
 
     protected function createDefaultStatuses(Organization $organization): void
@@ -105,6 +109,19 @@ class OrganizationObserver
                 ...$folder,
             ]);
         }
+    }
+
+    protected function createDefaultDepartment(Organization $organization): void
+    {
+        Department::withoutGlobalScopes()->create([
+            'organization_id' => $organization->id,
+            'name' => 'Algemeen',
+            'slug' => 'algemeen',
+            'description' => 'Standaard afdeling',
+            'color' => '#6b7280',
+            'is_default' => true,
+            'sort_order' => 0,
+        ]);
     }
 
     public function deleting(Organization $organization): void

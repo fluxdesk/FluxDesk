@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { Mail } from '@/components/inbox/mail';
-import type { Ticket, Status, Priority, User, Contact, InboxFilters, PaginatedData, TicketFolder, Tag, EmailChannel } from '@/types';
+import type { Ticket, Status, Priority, User, Contact, InboxFilters, PaginatedData, TicketFolder, Tag, EmailChannel, Department } from '@/types';
 
 interface InboxIndexProps {
     tickets: PaginatedData<Ticket>;
@@ -11,6 +11,7 @@ interface InboxIndexProps {
     folders: TicketFolder[];
     tags: Tag[];
     emailChannels: EmailChannel[];
+    departments: Department[];
     filters: InboxFilters;
 }
 
@@ -23,6 +24,7 @@ export default function InboxIndex({
     folders,
     tags,
     emailChannels,
+    departments,
     filters,
 }: InboxIndexProps) {
     return (
@@ -38,6 +40,7 @@ export default function InboxIndex({
                     folders={folders}
                     tags={tags}
                     emailChannels={emailChannels}
+                    departments={departments}
                     filters={filters}
                 />
             </div>

@@ -57,26 +57,16 @@ class SendTicketReplyJob implements ShouldQueue
         $message = $this->message;
         $ticket = $this->ticket;
 
-        // Validate ticket has an email channel
-        if (! $ticket->emailChannel) {
-            Log::warning('Cannot send email reply - ticket has no email channel', [
+        // Get email channel from ticket's department
+        $channel = $ticket->department?->emailChannels()->where('is_active', true)->first();
+
+        if (! $channel) {
+            Log::warning('Cannot send email reply - no active email channel for department', [
                 'ticket_id' => $ticket->id,
+                'department_id' => $ticket->department_id,
                 'message_id' => $message->id,
             ]);
-
-            return;
-        }
-
-        $channel = $ticket->emailChannel;
-
-        // Skip if channel is not active
-        if (! $channel->is_active) {
-            Log::warning('Cannot send email reply - channel is inactive', [
-                'channel_id' => $channel->id,
-                'ticket_id' => $ticket->id,
-                'message_id' => $message->id,
-            ]);
-            $message->markEmailFailed('Email channel is inactive');
+            $message->markEmailFailed('No active email channel for department');
 
             return;
         }

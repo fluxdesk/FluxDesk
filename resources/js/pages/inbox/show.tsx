@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { Mail } from '@/components/inbox/mail';
-import type { Ticket, Status, Priority, User, Contact, InboxFilters, PaginatedData, TicketFolder, Tag, EmailChannel } from '@/types';
+import type { Ticket, Status, Priority, User, Contact, InboxFilters, PaginatedData, TicketFolder, Tag, EmailChannel, Department } from '@/types';
 
 interface InboxShowProps {
     ticket: Ticket;
@@ -12,6 +12,7 @@ interface InboxShowProps {
     folders: TicketFolder[];
     tags: Tag[];
     emailChannels: EmailChannel[];
+    departments: Department[];
     filters: InboxFilters;
 }
 
@@ -25,6 +26,7 @@ export default function InboxShow({
     folders,
     tags,
     emailChannels,
+    departments,
     filters,
 }: InboxShowProps) {
     return (
@@ -40,6 +42,7 @@ export default function InboxShow({
                     folders={folders}
                     tags={tags}
                     emailChannels={emailChannels}
+                    departments={departments}
                     filters={filters}
                     selectedTicket={ticket}
                 />
