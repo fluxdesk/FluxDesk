@@ -158,17 +158,125 @@ class SettingsController extends Controller
      */
     public function updatePortal(Request $request): RedirectResponse
     {
+        $organization = $this->organizationContext->organization();
+        $settings = $organization->settings;
+
         $request->validate([
             'slug' => ['nullable', 'string', 'max:50', 'regex:/^[a-z0-9-]+$/'],
+            'portal_enabled' => ['nullable', 'boolean'],
+            'custom_domain' => [
+                'nullable',
+                'string',
+                'max:255',
+                'regex:/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/i',
+                function ($attribute, $value, $fail) use ($settings) {
+                    if (! $value) {
+                        return;
+                    }
+
+                    // Check if domain is already used by another organization
+                    $exists = \App\Models\OrganizationSettings::where('custom_domain', $value)
+                        ->where('id', '!=', $settings->id)
+                        ->exists();
+
+                    if ($exists) {
+                        $fail('Dit domein is al in gebruik door een andere organisatie.');
+                    }
+                },
+            ],
         ]);
 
-        $organization = $this->organizationContext->organization();
-
+        // Update organization slug
         if ($request->has('slug')) {
             $organization->update(['slug' => $request->slug]);
         }
 
+        // Check if custom domain changed
+        $domainChanged = $request->has('custom_domain') && $request->custom_domain !== $settings->custom_domain;
+
+        // Update settings
+        $settings->update($request->only([
+            'portal_enabled',
+            'custom_domain',
+        ]));
+
+        // Reset verification if domain changed
+        if ($domainChanged) {
+            $settings->update([
+                'custom_domain_verified' => false,
+                'custom_domain_verified_at' => null,
+            ]);
+        }
+
         return back()->with('success', 'Portaalinstellingen opgeslagen.');
+    }
+
+    /**
+     * Verify DNS configuration for custom domain
+     */
+    public function verifyDns(): RedirectResponse
+    {
+        $organization = $this->organizationContext->organization();
+        $settings = $organization->settings;
+
+        if (! $settings->custom_domain) {
+            return back()->with('error', 'Geen eigen domein geconfigureerd.');
+        }
+
+        // Get the expected target (current host)
+        $expectedTarget = request()->getHost();
+
+        // Perform DNS lookup
+        $verified = $this->checkDnsConfiguration($settings->custom_domain, $expectedTarget);
+
+        if ($verified) {
+            $settings->update([
+                'custom_domain_verified' => true,
+                'custom_domain_verified_at' => now(),
+            ]);
+
+            return back()->with('success', 'DNS-configuratie geverifieerd! Je eigen domein is actief.');
+        }
+
+        return back()->with('error', 'DNS-configuratie niet gevonden. Controleer of het CNAME-record correct is ingesteld en wacht eventueel op DNS-propagatie (kan tot 48 uur duren).');
+    }
+
+    /**
+     * Check if DNS is properly configured for custom domain
+     */
+    protected function checkDnsConfiguration(string $domain, string $expectedTarget): bool
+    {
+        // Remove www. prefix for checking
+        $domain = preg_replace('/^www\./i', '', $domain);
+
+        // Check CNAME records
+        $cnameRecords = @dns_get_record($domain, DNS_CNAME);
+        if ($cnameRecords) {
+            foreach ($cnameRecords as $record) {
+                $target = rtrim($record['target'] ?? '', '.');
+                if (strcasecmp($target, $expectedTarget) === 0) {
+                    return true;
+                }
+                // Also check without www
+                if (strcasecmp($target, 'www.'.$expectedTarget) === 0) {
+                    return true;
+                }
+            }
+        }
+
+        // Check A records as fallback (in case they pointed directly)
+        $aRecords = @dns_get_record($domain, DNS_A);
+        $expectedIps = @gethostbynamel($expectedTarget) ?: [];
+
+        if ($aRecords && $expectedIps) {
+            foreach ($aRecords as $record) {
+                if (in_array($record['ip'] ?? '', $expectedIps, true)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public function uploadLogo(Request $request): RedirectResponse

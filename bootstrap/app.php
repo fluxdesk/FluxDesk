@@ -4,6 +4,7 @@ use App\Http\Middleware\EnsureContactAuthenticated;
 use App\Http\Middleware\EnsureHasOrganization;
 use App\Http\Middleware\EnsureOrganizationAdmin;
 use App\Http\Middleware\EnsureOrganizationMember;
+use App\Http\Middleware\EnsurePortalEnabled;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\HandlePortalInertiaRequests;
@@ -95,6 +96,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'org.member' => EnsureOrganizationMember::class,
             'org.admin' => EnsureOrganizationAdmin::class,
             'contact.auth' => EnsureContactAuthenticated::class,
+            'portal.enabled' => EnsurePortalEnabled::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

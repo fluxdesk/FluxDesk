@@ -2,8 +2,8 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Organization;
 use App\Services\PortalOrganizationContext;
+use App\Services\TenantResolver;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,28 +11,26 @@ use Symfony\Component\HttpFoundation\Response;
 class SetPortalOrganizationContext
 {
     public function __construct(
-        protected PortalOrganizationContext $context
+        protected PortalOrganizationContext $context,
+        protected TenantResolver $resolver
     ) {}
 
     /**
      * Handle an incoming request.
      *
+     * Uses TenantResolver to resolve organization from:
+     * 1. URL slug parameter
+     * 2. Future: Custom domain
+     * 3. System default (fallback)
+     *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $organizationParam = $request->route('organization');
+        $organization = $this->resolver->resolve($request);
 
-        // Route model binding may have already resolved it
-        if ($organizationParam instanceof Organization) {
-            $organization = $organizationParam;
-        } else {
-            // Look up by slug
-            $organization = Organization::where('slug', $organizationParam)->first();
-
-            if (! $organization) {
-                abort(404, 'Organisatie niet gevonden.');
-            }
+        if (! $organization) {
+            abort(404, 'Organisatie niet gevonden.');
         }
 
         // Set in context service

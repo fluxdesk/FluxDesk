@@ -4,6 +4,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FolderController;
 use App\Http\Controllers\InvitationAcceptController;
+use App\Http\Controllers\LandingController;
 use App\Http\Controllers\MagicLinkController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OnboardingController;
@@ -25,8 +26,8 @@ use App\Http\Controllers\Tickets\TicketController;
 use App\Http\Controllers\UpgradeController;
 use Illuminate\Support\Facades\Route;
 
-// Home route - redirects to login (used after logout)
-Route::redirect('/', '/login')->name('home');
+// Home route - shows tenant landing page (resolves to default tenant)
+Route::get('/', [LandingController::class, 'show'])->name('home');
 
 // Onboarding routes (for users without organizations)
 Route::middleware(['auth', 'verified'])->prefix('onboarding')->name('onboarding.')->group(function () {
@@ -97,6 +98,7 @@ Route::middleware(['auth', 'verified', 'org.required'])->group(function () {
         // Portal
         Route::get('portal', [SettingsController::class, 'portal'])->name('portal.index');
         Route::patch('portal', [SettingsController::class, 'updatePortal'])->name('portal.update');
+        Route::post('portal/verify-dns', [SettingsController::class, 'verifyDns'])->name('portal.verify-dns');
 
         // Statuses
         Route::get('statuses', [StatusController::class, 'index'])->name('statuses.index');

@@ -21,8 +21,11 @@ use Illuminate\Support\Facades\Route;
 // Landing page (public, org-branded)
 Route::get('{organization}', [LandingController::class, 'show'])->name('landing');
 
-// Public portal routes (no auth required)
-Route::prefix('{organization}/portal')->name('portal.')->group(function () {
+// Convenience redirect for employee login from tenant URL
+Route::redirect('{organization}/login', '/login')->name('landing.login');
+
+// Public portal routes (no auth required, but portal must be enabled)
+Route::prefix('{organization}/portal')->name('portal.')->middleware('portal.enabled')->group(function () {
     Route::get('login', [PortalAuthController::class, 'showLogin'])->name('login');
     Route::post('login', [PortalAuthController::class, 'sendMagicLink'])
         ->middleware('throttle:portal-magic-link')
@@ -30,8 +33,8 @@ Route::prefix('{organization}/portal')->name('portal.')->group(function () {
     Route::get('auth/{token}', [PortalAuthController::class, 'authenticate'])->name('auth');
 });
 
-// Protected portal routes (contact auth required)
-Route::prefix('{organization}/portal')->name('portal.')->middleware('contact.auth')->group(function () {
+// Protected portal routes (contact auth required, portal must be enabled)
+Route::prefix('{organization}/portal')->name('portal.')->middleware(['portal.enabled', 'contact.auth'])->group(function () {
     Route::post('logout', [PortalAuthController::class, 'logout'])->name('logout');
 
     // Dashboard

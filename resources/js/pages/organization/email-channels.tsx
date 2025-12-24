@@ -500,7 +500,7 @@ function EmailChannelFormDialog({
         || providers.find((p) => p.available)?.value
         || 'microsoft365';
 
-    // Default to first department if creating
+    // Default to the first department if creating
     const defaultDepartmentId = channel?.department_id?.toString()
         || departments[0]?.id?.toString()
         || '';

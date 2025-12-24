@@ -25,6 +25,10 @@ class OrganizationSettings extends Model
         'business_hours',
         'system_email_channel_id',
         'system_emails_enabled',
+        'portal_enabled',
+        'custom_domain',
+        'custom_domain_verified',
+        'custom_domain_verified_at',
         'share_sla_times_with_contacts',
         'share_average_reply_time',
         'sla_reminder_intervals',
@@ -44,6 +48,9 @@ class OrganizationSettings extends Model
             'share_average_reply_time' => 'boolean',
             'sla_reminder_intervals' => 'array',
             'system_emails_enabled' => 'boolean',
+            'portal_enabled' => 'boolean',
+            'custom_domain_verified' => 'boolean',
+            'custom_domain_verified_at' => 'datetime',
         ];
     }
 
@@ -84,6 +91,15 @@ class OrganizationSettings extends Model
     public function areSystemEmailsEnabled(): bool
     {
         return $this->system_emails_enabled ?? true;
+    }
+
+    /**
+     * Check if the customer portal is enabled for this organization.
+     * Defaults to true if not explicitly set.
+     */
+    public function isPortalEnabled(): bool
+    {
+        return $this->portal_enabled ?? true;
     }
 
     /**

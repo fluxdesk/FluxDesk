@@ -16,9 +16,10 @@ interface Organization {
 
 interface Props {
     organization: Organization;
+    portalEnabled: boolean;
 }
 
-export default function Landing({ organization }: Props) {
+export default function Landing({ organization, portalEnabled }: Props) {
     const primaryColor = organization.settings?.primary_color ?? '#18181b';
     const accentColor = organization.settings?.accent_color ?? '#3b82f6';
 
@@ -60,7 +61,9 @@ export default function Landing({ organization }: Props) {
                                     {organization.name}
                                 </h1>
                                 <p className="text-muted-foreground">
-                                    Welkom bij ons support portaal
+                                    {portalEnabled
+                                        ? 'Welkom bij ons support portaal'
+                                        : 'Welkom'}
                                 </p>
                             </div>
                         </div>
@@ -68,57 +71,80 @@ export default function Landing({ organization }: Props) {
                         {/* Login options card */}
                         <Card className="shadow-lg border-0 bg-card/80 backdrop-blur-sm">
                             <CardContent className="p-6 space-y-4">
-                                <p className="text-center text-sm text-muted-foreground pb-2">
-                                    Kies hoe je wilt inloggen
-                                </p>
+                                {portalEnabled ? (
+                                    <>
+                                        <p className="text-center text-sm text-muted-foreground pb-2">
+                                            Kies hoe je wilt inloggen
+                                        </p>
 
-                                {/* Customer login - Primary CTA */}
-                                <Link
-                                    href={`/${organization.slug}/portal/login`}
-                                    className="block"
-                                >
-                                    <Button
-                                        className="w-full h-12 text-base font-medium text-white shadow-md hover:shadow-lg transition-all duration-200"
-                                        style={{ backgroundColor: primaryColor }}
-                                    >
-                                        <Headset className="size-5 mr-2.5" />
-                                        Inloggen als klant
-                                    </Button>
-                                </Link>
+                                        {/* Customer login - Primary CTA */}
+                                        <Link
+                                            href={`/${organization.slug}/portal/login`}
+                                            className="block"
+                                        >
+                                            <Button
+                                                className="w-full h-12 text-base font-medium text-white shadow-md hover:shadow-lg transition-all duration-200"
+                                                style={{ backgroundColor: primaryColor }}
+                                            >
+                                                <Headset className="size-5 mr-2.5" />
+                                                Inloggen als klant
+                                            </Button>
+                                        </Link>
 
-                                <div className="relative py-2">
-                                    <div className="absolute inset-0 flex items-center">
-                                        <span className="w-full border-t" />
-                                    </div>
-                                    <div className="relative flex justify-center text-xs uppercase">
-                                        <span className="bg-card px-2 text-muted-foreground">of</span>
-                                    </div>
-                                </div>
+                                        <div className="relative py-2">
+                                            <div className="absolute inset-0 flex items-center">
+                                                <span className="w-full border-t" />
+                                            </div>
+                                            <div className="relative flex justify-center text-xs uppercase">
+                                                <span className="bg-card px-2 text-muted-foreground">of</span>
+                                            </div>
+                                        </div>
 
-                                {/* Staff login - Secondary CTA */}
-                                <Link href="/login" className="block">
-                                    <Button
-                                        variant="outline"
-                                        className="w-full h-12 text-base font-medium border-2 hover:bg-muted/50 transition-all duration-200"
-                                    >
-                                        <Users className="size-5 mr-2.5" />
-                                        Inloggen als medewerker
-                                    </Button>
-                                </Link>
+                                        {/* Staff login - Secondary CTA */}
+                                        <Link href="/login" className="block">
+                                            <Button
+                                                variant="outline"
+                                                className="w-full h-12 text-base font-medium border-2 hover:bg-muted/50 transition-all duration-200"
+                                            >
+                                                <Users className="size-5 mr-2.5" />
+                                                Inloggen als medewerker
+                                            </Button>
+                                        </Link>
+                                    </>
+                                ) : (
+                                    <>
+                                        <p className="text-center text-sm text-muted-foreground pb-2">
+                                            Inloggen voor medewerkers
+                                        </p>
+
+                                        {/* Staff login - Primary CTA when portal disabled */}
+                                        <Link href="/login" className="block">
+                                            <Button
+                                                className="w-full h-12 text-base font-medium text-white shadow-md hover:shadow-lg transition-all duration-200"
+                                                style={{ backgroundColor: primaryColor }}
+                                            >
+                                                <Users className="size-5 mr-2.5" />
+                                                Inloggen als medewerker
+                                            </Button>
+                                        </Link>
+                                    </>
+                                )}
                             </CardContent>
                         </Card>
 
-                        {/* Help text */}
-                        <p className="text-center text-sm text-muted-foreground">
-                            Heb je nog geen account?{' '}
-                            <Link
-                                href={`/${organization.slug}/portal/login`}
-                                className="font-medium underline-offset-4 hover:underline"
-                                style={{ color: primaryColor }}
-                            >
-                                Vraag toegang aan
-                            </Link>
-                        </p>
+                        {/* Help text - only show when portal is enabled */}
+                        {portalEnabled && (
+                            <p className="text-center text-sm text-muted-foreground">
+                                Heb je nog geen account?{' '}
+                                <Link
+                                    href={`/${organization.slug}/portal/login`}
+                                    className="font-medium underline-offset-4 hover:underline"
+                                    style={{ color: primaryColor }}
+                                >
+                                    Vraag toegang aan
+                                </Link>
+                            </p>
+                        )}
                     </div>
                 </main>
 
