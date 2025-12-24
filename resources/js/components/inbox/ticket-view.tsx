@@ -287,7 +287,7 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
     return (
         <div className="flex h-full overflow-hidden">
             {/* Main Content */}
-            <div className="flex flex-1 flex-col min-h-0">
+            <div className="flex flex-1 flex-col min-h-0 bg-background">
                 {/* Header */}
                 <div className="flex items-center justify-between border-b px-2 md:px-4 py-2 md:py-3 shrink-0">
                     {/* Mobile: Back button */}
@@ -415,66 +415,82 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                 </div>
 
                 {/* Messages - scrollable area */}
-                <div ref={messagesContainerRef} className="flex-1 min-h-0 overflow-auto p-4">
-                    <div className="space-y-4">
-                        {ticket.messages && ticket.messages.length > 0 ? (
-                            ticket.messages.map((message) => (
-                                <MessageBubble key={message.id} message={message} ticket={ticket} />
-                            ))
-                        ) : (
-                            <div className="flex items-center justify-center py-8 text-muted-foreground">
-                                Nog geen berichten
-                            </div>
-                        )}
-                        {/* Scroll anchor */}
-                        <div ref={messagesEndRef} />
+                <ScrollArea className="flex-1 min-h-0">
+                    <div ref={messagesContainerRef} className="p-4">
+                        <div className="space-y-4">
+                            {ticket.messages && ticket.messages.length > 0 ? (
+                                ticket.messages.map((message) => (
+                                    <MessageBubble key={message.id} message={message} ticket={ticket} />
+                                ))
+                            ) : (
+                                <div className="flex items-center justify-center py-8 text-muted-foreground">
+                                    Nog geen berichten
+                                </div>
+                            )}
+                            {/* Scroll anchor */}
+                            <div ref={messagesEndRef} />
+                        </div>
                     </div>
-                </div>
+                </ScrollArea>
 
-                {/* Composer - fixed at bottom */}
-                <div className="shrink-0 border-t p-3 md:p-4 bg-background">
+                {/* Composer - floating island */}
+                <div className="shrink-0 p-3 md:p-4">
                     <form onSubmit={handleSubmitMessage}>
-                        <div className="space-y-3">
-                            <div className="flex items-center gap-2">
-                                <Tabs value={messageType} onValueChange={(v) => {
-                                    setMessageType(v as 'reply' | 'note');
-                                    setData('type', v as 'reply' | 'note');
-                                }}>
-                                    <TabsList className="h-8">
-                                        <TabsTrigger value="reply" className="text-xs px-3 gap-1.5">
-                                            <Send className="h-3.5 w-3.5" />
-                                            Antwoord
-                                        </TabsTrigger>
-                                        <TabsTrigger value="note" className="text-xs px-3 gap-1.5">
-                                            <StickyNote className="h-3.5 w-3.5" />
-                                            Notitie
-                                        </TabsTrigger>
-                                    </TabsList>
-                                </Tabs>
-                                {messageType === 'note' && (
-                                    <span className="text-xs text-amber-600 dark:text-amber-400">
-                                        Interne notitie - niet zichtbaar voor klant
-                                    </span>
-                                )}
-                            </div>
+                        <div className={cn(
+                            'rounded-xl border border-border/50 bg-card shadow-lg transition-shadow',
+                            'hover:shadow-xl focus-within:shadow-xl focus-within:ring-1 focus-within:ring-ring/20',
+                            messageType === 'note' && 'border-amber-300/50 bg-amber-50/50 dark:border-amber-700/50 dark:bg-amber-900/50',
+                        )}>
+                            {/* Textarea */}
                             <MentionTextarea
                                 placeholder={messageType === 'reply' ? `Antwoord aan ${ticket.contact?.name || 'klant'}...` : 'Voeg een interne notitie toe...'}
                                 value={data.body}
                                 onChange={(value) => setData('body', value)}
                                 onKeyDown={handleKeyDown}
                                 users={agents}
+                                autoResize
+                                minRows={2}
+                                maxRows={10}
                                 className={cn(
-                                    'flex min-h-[100px] w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
-                                    messageType === 'note' && 'border-amber-300 bg-amber-50/50 focus-visible:ring-amber-400 dark:border-amber-700 dark:bg-amber-950/20',
+                                    'w-full resize-none border-0 bg-transparent px-4 py-3 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0',
                                 )}
                             />
-                            <div className="flex items-center justify-between">
-                                <span className="text-xs text-muted-foreground">
-                                    Druk <kbd className="rounded border bg-muted px-1 py-0.5 text-[10px]">⌘</kbd> + <kbd className="rounded border bg-muted px-1 py-0.5 text-[10px]">Enter</kbd> om te versturen
-                                </span>
-                                <Button type="submit" disabled={processing || !data.body.trim()} size="sm">
-                                    {messageType === 'reply' ? 'Versturen' : 'Notitie toevoegen'}
-                                </Button>
+                            {/* Footer bar */}
+                            <div className={cn(
+                                'flex items-center justify-between border-t px-3 py-2',
+                                messageType === 'note' ? 'border-amber-200/50 dark:border-amber-800/50' : 'border-border/50',
+                            )}>
+                                <div className="flex items-center gap-2">
+                                    <Tabs value={messageType} onValueChange={(v) => {
+                                        setMessageType(v as 'reply' | 'note');
+                                        setData('type', v as 'reply' | 'note');
+                                    }}>
+                                        <TabsList className="h-7 bg-transparent p-0">
+                                            <TabsTrigger value="reply" className="h-7 gap-1 rounded-md px-2 text-xs data-[state=active]:bg-muted data-[state=active]:shadow-none">
+                                                <Send className="h-3 w-3" />
+                                                Antwoord
+                                            </TabsTrigger>
+                                            <TabsTrigger value="note" className="h-7 gap-1 rounded-md px-2 text-xs data-[state=active]:bg-amber-100 data-[state=active]:text-amber-700 data-[state=active]:shadow-none dark:data-[state=active]:bg-amber-900/50 dark:data-[state=active]:text-amber-400">
+                                                <StickyNote className="h-3 w-3" />
+                                                Notitie
+                                            </TabsTrigger>
+                                        </TabsList>
+                                    </Tabs>
+                                    {messageType === 'note' && (
+                                        <span className="hidden text-xs text-amber-600 dark:text-amber-400 sm:inline">
+                                            Intern
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="hidden text-xs text-muted-foreground sm:inline">
+                                        <kbd className="rounded border bg-muted px-1 py-0.5 text-[10px]">⌘</kbd> + <kbd className="rounded border bg-muted px-1 py-0.5 text-[10px]">↵</kbd>
+                                    </span>
+                                    <Button type="submit" disabled={processing || !data.body.trim()} size="sm" className="h-7 gap-1.5 px-3 text-xs">
+                                        <Send className="h-3 w-3" />
+                                        {messageType === 'reply' ? 'Versturen' : 'Toevoegen'}
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </form>
@@ -483,7 +499,7 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
 
             {/* Actions Sidebar */}
             {!sidebarCollapsed && (
-            <div className="hidden md:block w-72 shrink-0 border-l bg-muted/30 transition-all duration-200">
+            <div className="hidden md:block w-72 shrink-0 border-l bg-background transition-all duration-200">
                 <ScrollArea className="h-full">
                     <div className="space-y-4 p-4 pr-3">
                         {/* Contact */}

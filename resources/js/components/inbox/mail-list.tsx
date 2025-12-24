@@ -490,14 +490,14 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                                 className={cn(
                                     'flex flex-col text-left transition-colors border-b border-border/50 cursor-grab active:cursor-grabbing overflow-hidden',
                                     densityClasses[density],
-                                    'hover:bg-muted/50',
-                                    selectedTicketId === item.id && 'bg-muted',
-                                    isSelected && 'bg-primary/10',
+                                    'hover:bg-sidebar-accent',
+                                    selectedTicketId === item.id && 'bg-accent',
+                                    isSelected && 'bg-primary/20',
                                     // Unread styling
-                                    !item.is_read && !isSelected && selectedTicketId !== item.id && 'bg-primary/[0.03]',
+                                    !item.is_read && !isSelected && selectedTicketId !== item.id && 'bg-primary/[0.05]',
                                     // Only show left border for urgent items
-                                    isSlaBreach && 'border-l-2 border-l-destructive bg-destructive/[0.03]',
-                                    isSlaUrgent && !isSlaBreach && 'border-l-2 border-l-amber-500 bg-amber-500/[0.03]',
+                                    isSlaBreach && 'border-l-2 border-l-destructive bg-destructive/10',
+                                    isSlaUrgent && !isSlaBreach && 'border-l-2 border-l-amber-500 bg-amber-500/10',
                                 )}
                                 onClick={(e) => handleSelect(item.id, e)}
                             >

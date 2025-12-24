@@ -84,7 +84,7 @@ export function InboxListHeader({
     const activeFilterCount = Object.values(filters).filter(Boolean).length;
 
     return (
-        <div className="border-b border-border/50 bg-background">
+        <div className="border-b border-border/50">
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3">
                 <div className="flex items-center gap-2">

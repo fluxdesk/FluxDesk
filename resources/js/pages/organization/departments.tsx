@@ -339,7 +339,10 @@ function DepartmentFormDialog({
                         <InputError message={errors.color} />
                     </div>
 
-                    <div className="flex items-start space-x-3 rounded-lg border p-3">
+                    <label
+                        htmlFor="is_default"
+                        className="flex items-start space-x-3 rounded-lg border border-border/50 p-3 cursor-pointer transition-colors hover:bg-muted/50 dark:bg-input dark:border-white/10 dark:hover:bg-white/5"
+                    >
                         <Checkbox
                             id="is_default"
                             checked={data.is_default}
@@ -347,14 +350,12 @@ function DepartmentFormDialog({
                             className="mt-0.5"
                         />
                         <div className="space-y-1">
-                            <Label htmlFor="is_default" className="font-medium cursor-pointer">
-                                Standaardafdeling
-                            </Label>
+                            <span className="font-medium">Standaardafdeling</span>
                             <p className="text-xs text-muted-foreground">
                                 Nieuwe tickets worden automatisch aan deze afdeling toegewezen
                             </p>
                         </div>
-                    </div>
+                    </label>
                 </div>
 
                 <DialogFooter>

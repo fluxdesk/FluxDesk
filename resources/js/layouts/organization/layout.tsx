@@ -72,7 +72,7 @@ export default function OrganizationLayout({ children }: PropsWithChildren) {
     return (
         <div className="flex h-full flex-col md:flex-row overflow-hidden">
             {/* Mobile Nav - horizontal scrollable */}
-            <div className="md:hidden border-b bg-muted/30 shrink-0">
+            <div className="md:hidden border-b bg-sidebar shrink-0">
                 <div className="p-3 pb-0">
                     <h2 className="text-lg font-semibold tracking-tight">Organisatie</h2>
                 </div>
@@ -88,7 +88,7 @@ export default function OrganizationLayout({ children }: PropsWithChildren) {
                                     'flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors shrink-0',
                                     active
                                         ? 'bg-primary text-primary-foreground'
-                                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                                        : 'text-muted-foreground hover:bg-sidebar-accent hover:text-foreground'
                                 )}
                             >
                                 {item.icon && <item.icon className="h-4 w-4" />}
@@ -100,7 +100,7 @@ export default function OrganizationLayout({ children }: PropsWithChildren) {
             </div>
 
             {/* Desktop Sidebar - Fixed, never scrolls */}
-            <aside className="hidden md:flex w-56 shrink-0 border-r border-border/50 bg-muted/30 flex-col h-full overflow-hidden">
+            <aside className="hidden md:flex w-56 shrink-0 border-r border-border/50 bg-sidebar flex-col h-full overflow-hidden">
                 <div className="p-4">
                     <h2 className="text-lg font-semibold tracking-tight">Organisatie</h2>
                     <p className="text-xs text-muted-foreground">Configureer je werkruimte</p>
@@ -117,7 +117,7 @@ export default function OrganizationLayout({ children }: PropsWithChildren) {
                                     'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
                                     active
                                         ? 'bg-primary text-primary-foreground'
-                                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                                        : 'text-muted-foreground hover:bg-sidebar-accent hover:text-foreground'
                                 )}
                             >
                                 {item.icon && <item.icon className="h-4 w-4" />}
@@ -129,7 +129,7 @@ export default function OrganizationLayout({ children }: PropsWithChildren) {
             </aside>
 
             {/* Content Area - Only this scrolls */}
-            <div className="flex-1 min-h-0 overflow-auto">
+            <div className="flex-1 min-h-0 overflow-auto bg-background">
                 <div className="p-4 md:p-8">
                     {children}
                 </div>

@@ -78,6 +78,9 @@ class InstallCommand extends Command
         // Configure mail
         $this->configureMail();
 
+        // Configure cache, session, and queue
+        $this->configureServices();
+
         // Create admin user
         $this->createAdminUser();
 
@@ -342,6 +345,139 @@ class InstallCommand extends Command
         if ($mailer === 'log') {
             warning('Using log driver. Emails will be written to storage/logs/laravel.log');
         }
+    }
+
+    protected function configureServices(): void
+    {
+        note('Cache, Sessions & Queue');
+
+        info('These settings affect performance and background job processing.');
+
+        $this->envVariables['CACHE_STORE'] = select(
+            label: 'Cache store',
+            options: [
+                'database' => 'Database (recommended - works out of the box)',
+                'file' => 'File System (simple but slower)',
+                'redis' => 'Redis (high performance, requires Redis server)',
+            ],
+            default: 'database'
+        );
+
+        $this->envVariables['SESSION_DRIVER'] = select(
+            label: 'Session driver',
+            options: [
+                'database' => 'Database (recommended)',
+                'file' => 'File System',
+                'redis' => 'Redis (high performance)',
+            ],
+            default: 'database'
+        );
+
+        $this->envVariables['QUEUE_CONNECTION'] = select(
+            label: 'Queue driver',
+            options: [
+                'database' => 'Database (recommended - required for email sync)',
+                'redis' => 'Redis (best for high volume)',
+                'sync' => 'Synchronous (jobs run immediately, blocks requests)',
+            ],
+            default: 'database',
+            hint: 'Queue is used for email sync, notifications, and background jobs'
+        );
+
+        if ($this->envVariables['QUEUE_CONNECTION'] === 'sync') {
+            warning('Sync mode processes jobs immediately which blocks requests.');
+            warning('For production with email sync, use Database or Redis instead.');
+            info('You can change this later in your .env file (QUEUE_CONNECTION).');
+        } else {
+            info('Remember to run a queue worker in production: php artisan queue:work');
+        }
+
+        // Check if any service uses Redis
+        $usesRedis = in_array('redis', [
+            $this->envVariables['CACHE_STORE'],
+            $this->envVariables['SESSION_DRIVER'],
+            $this->envVariables['QUEUE_CONNECTION'],
+        ]);
+
+        if ($usesRedis) {
+            $this->configureRedis();
+        }
+    }
+
+    protected function configureRedis(): void
+    {
+        note('Redis Configuration');
+
+        $this->envVariables['REDIS_HOST'] = text(
+            label: 'Redis host',
+            default: '127.0.0.1',
+            required: true
+        );
+
+        $this->envVariables['REDIS_PORT'] = text(
+            label: 'Redis port',
+            default: '6379',
+            required: true
+        );
+
+        $password = password(
+            label: 'Redis password',
+            required: false,
+            hint: 'Leave empty if no password'
+        );
+
+        $this->envVariables['REDIS_PASSWORD'] = $password ?: 'null';
+
+        // Test Redis connection
+        $this->testRedisConnection();
+    }
+
+    protected function testRedisConnection(): bool
+    {
+        $result = spin(function () {
+            try {
+                $redis = new \Redis;
+                $connected = $redis->connect(
+                    $this->envVariables['REDIS_HOST'],
+                    (int) $this->envVariables['REDIS_PORT'],
+                    2.0
+                );
+
+                if (! $connected) {
+                    return 'Could not connect to Redis server';
+                }
+
+                $password = $this->envVariables['REDIS_PASSWORD'];
+                if ($password && $password !== 'null') {
+                    if (! $redis->auth($password)) {
+                        return 'Redis authentication failed';
+                    }
+                }
+
+                $redis->ping();
+                $redis->close();
+
+                return true;
+            } catch (\Exception $e) {
+                return $e->getMessage();
+            }
+        }, 'Testing Redis connection...');
+
+        if ($result !== true) {
+            error('Redis connection failed: '.$result);
+
+            if (confirm('Try again with different settings?', true)) {
+                return $this->configureRedis();
+            }
+
+            warning('Continuing without Redis. You may need to configure it later.');
+
+            return false;
+        }
+
+        info('Redis connection successful.');
+
+        return true;
     }
 
     protected function createAdminUser(): void

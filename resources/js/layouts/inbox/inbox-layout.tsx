@@ -20,7 +20,7 @@ export function InboxLayout({ sidebar, list, detail, className }: InboxLayoutPro
             <div className="flex flex-1 overflow-hidden p-2 pl-0">
                 <div className="flex flex-1 overflow-hidden rounded-lg border bg-background shadow-sm">
                     {/* Ticket List Panel - fixed width */}
-                    <div className="flex h-full w-80 shrink-0 flex-col border-r">
+                    <div className="flex h-full w-80 shrink-0 flex-col border-r border-border/50 bg-sidebar">
                         {list}
                     </div>
 

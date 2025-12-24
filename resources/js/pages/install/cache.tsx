@@ -61,9 +61,9 @@ const sessionDriverOptions = [
 ];
 
 const queueConnectionOptions = [
-    { value: 'database', label: 'Database', description: 'Recommended for most setups' },
-    { value: 'sync', label: 'Synchronous', description: 'Process jobs immediately (slower)' },
-    { value: 'redis', label: 'Redis', description: 'High-performance job queue' },
+    { value: 'database', label: 'Database', description: 'Recommended. Required for email sync & notifications.', recommended: true },
+    { value: 'redis', label: 'Redis', description: 'Best for high volume. Requires Redis server.' },
+    { value: 'sync', label: 'Synchronous', description: 'Jobs run immediately (blocks requests). Not for production.', warning: true },
 ];
 
 export default function CacheSetup({ appName, currentConfig }: Props) {
@@ -260,6 +260,26 @@ export default function CacheSetup({ appName, currentConfig }: Props) {
                             <InputError message={errors.queue_connection} />
                         </div>
                     </div>
+
+                    {/* Queue Info Box */}
+                    {data.queue_connection === 'sync' ? (
+                        <div className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3">
+                            <p className="text-xs text-amber-300">
+                                <strong>Warning:</strong> Synchronous mode processes jobs immediately, which blocks HTTP requests.
+                                This is fine for development but not recommended for production. Email sync and notifications
+                                will run inline, potentially slowing down your application.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="mt-4 rounded-lg border border-blue-500/30 bg-blue-500/10 p-3">
+                            <p className="text-xs text-blue-300">
+                                <strong>Note:</strong> For production, run a queue worker: <code className="rounded bg-blue-500/20 px-1">php artisan queue:work</code>
+                            </p>
+                            <p className="mt-1 text-xs text-zinc-400">
+                                The queue handles email sync, sending notifications, and other background tasks.
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Redis Configuration */}

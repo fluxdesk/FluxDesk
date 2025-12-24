@@ -31,7 +31,8 @@ class EmailChannelController extends Controller
     public function index(): Response
     {
         $organization = $this->organizationContext->organization();
-        $channels = EmailChannel::orderBy('name')->get();
+        $channels = EmailChannel::with('department:id,name,color')->orderBy('name')->get();
+        $departments = Department::orderBy('sort_order')->get(['id', 'name', 'color']);
 
         // Get supported providers from factory with availability based on integration status
         $providers = collect(EmailProvider::cases())
@@ -68,6 +69,7 @@ class EmailChannelController extends Controller
         return Inertia::render('organization/email-channels', [
             'channels' => $channels,
             'providers' => $providers,
+            'departments' => $departments,
             'systemEmailChannelId' => $organization->settings->system_email_channel_id,
             'systemEmailsEnabled' => $organization->settings->system_emails_enabled ?? true,
         ]);
@@ -91,6 +93,7 @@ class EmailChannelController extends Controller
             'organization_id' => $this->organizationContext->id(),
             'name' => $request->name,
             'provider' => $request->provider,
+            'department_id' => $request->department_id,
             'is_default' => $request->boolean('is_default', false),
             'is_active' => false, // Will be activated after configuration
             'auto_reply_enabled' => $request->boolean('auto_reply_enabled', false),

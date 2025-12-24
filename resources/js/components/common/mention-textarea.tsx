@@ -8,6 +8,9 @@ interface MentionTextareaProps extends Omit<React.TextareaHTMLAttributes<HTMLTex
     value: string;
     onChange: (value: string) => void;
     users: User[];
+    autoResize?: boolean;
+    minRows?: number;
+    maxRows?: number;
 }
 
 export function MentionTextarea({
@@ -15,6 +18,9 @@ export function MentionTextarea({
     onChange,
     users,
     className,
+    autoResize = false,
+    minRows = 2,
+    maxRows = 8,
     ...props
 }: MentionTextareaProps) {
     const getInitials = useInitials();
@@ -27,6 +33,26 @@ export function MentionTextarea({
     const [mentionQuery, setMentionQuery] = React.useState('');
     const [mentionStart, setMentionStart] = React.useState<number | null>(null);
     const [dropdownAbove, setDropdownAbove] = React.useState(true);
+
+    // Auto-resize textarea based on content
+    React.useEffect(() => {
+        if (!autoResize || !textareaRef.current) return;
+
+        const textarea = textareaRef.current;
+        const lineHeight = parseInt(getComputedStyle(textarea).lineHeight) || 20;
+        const minHeight = lineHeight * minRows;
+        const maxHeight = lineHeight * maxRows;
+
+        // Reset height to auto to get proper scrollHeight
+        textarea.style.height = 'auto';
+
+        // Calculate new height
+        const newHeight = Math.min(Math.max(textarea.scrollHeight, minHeight), maxHeight);
+        textarea.style.height = `${newHeight}px`;
+
+        // Show scrollbar if content exceeds max height
+        textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden';
+    }, [value, autoResize, minRows, maxRows]);
 
     // Filter users based on mention query
     const filteredUsers = React.useMemo(() => {

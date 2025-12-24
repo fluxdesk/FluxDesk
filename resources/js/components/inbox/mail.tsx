@@ -199,11 +199,11 @@ export function Mail({
                     // Mobile: Show collapsed nav + ticket list
                     <div className="flex h-full">
                         {/* Collapsed navigation */}
-                        <div className="w-[50px] shrink-0 bg-muted/40 border-r">
+                        <div className="w-[50px] shrink-0 bg-sidebar border-r">
                             <AppNav isCollapsed={true} folders={folders} tags={tags} currentFolder={filters.folder} />
                         </div>
                         {/* Ticket list */}
-                        <div className="flex-1 overflow-hidden">
+                        <div className="flex-1 overflow-hidden bg-sidebar">
                             {TicketListHeader}
                         </div>
                     </div>
@@ -235,7 +235,7 @@ export function Mail({
                             document.cookie = `fluxdesk:collapsed=${JSON.stringify(size < 8)}`;
                         }}
                         className={cn(
-                            'bg-muted/40',
+                            'bg-sidebar',
                             isCollapsed && 'min-w-[50px] transition-all duration-300 ease-in-out',
                         )}
                     >
@@ -245,7 +245,7 @@ export function Mail({
                     <ResizableHandle withHandle />
 
                     {/* Ticket List */}
-                    <ResizablePanel defaultSize={defaultLayout[1]} minSize={22} maxSize={40}>
+                    <ResizablePanel defaultSize={defaultLayout[1]} minSize={15} maxSize={40} className="bg-sidebar">
                         {TicketListHeader}
                     </ResizablePanel>
 

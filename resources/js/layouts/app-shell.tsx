@@ -33,20 +33,20 @@ export function AppShell({
             <TooltipProvider delayDuration={0}>
                 {/* Mobile Layout - Collapsed icon sidebar */}
                 <div className="flex h-screen overflow-hidden md:hidden">
-                    <div className="w-[50px] shrink-0 bg-muted/40 border-r overflow-hidden">
+                    <div className="w-[50px] shrink-0 bg-sidebar border-r overflow-hidden">
                         <AppNav isCollapsed={true} />
                     </div>
-                    <div className="flex-1 overflow-auto">
+                    <div className="flex-1 overflow-auto bg-background">
                         {children}
                     </div>
                 </div>
 
                 {/* Desktop Layout - Full sidebar */}
                 <div className="hidden md:flex h-screen overflow-hidden">
-                    <div className="w-[200px] shrink-0 bg-muted/40 border-r overflow-hidden">
+                    <div className="w-[200px] shrink-0 bg-sidebar border-r overflow-hidden">
                         <AppNav isCollapsed={false} />
                     </div>
-                    <div className="flex-1 overflow-auto">
+                    <div className="flex-1 overflow-auto bg-background">
                         {children}
                     </div>
                 </div>
@@ -81,7 +81,7 @@ export function AppShell({
                             document.cookie = `fluxdesk:collapsed=${JSON.stringify(size < 8)}`;
                         }}
                         className={cn(
-                            'bg-muted/40 !overflow-hidden',
+                            'bg-sidebar !overflow-hidden',
                             isCollapsed && 'min-w-[50px] transition-all duration-300 ease-in-out',
                         )}
                     >

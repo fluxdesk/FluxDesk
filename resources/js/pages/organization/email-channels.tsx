@@ -27,7 +27,7 @@ import OrganizationLayout from '@/layouts/organization/layout';
 import { Switch } from '@/components/ui/switch';
 import { store, update, destroy, test, sync, configure, logs, systemEmail, systemEmailsEnabled } from '@/routes/organization/email-channels';
 import { redirect as oauthRedirect } from '@/routes/organization/email-channels/oauth';
-import { type EmailChannel, type EmailProviderOption } from '@/types';
+import { type Department, type EmailChannel, type EmailProviderOption } from '@/types';
 import { Head, useForm, router, Link } from '@inertiajs/react';
 import {
     AlertCircle,
@@ -62,11 +62,12 @@ import { nl } from 'date-fns/locale';
 interface Props {
     channels: EmailChannel[];
     providers: EmailProviderOption[];
+    departments: Department[];
     systemEmailChannelId: number | null;
     systemEmailsEnabled: boolean;
 }
 
-export default function EmailChannels({ channels, providers, systemEmailChannelId, systemEmailsEnabled: initialSystemEmailsEnabled }: Props) {
+export default function EmailChannels({ channels, providers, departments, systemEmailChannelId, systemEmailsEnabled: initialSystemEmailsEnabled }: Props) {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [editingChannel, setEditingChannel] = useState<EmailChannel | null>(null);
     const [deletingChannel, setDeletingChannel] = useState<EmailChannel | null>(null);
@@ -231,6 +232,7 @@ export default function EmailChannels({ channels, providers, systemEmailChannelI
                                     </DialogTrigger>
                                     <EmailChannelFormDialog
                                         providers={providers}
+                                        departments={departments}
                                         onClose={() => setIsCreateOpen(false)}
                                     />
                                 </Dialog>
@@ -252,6 +254,7 @@ export default function EmailChannels({ channels, providers, systemEmailChannelI
                                             key={channel.id}
                                             channel={channel}
                                             providers={providers}
+                                            departments={departments}
                                             isEditing={editingChannel?.id === channel.id}
                                             onEdit={() => setEditingChannel(channel)}
                                             onEditClose={() => setEditingChannel(null)}
@@ -281,6 +284,7 @@ export default function EmailChannels({ channels, providers, systemEmailChannelI
 function EmailChannelItem({
     channel,
     providers,
+    departments,
     isEditing,
     onEdit,
     onEditClose,
@@ -288,6 +292,7 @@ function EmailChannelItem({
 }: {
     channel: EmailChannel;
     providers: EmailProviderOption[];
+    departments: Department[];
     isEditing: boolean;
     onEdit: () => void;
     onEditClose: () => void;
@@ -427,6 +432,7 @@ function EmailChannelItem({
                             <EmailChannelFormDialog
                                 channel={channel}
                                 providers={providers}
+                                departments={departments}
                                 onClose={onEditClose}
                             />
                         </Dialog>
@@ -481,10 +487,12 @@ function EmailChannelItem({
 function EmailChannelFormDialog({
     channel,
     providers,
+    departments,
     onClose,
 }: {
     channel?: EmailChannel;
     providers: EmailProviderOption[];
+    departments: Department[];
     onClose: () => void;
 }) {
     // Default to first available provider, or microsoft365 if editing
@@ -492,9 +500,15 @@ function EmailChannelFormDialog({
         || providers.find((p) => p.available)?.value
         || 'microsoft365';
 
+    // Default to first department if creating
+    const defaultDepartmentId = channel?.department_id?.toString()
+        || departments[0]?.id?.toString()
+        || '';
+
     const { data, setData, post, patch, processing, errors, reset } = useForm({
         name: channel?.name || '',
         provider: defaultProvider,
+        department_id: defaultDepartmentId,
         is_default: channel?.is_default || false,
         is_active: channel?.is_active ?? true,
         auto_reply_enabled: channel?.auto_reply_enabled || false,
@@ -586,7 +600,39 @@ function EmailChannelFormDialog({
                         </div>
                     )}
 
-                    <div className="flex items-start space-x-3 rounded-lg border p-3">
+                    <div className="grid gap-2">
+                        <Label htmlFor="department">Afdeling</Label>
+                        <Select
+                            value={data.department_id}
+                            onValueChange={(value) => setData('department_id', value)}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Selecteer een afdeling" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {departments.map((department) => (
+                                    <SelectItem key={department.id} value={department.id.toString()}>
+                                        <div className="flex items-center gap-2">
+                                            <div
+                                                className="h-2 w-2 rounded-full"
+                                                style={{ backgroundColor: department.color }}
+                                            />
+                                            {department.name}
+                                        </div>
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">
+                            Tickets uit dit e-mailaccount worden aan deze afdeling toegewezen
+                        </p>
+                        <InputError message={errors.department_id} />
+                    </div>
+
+                    <label
+                        htmlFor="is_default"
+                        className="flex items-start space-x-3 rounded-lg border border-border/50 p-3 cursor-pointer transition-colors hover:bg-muted/50 dark:bg-input dark:border-white/10 dark:hover:bg-white/5"
+                    >
                         <Checkbox
                             id="is_default"
                             checked={data.is_default}
@@ -594,17 +640,18 @@ function EmailChannelFormDialog({
                             className="mt-0.5"
                         />
                         <div className="space-y-1">
-                            <Label htmlFor="is_default" className="font-medium cursor-pointer">
-                                Standaard e-mailaccount
-                            </Label>
+                            <span className="font-medium">Standaard e-mailaccount</span>
                             <p className="text-xs text-muted-foreground">
                                 Wordt gebruikt voor nieuwe tickets zonder specifiek e-mailkanaal
                             </p>
                         </div>
-                    </div>
+                    </label>
 
                     {channel && (
-                        <div className="flex items-start space-x-3 rounded-lg border p-3">
+                        <label
+                            htmlFor="is_active"
+                            className="flex items-start space-x-3 rounded-lg border border-border/50 p-3 cursor-pointer transition-colors hover:bg-muted/50 dark:bg-input dark:border-white/10 dark:hover:bg-white/5"
+                        >
                             <Checkbox
                                 id="is_active"
                                 checked={data.is_active}
@@ -612,14 +659,12 @@ function EmailChannelFormDialog({
                                 className="mt-0.5"
                             />
                             <div className="space-y-1">
-                                <Label htmlFor="is_active" className="font-medium cursor-pointer">
-                                    Account is actief
-                                </Label>
+                                <span className="font-medium">Account is actief</span>
                                 <p className="text-xs text-muted-foreground">
                                     Deactiveer om tijdelijk geen e-mails te ontvangen
                                 </p>
                             </div>
-                        </div>
+                        </label>
                     )}
                 </div>
 

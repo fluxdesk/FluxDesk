@@ -280,7 +280,10 @@ function StatusFormDialog({
                         <InputError message={errors.color} />
                     </div>
 
-                    <div className="flex items-start space-x-3 rounded-lg border p-3">
+                    <label
+                        htmlFor="is_default"
+                        className="flex items-start space-x-3 rounded-lg border border-border/50 p-3 cursor-pointer transition-colors hover:bg-muted/50 dark:bg-input dark:border-white/10 dark:hover:bg-white/5"
+                    >
                         <Checkbox
                             id="is_default"
                             checked={data.is_default}
@@ -288,16 +291,17 @@ function StatusFormDialog({
                             className="mt-0.5"
                         />
                         <div className="space-y-1">
-                            <Label htmlFor="is_default" className="font-medium cursor-pointer">
-                                Standaardstatus
-                            </Label>
+                            <span className="font-medium">Standaardstatus</span>
                             <p className="text-xs text-muted-foreground">
                                 Nieuwe tickets krijgen automatisch deze status
                             </p>
                         </div>
-                    </div>
+                    </label>
 
-                    <div className="flex items-start space-x-3 rounded-lg border p-3">
+                    <label
+                        htmlFor="is_closed"
+                        className="flex items-start space-x-3 rounded-lg border border-border/50 p-3 cursor-pointer transition-colors hover:bg-muted/50 dark:bg-input dark:border-white/10 dark:hover:bg-white/5"
+                    >
                         <Checkbox
                             id="is_closed"
                             checked={data.is_closed}
@@ -305,14 +309,12 @@ function StatusFormDialog({
                             className="mt-0.5"
                         />
                         <div className="space-y-1">
-                            <Label htmlFor="is_closed" className="font-medium cursor-pointer">
-                                Gesloten status
-                            </Label>
+                            <span className="font-medium">Gesloten status</span>
                             <p className="text-xs text-muted-foreground">
                                 Markeert ticket als afgehandeld
                             </p>
                         </div>
-                    </div>
+                    </label>
                 </div>
 
                 <DialogFooter>

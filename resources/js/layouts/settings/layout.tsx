@@ -48,7 +48,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
     return (
         <div className="flex h-full flex-col sm:flex-row">
             {/* Sidebar - visible on all screen sizes */}
-            <aside className="w-full sm:w-56 shrink-0 border-b sm:border-b-0 sm:border-r border-border/50 bg-muted/30">
+            <aside className="w-full sm:w-56 shrink-0 border-b sm:border-b-0 sm:border-r border-border/50 bg-sidebar">
                 <div className="flex flex-col">
                     <div className="p-4 pb-2 sm:pb-4">
                         <h2 className="text-lg font-semibold tracking-tight">Instellingen</h2>
@@ -66,7 +66,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                                         'flex items-center gap-2 sm:gap-3 whitespace-nowrap sm:whitespace-normal rounded-md px-3 py-2 text-sm font-medium transition-colors shrink-0 sm:shrink',
                                         active
                                             ? 'bg-primary text-primary-foreground'
-                                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                                            : 'text-muted-foreground hover:bg-sidebar-accent hover:text-foreground'
                                     )}
                                 >
                                     {item.icon && <item.icon className="h-4 w-4" />}
@@ -79,7 +79,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
             </aside>
 
             {/* Content Area */}
-            <div className="flex-1 overflow-auto">
+            <div className="flex-1 overflow-auto bg-background">
                 <div className="p-4 sm:p-8">
                     {children}
                 </div>

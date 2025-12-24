@@ -89,16 +89,23 @@ class IntegrationController extends Controller
             }
         }
 
+        // Check if credentials actually changed - only reset verification if they did
+        $credentialsChanged = ! $existing || ($existing->credentials ?? []) !== $credentials;
+
+        $updateData = ['credentials' => $credentials];
+
+        // Only reset verification if credentials changed
+        if ($credentialsChanged) {
+            $updateData['is_verified'] = false;
+            $updateData['verified_at'] = null;
+        }
+
         OrganizationIntegration::updateOrCreate(
             [
                 'organization_id' => $this->context->id(),
                 'integration' => $request->input('integration'),
             ],
-            [
-                'credentials' => $credentials,
-                'is_verified' => false,
-                'verified_at' => null,
-            ]
+            $updateData
         );
 
         return back()->with('success', 'Credentials opgeslagen. Test de verbinding om te activeren.');

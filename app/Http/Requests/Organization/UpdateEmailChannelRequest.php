@@ -22,6 +22,7 @@ class UpdateEmailChannelRequest extends FormRequest
     {
         return [
             'name' => ['sometimes', 'string', 'max:255'],
+            'department_id' => ['sometimes', 'exists:departments,id'],
             'is_default' => ['sometimes', 'boolean'],
             'is_active' => ['sometimes', 'boolean'],
             'sync_interval_minutes' => ['sometimes', 'integer', 'min:1', 'max:60'],

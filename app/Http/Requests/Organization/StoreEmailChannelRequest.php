@@ -25,6 +25,7 @@ class StoreEmailChannelRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'provider' => ['required', Rule::enum(EmailProvider::class)],
+            'department_id' => ['required', 'exists:departments,id'],
             'is_default' => ['boolean'],
             'auto_reply_enabled' => ['boolean'],
         ];
@@ -36,8 +37,10 @@ class StoreEmailChannelRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'A name for the email channel is required.',
-            'provider.required' => 'Please select an email provider.',
+            'name.required' => 'Een naam voor het e-mailaccount is verplicht.',
+            'provider.required' => 'Selecteer een provider.',
+            'department_id.required' => 'Selecteer een afdeling.',
+            'department_id.exists' => 'De geselecteerde afdeling bestaat niet.',
         ];
     }
 }
