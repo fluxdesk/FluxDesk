@@ -81,10 +81,22 @@ Route::middleware(['auth', 'verified', 'org.required'])->group(function () {
         // General settings
         Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
         Route::patch('settings', [SettingsController::class, 'update'])->name('settings.update');
-        Route::post('settings/logo', [SettingsController::class, 'uploadLogo'])->name('settings.logo.upload');
-        Route::delete('settings/logo', [SettingsController::class, 'deleteLogo'])->name('settings.logo.delete');
-        Route::post('settings/email-logo', [SettingsController::class, 'uploadEmailLogo'])->name('settings.email-logo.upload');
-        Route::delete('settings/email-logo', [SettingsController::class, 'deleteEmailLogo'])->name('settings.email-logo.delete');
+
+        // Branding
+        Route::get('branding', [SettingsController::class, 'branding'])->name('branding.index');
+        Route::patch('branding', [SettingsController::class, 'updateBranding'])->name('branding.update');
+        Route::post('branding/logo', [SettingsController::class, 'uploadLogo'])->name('branding.logo.upload');
+        Route::delete('branding/logo', [SettingsController::class, 'deleteLogo'])->name('branding.logo.delete');
+        Route::post('branding/email-logo', [SettingsController::class, 'uploadEmailLogo'])->name('branding.email-logo.upload');
+        Route::delete('branding/email-logo', [SettingsController::class, 'deleteEmailLogo'])->name('branding.email-logo.delete');
+
+        // Ticket Numbers
+        Route::get('ticket-numbers', [SettingsController::class, 'ticketNumbers'])->name('ticket-numbers.index');
+        Route::patch('ticket-numbers', [SettingsController::class, 'updateTicketNumbers'])->name('ticket-numbers.update');
+
+        // Portal
+        Route::get('portal', [SettingsController::class, 'portal'])->name('portal.index');
+        Route::patch('portal', [SettingsController::class, 'updatePortal'])->name('portal.update');
 
         // Statuses
         Route::get('statuses', [StatusController::class, 'index'])->name('statuses.index');

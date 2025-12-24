@@ -1,5 +1,8 @@
 import { cn } from '@/lib/utils';
 import { index as settingsIndex } from '@/routes/organization/settings';
+import { index as brandingIndex } from '@/routes/organization/branding';
+import { index as ticketNumbersIndex } from '@/routes/organization/ticket-numbers';
+import { index as portalIndex } from '@/routes/organization/portal';
 import { index as statusesIndex } from '@/routes/organization/statuses';
 import { index as prioritiesIndex } from '@/routes/organization/priorities';
 import { index as tagsIndex } from '@/routes/organization/tags';
@@ -10,7 +13,7 @@ import { index as departmentsIndex } from '@/routes/organization/departments';
 import { index as integrationsIndex } from '@/routes/organization/integrations';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { Settings, CircleDot, Flag, Tags, Clock, Users, Mail, Building2, Plug } from 'lucide-react';
+import { Settings, CircleDot, Flag, Tags, Clock, Users, Mail, Building2, Plug, Palette, Hash, Globe } from 'lucide-react';
 import { type PropsWithChildren } from 'react';
 
 const sidebarNavItems: NavItem[] = [
@@ -18,6 +21,21 @@ const sidebarNavItems: NavItem[] = [
         title: 'Algemeen',
         href: settingsIndex(),
         icon: Settings,
+    },
+    {
+        title: 'Huisstijl',
+        href: brandingIndex(),
+        icon: Palette,
+    },
+    {
+        title: 'Ticketnummers',
+        href: ticketNumbersIndex(),
+        icon: Hash,
+    },
+    {
+        title: 'Klantenportaal',
+        href: portalIndex(),
+        icon: Globe,
     },
     {
         title: 'Statussen',
