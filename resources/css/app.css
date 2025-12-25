@@ -147,7 +147,7 @@
     }
 }
 
-/* Force email HTML content to use theme colors in dark mode */
+/* Force email HTML content to use theme colors and proper formatting */
 .email-content {
     color: inherit;
 }
@@ -156,6 +156,65 @@
     color: inherit !important;
 }
 
+/* Paragraphs */
+.email-content p {
+    margin-bottom: 0.75rem;
+}
+
+.email-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Lists */
+.email-content ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.email-content ol {
+    list-style-type: decimal;
+    padding-left: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.email-content ul:last-child,
+.email-content ol:last-child {
+    margin-bottom: 0;
+}
+
+.email-content li {
+    margin-bottom: 0.25rem;
+}
+
+.email-content li:last-child {
+    margin-bottom: 0;
+}
+
+/* Nested lists */
+.email-content li > ul,
+.email-content li > ol {
+    margin-top: 0.25rem;
+    margin-bottom: 0;
+}
+
+/* Text formatting */
+.email-content strong,
+.email-content b {
+    font-weight: 600;
+}
+
+.email-content em,
+.email-content i {
+    font-style: italic;
+}
+
+.email-content del,
+.email-content s {
+    text-decoration: line-through;
+}
+
+/* Links */
 .email-content a {
     color: var(--color-primary) !important;
     text-decoration: underline;
@@ -163,5 +222,29 @@
 
 .dark .email-content a {
     color: oklch(0.7 0.15 250) !important;
+}
+
+/* Code */
+.email-content code {
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+}
+
+.dark .email-content code {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Block quotes */
+.email-content blockquote {
+    border-left: 3px solid currentColor;
+    padding-left: 1rem;
+    margin: 0.75rem 0;
+    opacity: 0.8;
+}
+
+.email-content blockquote:last-child {
+    margin-bottom: 0;
 }
 
