@@ -397,3 +397,27 @@ export interface AppNotification {
     read_at: string | null;
     created_at: string;
 }
+
+// File Upload Types
+export interface UploadedFile {
+    temp_id: string;
+    filename: string;
+    original_filename: string;
+    mime_type: string;
+    size: number;
+    path: string;
+    is_image: boolean;
+    preview_url?: string;
+    uploading?: boolean;
+    error?: string;
+}
+
+export interface AttachmentData {
+    filename: string;
+    original_filename: string;
+    mime_type: string;
+    size: number;
+    path: string;
+    content_id?: string | null;
+    is_inline: boolean;
+}

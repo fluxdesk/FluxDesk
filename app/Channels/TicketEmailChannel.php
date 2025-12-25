@@ -115,6 +115,8 @@ class TicketEmailChannel
                 'headers' => [
                     'ticket_number' => $ticket->ticket_number,
                 ],
+                // File attachments to include in email
+                'attachments' => $data['attachments'] ?? collect(),
             ]);
 
             // Log successful send

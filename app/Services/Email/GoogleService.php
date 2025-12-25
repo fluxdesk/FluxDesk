@@ -13,6 +13,7 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Google Workspace / Gmail email provider service.
@@ -791,6 +792,9 @@ class GoogleService implements EmailProviderInterface
      */
     private function buildNotificationMessage(EmailChannel $channel, array $data): string
     {
+        $attachments = $data['attachments'] ?? collect();
+        $hasAttachments = $attachments->isNotEmpty();
+
         $raw = "MIME-Version: 1.0\r\n";
         $raw .= 'From: '.($channel->name ? $channel->name.' <'.$channel->email_address.'>' : $channel->email_address)."\r\n";
         $raw .= 'To: '.($data['to_name'] ? $data['to_name'].' <'.$data['to_email'].'>' : $data['to_email'])."\r\n";
@@ -837,10 +841,46 @@ class GoogleService implements EmailProviderInterface
             $raw .= 'X-Ticket-Reference: '.$data['headers']['ticket_number']."\r\n";
         }
 
-        $raw .= "Content-Type: text/html; charset=UTF-8\r\n";
-        $raw .= "Content-Transfer-Encoding: base64\r\n";
-        $raw .= "\r\n";
-        $raw .= chunk_split(base64_encode($data['html']));
+        if ($hasAttachments) {
+            // Multipart message with attachments
+            $boundary = 'boundary_'.uniqid();
+            $raw .= "Content-Type: multipart/mixed; boundary=\"{$boundary}\"\r\n";
+            $raw .= "\r\n";
+
+            // HTML body part
+            $raw .= "--{$boundary}\r\n";
+            $raw .= "Content-Type: text/html; charset=UTF-8\r\n";
+            $raw .= "Content-Transfer-Encoding: base64\r\n";
+            $raw .= "\r\n";
+            $raw .= chunk_split(base64_encode($data['html']));
+
+            // Attachment parts
+            foreach ($attachments as $attachment) {
+                if (empty($attachment->path) || ! Storage::disk('local')->exists($attachment->path)) {
+                    continue;
+                }
+
+                $content = Storage::disk('local')->get($attachment->path);
+                $filename = $attachment->original_filename;
+                $mimeType = $attachment->mime_type;
+
+                $raw .= "--{$boundary}\r\n";
+                $raw .= "Content-Type: {$mimeType}; name=\"{$filename}\"\r\n";
+                $raw .= "Content-Disposition: attachment; filename=\"{$filename}\"\r\n";
+                $raw .= "Content-Transfer-Encoding: base64\r\n";
+                $raw .= "\r\n";
+                $raw .= chunk_split(base64_encode($content));
+            }
+
+            // Close boundary
+            $raw .= "--{$boundary}--\r\n";
+        } else {
+            // Simple HTML message without attachments
+            $raw .= "Content-Type: text/html; charset=UTF-8\r\n";
+            $raw .= "Content-Transfer-Encoding: base64\r\n";
+            $raw .= "\r\n";
+            $raw .= chunk_split(base64_encode($data['html']));
+        }
 
         return $raw;
     }

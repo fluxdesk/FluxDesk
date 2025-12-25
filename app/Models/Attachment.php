@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 
 class Attachment extends Model
 {
@@ -17,6 +17,12 @@ class Attachment extends Model
         'path',
         'content_id',
         'is_inline',
+    ];
+
+    protected $appends = [
+        'url',
+        'download_url',
+        'human_size',
     ];
 
     /**
@@ -35,9 +41,28 @@ class Attachment extends Model
         return $this->belongsTo(Message::class);
     }
 
+    /**
+     * Get a signed URL for serving this attachment (expires in 30 minutes).
+     */
     public function getUrlAttribute(): string
     {
-        return Storage::url($this->path);
+        return URL::temporarySignedRoute(
+            'attachments.serve',
+            now()->addMinutes(30),
+            ['attachment' => $this->id]
+        );
+    }
+
+    /**
+     * Get a signed URL for downloading this attachment.
+     */
+    public function getDownloadUrlAttribute(): string
+    {
+        return URL::temporarySignedRoute(
+            'attachments.download',
+            now()->addMinutes(30),
+            ['attachment' => $this->id]
+        );
     }
 
     public function getHumanSizeAttribute(): string

@@ -21,6 +21,7 @@ use App\Http\Controllers\Organization\StatusController;
 use App\Http\Controllers\Organization\TagController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\PersonalTagController;
+use App\Http\Controllers\Tickets\AttachmentController;
 use App\Http\Controllers\Tickets\MessageController;
 use App\Http\Controllers\Tickets\TicketController;
 use App\Http\Controllers\UpgradeController;
@@ -54,6 +55,11 @@ Route::middleware(['auth', 'verified', 'org.required'])->group(function () {
         Route::post('inbox/{ticket}/tags', [TicketController::class, 'updateTags'])->name('inbox.tags');
         Route::post('inbox/{ticket}/merge', [TicketController::class, 'merge'])->name('inbox.merge');
         Route::post('inbox/{ticket}/messages', [MessageController::class, 'store'])->name('inbox.messages.store');
+
+        // Attachment routes
+        Route::post('inbox/{ticket}/attachments', [AttachmentController::class, 'upload'])->name('inbox.attachments.upload');
+        Route::delete('inbox/{ticket}/attachments', [AttachmentController::class, 'deleteTemp'])->name('inbox.attachments.delete-temp');
+        Route::get('attachments/{attachment}/download', [AttachmentController::class, 'download'])->name('attachments.download');
 
         // Folders routes
         Route::post('folders', [FolderController::class, 'store'])->name('folders.store');
@@ -201,5 +207,9 @@ Route::prefix('invitations')->name('invitations.')->group(function () {
 // Magic link routes for contact access (no auth required)
 Route::get('ticket/{token}', [MagicLinkController::class, 'show'])->name('tickets.magic-link');
 Route::post('ticket/{token}/reply', [MagicLinkController::class, 'reply'])->name('tickets.magic-link.reply');
+
+// Signed URL routes for attachment serving (signature validation happens in controller)
+Route::get('attachments/{attachment}/serve', [AttachmentController::class, 'serve'])->name('attachments.serve');
+Route::get('attachments/temp-preview', [AttachmentController::class, 'tempPreview'])->name('attachments.temp-preview');
 
 require __DIR__.'/settings.php';

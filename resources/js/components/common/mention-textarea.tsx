@@ -13,7 +13,7 @@ interface MentionTextareaProps extends Omit<React.TextareaHTMLAttributes<HTMLTex
     maxRows?: number;
 }
 
-export function MentionTextarea({
+export const MentionTextarea = React.forwardRef<HTMLTextAreaElement, MentionTextareaProps>(function MentionTextarea({
     value,
     onChange,
     users,
@@ -22,11 +22,23 @@ export function MentionTextarea({
     minRows = 2,
     maxRows = 8,
     ...props
-}: MentionTextareaProps) {
+}, ref) {
     const getInitials = useInitials();
     const containerRef = React.useRef<HTMLDivElement>(null);
-    const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+    const internalRef = React.useRef<HTMLTextAreaElement>(null);
     const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+    // Merge refs so both internal and forwarded refs work
+    const textareaRef = React.useMemo(() => {
+        return (el: HTMLTextAreaElement | null) => {
+            internalRef.current = el;
+            if (typeof ref === 'function') {
+                ref(el);
+            } else if (ref) {
+                ref.current = el;
+            }
+        };
+    }, [ref]);
 
     const [showSuggestions, setShowSuggestions] = React.useState(false);
     const [selectedIndex, setSelectedIndex] = React.useState(0);
@@ -36,9 +48,9 @@ export function MentionTextarea({
 
     // Auto-resize textarea based on content
     React.useEffect(() => {
-        if (!autoResize || !textareaRef.current) return;
+        if (!autoResize || !internalRef.current) return;
 
-        const textarea = textareaRef.current;
+        const textarea = internalRef.current;
         const lineHeight = parseInt(getComputedStyle(textarea).lineHeight) || 20;
         const minHeight = lineHeight * minRows;
         const maxHeight = lineHeight * maxRows;
@@ -94,8 +106,8 @@ export function MentionTextarea({
 
     // Calculate if dropdown should appear above or below
     const calculateDropdownPosition = () => {
-        if (!textareaRef.current) return;
-        const textareaRect = textareaRef.current.getBoundingClientRect();
+        if (!internalRef.current) return;
+        const textareaRect = internalRef.current.getBoundingClientRect();
         const spaceAbove = textareaRect.top;
         const spaceBelow = window.innerHeight - textareaRect.bottom;
         setDropdownAbove(spaceAbove > 250 || spaceAbove > spaceBelow);
@@ -103,9 +115,9 @@ export function MentionTextarea({
 
     // Insert mention into text
     const insertMention = React.useCallback((user: User) => {
-        if (mentionStart === null || !textareaRef.current) return;
+        if (mentionStart === null || !internalRef.current) return;
 
-        const cursorPos = textareaRef.current.selectionStart;
+        const cursorPos = internalRef.current.selectionStart;
         const beforeMention = value.slice(0, mentionStart);
         const afterCursor = value.slice(cursorPos);
         const mentionText = `@${user.name} `;
@@ -118,8 +130,8 @@ export function MentionTextarea({
 
         const newCursorPos = mentionStart + mentionText.length;
         setTimeout(() => {
-            textareaRef.current?.setSelectionRange(newCursorPos, newCursorPos);
-            textareaRef.current?.focus();
+            internalRef.current?.setSelectionRange(newCursorPos, newCursorPos);
+            internalRef.current?.focus();
         }, 0);
     }, [mentionStart, value, onChange]);
 
@@ -254,4 +266,4 @@ export function MentionTextarea({
             {!dropdownAbove && renderDropdown()}
         </div>
     );
-}
+});

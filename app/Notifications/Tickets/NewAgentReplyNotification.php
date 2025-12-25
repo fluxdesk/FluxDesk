@@ -34,8 +34,8 @@ class NewAgentReplyNotification extends BaseTicketNotification
             return null;
         }
 
-        // Get the agent name who sent the reply
-        $agentName = $this->message->user?->name ?? 'Support';
+        // Ensure file attachments are loaded
+        $this->message->loadMissing('fileAttachments');
 
         // Generate magic link for the contact
         $magicLink = $this->getMagicLink($notifiable);
@@ -44,6 +44,7 @@ class NewAgentReplyNotification extends BaseTicketNotification
             'view' => 'emails.tickets.agent-reply',
             'subject' => "Re: {$this->ticket->subject}",
             'should_thread' => true, // Thread under customer's original email
+            'attachments' => $this->message->fileAttachments ?? collect(),
             'data' => [
                 'contact' => $notifiable,
                 'message' => $this->message,

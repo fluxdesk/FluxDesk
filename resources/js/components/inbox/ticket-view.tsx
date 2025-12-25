@@ -3,6 +3,8 @@
 import DOMPurify from 'dompurify';
 import { ConfirmationDialog } from '@/components/common/confirmation-dialog';
 import { MergeTicketsWizard } from '@/components/tickets/merge-tickets-wizard';
+import { ComposerForm } from '@/components/inbox/composer-form';
+import { MarkdownRenderer } from '@/components/common/markdown-renderer';
 import * as React from 'react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { nl } from 'date-fns/locale';
@@ -80,7 +82,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { MentionTextarea } from '@/components/common/mention-textarea';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     Tooltip,
@@ -89,7 +90,7 @@ import {
 } from '@/components/ui/tooltip';
 import { useInitials } from '@/hooks/use-initials';
 import type { Ticket, Status, Priority, User, Contact, Message, TicketFolder, Tag } from '@/types';
-import { router, useForm } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import { toast } from 'sonner';
 
 interface TicketViewProps {
@@ -106,7 +107,6 @@ interface TicketViewProps {
 
 export function TicketView({ ticket, statuses, priorities, agents, contacts, folders = [], currentFolder, allTickets = [] }: TicketViewProps) {
     const getInitials = useInitials();
-    const [messageType, setMessageType] = React.useState<'reply' | 'note'>('reply');
     const [isChangeContactOpen, setIsChangeContactOpen] = React.useState(false);
     const [isDetailsOpen, setIsDetailsOpen] = React.useState(false);
     const [isMergeOpen, setIsMergeOpen] = React.useState(false);
@@ -143,11 +143,6 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
         }, 100);
         return () => clearTimeout(timer);
     }, [ticket.id, ticket.messages?.length]);
-
-    const { data, setData, post, processing, reset } = useForm({
-        body: '',
-        type: 'reply' as 'reply' | 'note',
-    });
 
     const updateTicket = (field: string, value: string | number | null) => {
         router.patch(`/inbox/${ticket.id}`, { [field]: value }, {
@@ -219,27 +214,6 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
 
     const solvedFolder = folders.find((f) => f.system_type === 'solved');
     const isSolved = ticket.folder_id === solvedFolder?.id;
-
-    const handleSubmitMessage = (e?: React.FormEvent) => {
-        e?.preventDefault();
-        if (!data.body.trim() || processing) return;
-
-        post(`/inbox/${ticket.id}/messages`, {
-            preserveScroll: true,
-            onSuccess: () => {
-                reset();
-                // Scroll to the new message after a short delay
-                setTimeout(scrollToBottom, 150);
-            },
-        });
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-            e.preventDefault();
-            handleSubmitMessage();
-        }
-    };
 
     const handleContactChange = (contactId: number) => {
         updateTicket('contact_id', contactId);
@@ -435,65 +409,11 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
 
                 {/* Composer - floating island */}
                 <div className="shrink-0 p-3 md:p-4">
-                    <form onSubmit={handleSubmitMessage}>
-                        <div className={cn(
-                            'rounded-xl border border-border/50 bg-card shadow-lg transition-shadow',
-                            'hover:shadow-xl focus-within:shadow-xl focus-within:ring-1 focus-within:ring-ring/20',
-                            messageType === 'note' && 'border-amber-300/50 bg-amber-50/50 dark:border-amber-700/50 dark:bg-amber-900/50',
-                        )}>
-                            {/* Textarea */}
-                            <MentionTextarea
-                                placeholder={messageType === 'reply' ? `Antwoord aan ${ticket.contact?.name || 'klant'}...` : 'Voeg een interne notitie toe...'}
-                                value={data.body}
-                                onChange={(value) => setData('body', value)}
-                                onKeyDown={handleKeyDown}
-                                users={agents}
-                                autoResize
-                                minRows={2}
-                                maxRows={10}
-                                className={cn(
-                                    'w-full resize-none border-0 bg-transparent px-4 py-3 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0',
-                                )}
-                            />
-                            {/* Footer bar */}
-                            <div className={cn(
-                                'flex items-center justify-between border-t px-3 py-2',
-                                messageType === 'note' ? 'border-amber-200/50 dark:border-amber-800/50' : 'border-border/50',
-                            )}>
-                                <div className="flex items-center gap-2">
-                                    <Tabs value={messageType} onValueChange={(v) => {
-                                        setMessageType(v as 'reply' | 'note');
-                                        setData('type', v as 'reply' | 'note');
-                                    }}>
-                                        <TabsList className="h-7 bg-transparent p-0">
-                                            <TabsTrigger value="reply" className="h-7 gap-1 rounded-md px-2 text-xs data-[state=active]:bg-muted data-[state=active]:shadow-none">
-                                                <Send className="h-3 w-3" />
-                                                Antwoord
-                                            </TabsTrigger>
-                                            <TabsTrigger value="note" className="h-7 gap-1 rounded-md px-2 text-xs data-[state=active]:bg-amber-100 data-[state=active]:text-amber-700 data-[state=active]:shadow-none dark:data-[state=active]:bg-amber-900/50 dark:data-[state=active]:text-amber-400">
-                                                <StickyNote className="h-3 w-3" />
-                                                Notitie
-                                            </TabsTrigger>
-                                        </TabsList>
-                                    </Tabs>
-                                    {messageType === 'note' && (
-                                        <span className="hidden text-xs text-amber-600 dark:text-amber-400 sm:inline">
-                                            Intern
-                                        </span>
-                                    )}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <span className="hidden text-xs text-muted-foreground sm:inline">
-                                        <kbd className="rounded border bg-muted px-1 py-0.5 text-[10px]">⌘</kbd> + <kbd className="rounded border bg-muted px-1 py-0.5 text-[10px]">↵</kbd>
-                                    </span>
-                                    <Button type="submit" disabled={processing || !data.body.trim()} size="sm" className="h-7 gap-1.5 px-3 text-xs">
-                                        <Send className="h-3 w-3" />
-                                        {messageType === 'reply' ? 'Versturen' : 'Toevoegen'}
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
+                    <ComposerForm
+                        ticket={ticket}
+                        agents={agents}
+                        onSuccess={() => setTimeout(scrollToBottom, 150)}
+                    />
                 </div>
             </div>
 

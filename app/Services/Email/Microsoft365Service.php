@@ -13,6 +13,7 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Microsoft 365 email provider service.
@@ -528,6 +529,12 @@ class Microsoft365Service implements EmailProviderInterface
             ];
         }
 
+        // Add attachments if present
+        $attachments = $this->prepareAttachments($data['attachments'] ?? []);
+        if (! empty($attachments)) {
+            $replyPayload['message']['attachments'] = $attachments;
+        }
+
         $endpoint = self::GRAPH_URL."/me/messages/{$originalMessageId}/reply";
         $response = $this->makeRequest($channel)->post($endpoint, $replyPayload);
 
@@ -572,6 +579,12 @@ class Microsoft365Service implements EmailProviderInterface
             $message['internetMessageHeaders'] = [
                 ['name' => 'X-Ticket-ID', 'value' => $data['headers']['ticket_number']],
             ];
+        }
+
+        // Add attachments if present
+        $attachments = $this->prepareAttachments($data['attachments'] ?? []);
+        if (! empty($attachments)) {
+            $message['attachments'] = $attachments;
         }
 
         $response = $this->makeRequest($channel)->post(self::GRAPH_URL.'/me/sendMail', [
@@ -640,6 +653,45 @@ class Microsoft365Service implements EmailProviderInterface
         return Http::withToken($channel->oauth_token)
             ->acceptJson()
             ->asJson();
+    }
+
+    /**
+     * Prepare attachments for the Microsoft Graph API.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function prepareAttachments(mixed $attachments): array
+    {
+        if (empty($attachments)) {
+            return [];
+        }
+
+        $prepared = [];
+
+        foreach ($attachments as $attachment) {
+            // Skip if no path
+            if (empty($attachment->path)) {
+                continue;
+            }
+
+            // Read file from storage
+            if (! Storage::disk('local')->exists($attachment->path)) {
+                Log::warning('Attachment file not found', ['path' => $attachment->path]);
+
+                continue;
+            }
+
+            $content = Storage::disk('local')->get($attachment->path);
+
+            $prepared[] = [
+                '@odata.type' => '#microsoft.graph.fileAttachment',
+                'name' => $attachment->original_filename,
+                'contentType' => $attachment->mime_type,
+                'contentBytes' => base64_encode($content),
+            ];
+        }
+
+        return $prepared;
     }
 
     /**
