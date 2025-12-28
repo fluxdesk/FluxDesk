@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Organization;
+use Carbon\Carbon;
 
 class OrganizationContext
 {
@@ -48,5 +49,29 @@ class OrganizationContext
         }
 
         return $this->organization;
+    }
+
+    /**
+     * Get the organization's timezone.
+     */
+    public function timezone(): string
+    {
+        return $this->organization?->settings?->timezone ?? 'UTC';
+    }
+
+    /**
+     * Format a Carbon date using the organization's timezone.
+     */
+    public function formatDate(Carbon $date, string $format = 'd M Y H:i'): string
+    {
+        return $date->copy()->setTimezone($this->timezone())->format($format);
+    }
+
+    /**
+     * Convert a Carbon date to the organization's timezone.
+     */
+    public function toTimezone(Carbon $date): Carbon
+    {
+        return $date->copy()->setTimezone($this->timezone());
     }
 }

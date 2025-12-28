@@ -2,8 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router } from '@inertiajs/react';
-import { formatDistanceToNow } from 'date-fns';
-import { nl } from 'date-fns/locale';
+import { formatRelative } from '@/lib/date';
 import {
     AlertTriangle,
     CheckCircle2,
@@ -109,10 +108,7 @@ export default function Upgrade({ versionStatus, githubRepo }: Props) {
                             {status.published_at && (
                                 <p className="text-sm text-muted-foreground">
                                     Uitgebracht{' '}
-                                    {formatDistanceToNow(new Date(status.published_at), {
-                                        addSuffix: true,
-                                        locale: nl,
-                                    })}
+                                    {formatRelative(status.published_at)}
                                 </p>
                             )}
                         </CardContent>

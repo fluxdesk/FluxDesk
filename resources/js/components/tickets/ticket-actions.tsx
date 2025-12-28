@@ -10,8 +10,8 @@ import {
     Building2,
     Pencil,
 } from 'lucide-react';
-import { formatDistanceToNow, format, differenceInMinutes } from 'date-fns';
-import { nl } from 'date-fns/locale';
+import { differenceInMinutes } from 'date-fns';
+import { formatDateTime, formatRelative } from '@/lib/date';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -261,7 +261,7 @@ export function TicketActions({ ticket, statuses, priorities, agents, contacts =
                                             </span>
                                         ) : (
                                             <span className={`text-xs font-medium ${isOverdue ? 'text-destructive' : ''}`}>
-                                                {formatDistanceToNow(new Date(ticket.sla_first_response_due_at), { addSuffix: true, locale: nl })}
+                                                {formatRelative(ticket.sla_first_response_due_at)}
                                             </span>
                                         )}
                                     </div>
@@ -286,7 +286,7 @@ export function TicketActions({ ticket, statuses, priorities, agents, contacts =
                                             </span>
                                         ) : (
                                             <span className={`text-xs font-medium ${resolutionOverdue ? 'text-destructive' : ''}`}>
-                                                {formatDistanceToNow(new Date(ticket.sla_resolution_due_at), { addSuffix: true, locale: nl })}
+                                                {formatRelative(ticket.sla_resolution_due_at)}
                                             </span>
                                         )}
                                     </div>
@@ -338,22 +338,22 @@ export function TicketActions({ ticket, statuses, priorities, agents, contacts =
                     <div className="space-y-2.5">
                         <div className="flex items-center justify-between text-sm">
                             <span className="text-muted-foreground">Created</span>
-                            <span>{format(new Date(ticket.created_at), 'MMM d, h:mm a')}</span>
+                            <span>{formatDateTime(ticket.created_at)}</span>
                         </div>
                         <div className="flex items-center justify-between text-sm">
                             <span className="text-muted-foreground">Updated</span>
-                            <span>{formatDistanceToNow(new Date(ticket.updated_at), { addSuffix: true, locale: nl })}</span>
+                            <span>{formatRelative(ticket.updated_at)}</span>
                         </div>
                         {ticket.first_response_at && (
                             <div className="flex items-center justify-between text-sm">
                                 <span className="text-muted-foreground">First response</span>
-                                <span>{format(new Date(ticket.first_response_at), 'MMM d, h:mm a')}</span>
+                                <span>{formatDateTime(ticket.first_response_at)}</span>
                             </div>
                         )}
                         {ticket.resolved_at && (
                             <div className="flex items-center justify-between text-sm">
                                 <span className="text-muted-foreground">Resolved</span>
-                                <span>{format(new Date(ticket.resolved_at), 'MMM d, h:mm a')}</span>
+                                <span>{formatDateTime(ticket.resolved_at)}</span>
                             </div>
                         )}
                     </div>

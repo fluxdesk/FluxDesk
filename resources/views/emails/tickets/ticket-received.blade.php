@@ -70,12 +70,12 @@
                 @endif
                 @if(!empty($slaData['first_response_due']))
                 <p style="margin: 0 0 8px; font-size: 14px; color: #047857;">
-                    Eerste reactie uiterlijk: <strong>{{ $slaData['first_response_due']->format('d-m-Y H:i') }}</strong>
+                    Eerste reactie uiterlijk: <strong>{{ $slaData['first_response_due']->setTimezone($organization->settings?->timezone ?? 'UTC')->format('d-m-Y H:i') }}</strong>
                 </p>
                 @endif
                 @if(!empty($slaData['resolution_due']))
                 <p style="margin: 0; font-size: 14px; color: #047857;">
-                    Oplossing uiterlijk: <strong>{{ $slaData['resolution_due']->format('d-m-Y H:i') }}</strong>
+                    Oplossing uiterlijk: <strong>{{ $slaData['resolution_due']->setTimezone($organization->settings?->timezone ?? 'UTC')->format('d-m-Y H:i') }}</strong>
                 </p>
                 @endif
             </td>

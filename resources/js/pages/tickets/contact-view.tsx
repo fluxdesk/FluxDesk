@@ -1,7 +1,6 @@
 import DOMPurify from 'dompurify';
 import { Head, useForm } from '@inertiajs/react';
-import { format } from 'date-fns';
-import { nl } from 'date-fns/locale';
+import { formatDateTime } from '@/lib/date';
 import { Send, FileText, Image as ImageIcon, Download, Loader2 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -152,7 +151,7 @@ function MessageBubble({
             <div className={`flex max-w-[75%] flex-col ${isOwnMessage ? 'items-end' : ''}`}>
                 <div className="mb-1 flex items-center gap-2 text-xs text-muted-foreground">
                     <span className="font-medium">{senderName}</span>
-                    <span>{format(new Date(message.created_at), 'd MMM, HH:mm', { locale: nl })}</span>
+                    <span>{formatDateTime(message.created_at)}</span>
                 </div>
                 <div
                     className={`rounded-2xl px-4 py-3 ${

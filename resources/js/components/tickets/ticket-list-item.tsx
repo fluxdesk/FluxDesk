@@ -1,6 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { formatDistanceToNow } from 'date-fns';
-import { nl } from 'date-fns/locale';
+import { formatRelative } from '@/lib/date';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useInitials } from '@/hooks/use-initials';
@@ -15,7 +14,7 @@ export function TicketListItem({ ticket, isSelected }: TicketListItemProps) {
     const getInitials = useInitials();
     const contactName = ticket.contact?.name || ticket.contact?.email || 'Unknown';
     const previewText = ticket.latest_message?.[0]?.body || 'No messages yet';
-    const timeAgo = formatDistanceToNow(new Date(ticket.updated_at), { addSuffix: true, locale: nl });
+    const timeAgo = formatRelative(ticket.updated_at);
 
     return (
         <Link

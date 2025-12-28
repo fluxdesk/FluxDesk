@@ -6,8 +6,7 @@ import { MergeTicketsWizard } from '@/components/tickets/merge-tickets-wizard';
 import { ComposerForm } from '@/components/inbox/composer-form';
 import { MarkdownRenderer } from '@/components/common/markdown-renderer';
 import * as React from 'react';
-import { format, formatDistanceToNow } from 'date-fns';
-import { nl } from 'date-fns/locale';
+import { formatDateTime, formatRelative } from '@/lib/date';
 import {
     MoreVertical,
     Trash2,
@@ -280,7 +279,7 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                         <div className="mt-0.5 md:mt-1 flex items-center gap-2 md:gap-3 text-xs md:text-sm text-muted-foreground">
                             <span className="truncate">{ticket.contact?.name || ticket.contact?.email}</span>
                             <span className="shrink-0 hidden md:inline">&middot;</span>
-                            <span className="shrink-0 hidden md:inline">{format(new Date(ticket.created_at), 'PPp')}</span>
+                            <span className="shrink-0 hidden md:inline">{formatDateTime(ticket.created_at)}</span>
                         </div>
                     </div>
                     <div className="flex items-center gap-0.5 md:gap-1">
@@ -549,7 +548,7 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                                                     </span>
                                                 ) : (
                                                     <span className={cn('text-xs font-medium', isOverdue && 'text-destructive')}>
-                                                        {formatDistanceToNow(new Date(ticket.sla_first_response_due_at), { addSuffix: true, locale: nl })}
+                                                        {formatRelative(ticket.sla_first_response_due_at)}
                                                     </span>
                                                 )}
                                             </div>
@@ -567,7 +566,7 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                                                     </span>
                                                 ) : (
                                                     <span className={cn('text-xs font-medium', resolutionOverdue && 'text-destructive')}>
-                                                        {formatDistanceToNow(new Date(ticket.sla_resolution_due_at), { addSuffix: true, locale: nl })}
+                                                        {formatRelative(ticket.sla_resolution_due_at)}
                                                     </span>
                                                 )}
                                             </div>
@@ -608,22 +607,22 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                             <div className="space-y-2.5">
                                 <div className="flex items-center justify-between text-sm">
                                     <span className="text-muted-foreground">Aangemaakt</span>
-                                    <span>{format(new Date(ticket.created_at), 'MMM d, h:mm a')}</span>
+                                    <span>{formatDateTime(ticket.created_at)}</span>
                                 </div>
                                 <div className="flex items-center justify-between text-sm">
                                     <span className="text-muted-foreground">Bijgewerkt</span>
-                                    <span>{formatDistanceToNow(new Date(ticket.updated_at), { addSuffix: true, locale: nl })}</span>
+                                    <span>{formatRelative(ticket.updated_at)}</span>
                                 </div>
                                 {ticket.first_response_at && (
                                     <div className="flex items-center justify-between text-sm">
                                         <span className="text-muted-foreground">Eerste reactie</span>
-                                        <span>{format(new Date(ticket.first_response_at), 'MMM d, h:mm a')}</span>
+                                        <span>{formatDateTime(ticket.first_response_at)}</span>
                                     </div>
                                 )}
                                 {ticket.resolved_at && (
                                     <div className="flex items-center justify-between text-sm">
                                         <span className="text-muted-foreground">Opgelost</span>
-                                        <span>{format(new Date(ticket.resolved_at), 'MMM d, h:mm a')}</span>
+                                        <span>{formatDateTime(ticket.resolved_at)}</span>
                                     </div>
                                 )}
                             </div>
@@ -824,7 +823,7 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                                                         </span>
                                                     ) : (
                                                         <span className={cn('text-xs font-medium', isOverdue && 'text-destructive')}>
-                                                            {formatDistanceToNow(new Date(ticket.sla_first_response_due_at), { addSuffix: true, locale: nl })}
+                                                            {formatRelative(ticket.sla_first_response_due_at)}
                                                         </span>
                                                     )}
                                                 </div>
@@ -842,7 +841,7 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                                                         </span>
                                                     ) : (
                                                         <span className={cn('text-xs font-medium', resolutionOverdue && 'text-destructive')}>
-                                                            {formatDistanceToNow(new Date(ticket.sla_resolution_due_at), { addSuffix: true, locale: nl })}
+                                                            {formatRelative(ticket.sla_resolution_due_at)}
                                                         </span>
                                                     )}
                                                 </div>
@@ -883,22 +882,22 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                                 <div className="space-y-2.5">
                                     <div className="flex items-center justify-between text-sm">
                                         <span className="text-muted-foreground">Aangemaakt</span>
-                                        <span>{format(new Date(ticket.created_at), 'MMM d, h:mm a')}</span>
+                                        <span>{formatDateTime(ticket.created_at)}</span>
                                     </div>
                                     <div className="flex items-center justify-between text-sm">
                                         <span className="text-muted-foreground">Bijgewerkt</span>
-                                        <span>{formatDistanceToNow(new Date(ticket.updated_at), { addSuffix: true, locale: nl })}</span>
+                                        <span>{formatRelative(ticket.updated_at)}</span>
                                     </div>
                                     {ticket.first_response_at && (
                                         <div className="flex items-center justify-between text-sm">
                                             <span className="text-muted-foreground">Eerste reactie</span>
-                                            <span>{format(new Date(ticket.first_response_at), 'MMM d, h:mm a')}</span>
+                                            <span>{formatDateTime(ticket.first_response_at)}</span>
                                         </div>
                                     )}
                                     {ticket.resolved_at && (
                                         <div className="flex items-center justify-between text-sm">
                                             <span className="text-muted-foreground">Opgelost</span>
-                                            <span>{format(new Date(ticket.resolved_at), 'MMM d, h:mm a')}</span>
+                                            <span>{formatDateTime(ticket.resolved_at)}</span>
                                         </div>
                                     )}
                                 </div>
@@ -1013,7 +1012,7 @@ function MessageBubble({ message }: { message: Message; ticket: Ticket }) {
             <div className={cn('flex max-w-[70%] flex-col', !isCustomer && 'items-end')}>
                 <div className="mb-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                     <span className="font-medium">{senderName}</span>
-                    <span>{format(new Date(message.created_at), 'MMM d, h:mm a')}</span>
+                    <span>{formatDateTime(message.created_at)}</span>
                     {isNote && (
                         <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-400">
                             <StickyNote className="mr-1 h-3 w-3" />

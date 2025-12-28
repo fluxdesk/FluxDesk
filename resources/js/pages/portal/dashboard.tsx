@@ -5,8 +5,7 @@ import PortalLayout from '@/layouts/portal/portal-layout';
 import { type PaginatedData } from '@/types';
 import { type PortalSharedData, type PortalTicket } from '@/types/portal';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { formatDistanceToNow } from 'date-fns';
-import { nl } from 'date-fns/locale';
+import { formatRelative } from '@/lib/date';
 import { Clock, MessageSquare, Plus, Ticket } from 'lucide-react';
 
 interface Props {
@@ -144,10 +143,7 @@ function TicketCard({ ticket, orgSlug }: { ticket: PortalTicket; orgSlug: string
                             <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                                 <span className="flex items-center gap-1">
                                     <Clock className="size-3" />
-                                    {formatDistanceToNow(new Date(ticket.updated_at), {
-                                        addSuffix: true,
-                                        locale: nl,
-                                    })}
+                                    {formatRelative(ticket.updated_at)}
                                 </span>
                                 {ticket.messages_count !== undefined && (
                                     <span className="flex items-center gap-1">

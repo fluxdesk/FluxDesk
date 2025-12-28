@@ -523,17 +523,21 @@ export function AppNav({ isCollapsed, folders: propFolders, currentFolder }: App
                 </ScrollArea>
 
                 {/* Update & Notifications */}
-                <div className="mt-auto border-t p-2">
-                    {/* Update notification (only shows when update available) */}
-                    <div className="mb-1">
-                        <UpdateNotification isCollapsed={isCollapsed} />
-                    </div>
-                    {/* Notifications */}
-                    <div className="mb-1">
-                        <NotificationDropdown isCollapsed={isCollapsed} />
+                <div className="mt-auto">
+                    <Separator />
+                    <div className="p-2">
+                        {/* Update notification (only shows when update available) */}
+                        <div className="mb-1">
+                            <UpdateNotification isCollapsed={isCollapsed} />
+                        </div>
+                        {/* Notifications */}
+                        <div className="mb-1">
+                            <NotificationDropdown isCollapsed={isCollapsed} />
+                        </div>
                     </div>
                 </div>
-                <div className="border-t p-2">
+                <Separator />
+                <div className="p-2">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button

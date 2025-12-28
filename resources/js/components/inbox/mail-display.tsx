@@ -1,4 +1,4 @@
-import { format } from 'date-fns';
+import { formatDateTime } from '@/lib/date';
 import {
     Archive,
     ArchiveX,
@@ -143,7 +143,7 @@ export function MailDisplay({ ticket }: MailDisplayProps) {
                         </div>
                         {displayTicket.created_at && (
                             <div className="ml-auto text-xs text-muted-foreground">
-                                {format(new Date(displayTicket.created_at), 'PPpp')}
+                                {formatDateTime(displayTicket.created_at)}
                             </div>
                         )}
                     </div>
@@ -159,7 +159,7 @@ export function MailDisplay({ ticket }: MailDisplayProps) {
                                     </Avatar>
                                     <span className="font-medium text-sm">{message.sender_name}</span>
                                     <span className="text-xs text-muted-foreground">
-                                        {format(new Date(message.created_at), 'PP p')}
+                                        {formatDateTime(message.created_at)}
                                     </span>
                                 </div>
                                 <div className="pl-8 text-sm">{message.content}</div>

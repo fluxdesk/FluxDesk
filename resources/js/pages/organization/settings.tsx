@@ -1,7 +1,7 @@
 import InputError from '@/components/input-error';
+import { TimezoneSelect } from '@/components/common/timezone-select';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import AppLayout from '@/layouts/app-layout';
@@ -51,17 +51,15 @@ export default function SettingsPage({ organization, settings, canSetSystemDefau
                         </CardHeader>
                         <CardContent>
                             <form onSubmit={handleSubmit} className="space-y-6">
-                                <div className="space-y-2">
+                                <div className="grid gap-2">
                                     <Label htmlFor="timezone">Tijdzone</Label>
-                                    <Input
-                                        id="timezone"
+                                    <TimezoneSelect
                                         value={data.timezone}
-                                        onChange={(e) => setData('timezone', e.target.value)}
-                                        placeholder="Europe/Amsterdam"
+                                        onChange={(value) => setData('timezone', value)}
                                         className="max-w-xs"
                                     />
                                     <p className="text-xs text-muted-foreground">
-                                        Wordt gebruikt voor datumvariabelen in ticketnummers. Bijvoorbeeld: Europe/Amsterdam, America/New_York, UTC
+                                        Wordt gebruikt voor datumvariabelen in ticketnummers
                                     </p>
                                     <InputError message={errors.timezone} />
                                 </div>
@@ -69,7 +67,7 @@ export default function SettingsPage({ organization, settings, canSetSystemDefau
                                 {canSetSystemDefault && (
                                     <label
                                         htmlFor="is_system_default"
-                                        className="flex items-start space-x-3 rounded-lg border border-border/50 p-3 cursor-pointer transition-colors hover:bg-muted/50 dark:bg-input dark:border-white/10 dark:hover:bg-white/5"
+                                        className="flex items-start space-x-3 rounded-lg border border-border p-3 cursor-pointer transition-colors hover:bg-muted/50 dark:bg-input dark:border-white/10 dark:hover:bg-white/5"
                                     >
                                         <Switch
                                             id="is_system_default"

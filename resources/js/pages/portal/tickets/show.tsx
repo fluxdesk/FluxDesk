@@ -7,8 +7,7 @@ import PortalLayout from '@/layouts/portal/portal-layout';
 import { type PortalMessage, type PortalSharedData, type PortalTicket } from '@/types/portal';
 import { cn } from '@/lib/utils';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { format } from 'date-fns';
-import { nl } from 'date-fns/locale';
+import { formatDateTime } from '@/lib/date';
 import { ArrowLeft, Download, Loader2, Paperclip, Send, User } from 'lucide-react';
 
 interface Props {
@@ -90,7 +89,7 @@ export default function PortalTicketShow({ ticket }: Props) {
                 </CardHeader>
                 <CardContent className="pt-0">
                     <p className="text-sm text-muted-foreground">
-                        Aangemaakt op {format(new Date(ticket.created_at), 'd MMMM yyyy \'om\' HH:mm', { locale: nl })}
+                        Aangemaakt op {formatDateTime(ticket.created_at)}
                     </p>
                 </CardContent>
             </Card>
@@ -211,7 +210,7 @@ function MessageBubble({ message, isOwn, primaryColor }: MessageBubbleProps) {
                 <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-medium">{senderName}</span>
                     <span className="text-xs text-muted-foreground">
-                        {format(new Date(message.created_at), 'd MMM yyyy, HH:mm', { locale: nl })}
+                        {formatDateTime(message.created_at)}
                     </span>
                 </div>
                 <div

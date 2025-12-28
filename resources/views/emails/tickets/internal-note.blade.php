@@ -50,7 +50,7 @@
                     <tr>
                         <td style="padding-bottom: 8px;">
                             <span style="font-size: 13px; font-weight: 600; color: #374151;">{{ $message->user?->name ?? 'Collega' }}</span>
-                            <span style="font-size: 12px; color: #9ca3af; margin-left: 8px;">{{ $message->created_at->format('d M, H:i') }}</span>
+                            <span style="font-size: 12px; color: #9ca3af; margin-left: 8px;">{{ $message->created_at->setTimezone($organization->settings?->timezone ?? 'UTC')->format('d M, H:i') }}</span>
                         </td>
                     </tr>
                     <tr>

@@ -56,6 +56,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $user,
             ],
             'organization' => fn () => $this->organizationContext->get()?->load('settings'),
+            'timezone' => fn () => $this->organizationContext->get()?->settings?->timezone ?? 'UTC',
             'organizations' => fn () => $user?->organizations()->get(['organizations.id', 'organizations.name', 'organizations.slug']) ?? [],
             'isAdmin' => fn () => $user && $this->organizationContext->get() ? $user->isAdminOf($this->organizationContext->get()) : false,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',

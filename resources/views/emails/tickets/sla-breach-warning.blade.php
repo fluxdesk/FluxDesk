@@ -22,7 +22,7 @@
                         </td>
                         <td>
                             <p style="margin: 0; font-size: 14px; font-weight: 600; color: #92400e;">
-                                Deadline {{ $typeLabel }}: {{ $deadline?->format('d-m-Y H:i') }}
+                                Deadline {{ $typeLabel }}: {{ $deadline?->setTimezone($organization->settings?->timezone ?? 'UTC')->format('d-m-Y H:i') }}
                             </p>
                             <p style="margin: 4px 0 0; font-size: 13px; color: #b45309;">
                                 Nog {{ $timeRemaining }} resterend

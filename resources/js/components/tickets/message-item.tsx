@@ -1,6 +1,6 @@
 import DOMPurify from 'dompurify';
-import { format } from 'date-fns';
 import { StickyNote, Bot, Eye } from 'lucide-react';
+import { formatDateTime } from '@/lib/date';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -117,7 +117,7 @@ export function MessageItem({ message }: MessageItemProps) {
                         </Dialog>
                     )}
                     <time className="text-xs text-muted-foreground">
-                        {format(new Date(message.created_at), 'MMM d, h:mm a')}
+                        {formatDateTime(message.created_at)}
                     </time>
                 </div>
             </div>

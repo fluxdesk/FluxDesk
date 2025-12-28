@@ -56,8 +56,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { formatDistanceToNow } from 'date-fns';
-import { nl } from 'date-fns/locale';
+import { formatRelative } from '@/lib/date';
 
 interface Props {
     channels: EmailChannel[];
@@ -384,11 +383,7 @@ function EmailChannelItem({
                             <>
                                 <span className="shrink-0">•</span>
                                 <span className="shrink-0">
-                                    Sync{' '}
-                                    {formatDistanceToNow(new Date(channel.last_sync_at), {
-                                        addSuffix: true,
-                                        locale: nl,
-                                    })}
+                                    Sync {formatRelative(channel.last_sync_at)}
                                 </span>
                             </>
                         )}
@@ -631,7 +626,7 @@ function EmailChannelFormDialog({
 
                     <label
                         htmlFor="is_default"
-                        className="flex items-start space-x-3 rounded-lg border border-border/50 p-3 cursor-pointer transition-colors hover:bg-muted/50 dark:bg-input dark:border-white/10 dark:hover:bg-white/5"
+                        className="flex items-start space-x-3 rounded-lg border border-border p-3 cursor-pointer transition-colors hover:bg-muted/50 dark:bg-input dark:border-white/10 dark:hover:bg-white/5"
                     >
                         <Checkbox
                             id="is_default"
@@ -650,7 +645,7 @@ function EmailChannelFormDialog({
                     {channel && (
                         <label
                             htmlFor="is_active"
-                            className="flex items-start space-x-3 rounded-lg border border-border/50 p-3 cursor-pointer transition-colors hover:bg-muted/50 dark:bg-input dark:border-white/10 dark:hover:bg-white/5"
+                            className="flex items-start space-x-3 rounded-lg border border-border p-3 cursor-pointer transition-colors hover:bg-muted/50 dark:bg-input dark:border-white/10 dark:hover:bg-white/5"
                         >
                             <Checkbox
                                 id="is_active"

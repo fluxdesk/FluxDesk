@@ -11,8 +11,7 @@ import {
     DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import type { AppNotification } from '@/types';
-import { formatDistanceToNow } from 'date-fns';
-import { nl } from 'date-fns/locale';
+import { formatRelative } from '@/lib/date';
 
 interface NotificationDropdownProps {
     isCollapsed?: boolean;
@@ -231,10 +230,7 @@ export function NotificationDropdown({ isCollapsed = false }: NotificationDropdo
                                         </p>
                                     )}
                                     <p className="mt-1 text-xs text-muted-foreground">
-                                        {formatDistanceToNow(new Date(notification.created_at), {
-                                            addSuffix: true,
-                                            locale: nl,
-                                        })}
+                                        {formatRelative(notification.created_at)}
                                     </p>
                                 </div>
                                 {!notification.read_at && (

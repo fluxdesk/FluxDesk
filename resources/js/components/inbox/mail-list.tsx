@@ -1,6 +1,5 @@
 import DOMPurify from 'dompurify';
-import { format, isToday, isYesterday } from 'date-fns';
-import { nl } from 'date-fns/locale';
+import { formatTicketListDate } from '@/lib/date';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -54,21 +53,6 @@ import {
 import * as React from 'react';
 
 export type ListDensity = 'compact' | 'normal' | 'spacious';
-
-// Helper function to format date like "vandaag, 14:59" or "ma 12 dec, 14:59"
-function formatTicketDate(dateString: string): string {
-    const date = new Date(dateString);
-    const time = format(date, 'HH:mm');
-
-    if (isToday(date)) {
-        return `vandaag, ${time}`;
-    }
-    if (isYesterday(date)) {
-        return `gisteren, ${time}`;
-    }
-    // Format as "ma 12 dec, 14:59"
-    return format(date, "EEE d MMM, HH:mm", { locale: nl });
-}
 
 // Helper function to format SLA time remaining
 function formatSlaTime(dueDate: string): { text: string; isOverdue: boolean; isUrgent: boolean } {
@@ -471,6 +455,10 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                     const isSlaBreach = slaInfo?.isOverdue ?? false;
                     const isSlaUrgent = slaInfo?.isUrgent ?? false;
 
+                    // Check if priority is urgent
+                    const isUrgentPriority = item.priority?.slug === 'urgent';
+                    const hasSlaIndicator = isSlaBreach || isSlaUrgent;
+
                     // Get message preview
                     const preview = getMessagePreview(item.latestMessage, 120);
                     const isSelected = selectedIds.has(item.id);
@@ -495,10 +483,13 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                                     isSelected && 'bg-primary/20',
                                     // Unread styling
                                     !item.is_read && !isSelected && selectedTicketId !== item.id && 'bg-primary/[0.05]',
-                                    // Only show left border for urgent items
+                                    // SLA indicators take priority
                                     isSlaBreach && 'border-l-2 border-l-destructive bg-destructive/10',
                                     isSlaUrgent && !isSlaBreach && 'border-l-2 border-l-amber-500 bg-amber-500/10',
+                                    // Urgent priority indicator (when no SLA indicator)
+                                    isUrgentPriority && !hasSlaIndicator && 'border-l-2',
                                 )}
+                                style={isUrgentPriority && !hasSlaIndicator ? { borderLeftColor: item.priority?.color } : undefined}
                                 onClick={(e) => handleSelect(item.id, e)}
                             >
                                 {/* KLEIN (compact): Single line with fixed date position */}
@@ -535,9 +526,39 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                                         <span className="text-sm text-muted-foreground truncate">
                                             {truncateSubject(item.subject, 8)}
                                         </span>
+                                        {/* Tag dots with tooltips */}
+                                        {item.tags && item.tags.length > 0 && (
+                                            <div className="flex items-center gap-0.5 shrink-0">
+                                                {item.tags.slice(0, 4).map((tag) => (
+                                                    <Tooltip key={tag.id}>
+                                                        <TooltipTrigger asChild>
+                                                            <span
+                                                                className="h-2 w-2 rounded-full shrink-0"
+                                                                style={{ backgroundColor: tag.color }}
+                                                            />
+                                                        </TooltipTrigger>
+                                                        <TooltipContent side="top" className="text-xs">
+                                                            {tag.name}
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                ))}
+                                                {item.tags.length > 4 && (
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <span className="text-[9px] text-muted-foreground">
+                                                                +{item.tags.length - 4}
+                                                            </span>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent side="top" className="text-xs">
+                                                            {item.tags.slice(4).map((t) => t.name).join(', ')}
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                )}
+                                            </div>
+                                        )}
                                         {/* Time - FIXED at right edge */}
                                         <span className="absolute right-0 text-[11px] text-muted-foreground whitespace-nowrap bg-inherit">
-                                            {formatTicketDate(messageDate)}
+                                            {formatTicketListDate(messageDate)}
                                         </span>
                                     </div>
                                 )}
@@ -584,14 +605,38 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                                                     </span>
                                                 )}
                                             </div>
-                                            {/* Line 2: Subject (8 words max) */}
-                                            <p className="text-sm text-muted-foreground mt-0.5">
-                                                {truncateSubject(item.subject, 8)}
-                                            </p>
+                                            {/* Line 2: Subject + Tags */}
+                                            <div className="flex items-center gap-1.5 mt-0.5">
+                                                <p className="text-sm text-muted-foreground truncate">
+                                                    {truncateSubject(item.subject, 8)}
+                                                </p>
+                                                {/* Tags */}
+                                                {item.tags && item.tags.length > 0 && (
+                                                    <div className="flex items-center gap-1 shrink-0">
+                                                        {item.tags.slice(0, 3).map((tag) => (
+                                                            <span
+                                                                key={tag.id}
+                                                                className="rounded px-1.5 py-0.5 text-[9px] font-medium"
+                                                                style={{
+                                                                    backgroundColor: `${tag.color}15`,
+                                                                    color: tag.color,
+                                                                }}
+                                                            >
+                                                                {tag.name}
+                                                            </span>
+                                                        ))}
+                                                        {item.tags.length > 3 && (
+                                                            <span className="text-[9px] text-muted-foreground">
+                                                                +{item.tags.length - 3}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                         {/* Time - FIXED at right edge */}
                                         <span className="absolute right-0 top-0 text-[11px] text-muted-foreground whitespace-nowrap">
-                                            {formatTicketDate(messageDate)}
+                                            {formatTicketListDate(messageDate)}
                                         </span>
                                     </div>
                                 )}
@@ -678,7 +723,7 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                                         </div>
                                         {/* Time - FIXED at right edge */}
                                         <span className="absolute right-0 top-0 text-xs text-muted-foreground whitespace-nowrap">
-                                            {formatTicketDate(messageDate)}
+                                            {formatTicketListDate(messageDate)}
                                         </span>
                                     </div>
                                 )}

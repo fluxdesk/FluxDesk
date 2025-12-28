@@ -35,8 +35,7 @@ import {
     XCircle,
 } from 'lucide-react';
 import { useState } from 'react';
-import { format, formatDistanceToNow } from 'date-fns';
-import { nl } from 'date-fns/locale';
+import { formatDateTime, formatRelative } from '@/lib/date';
 import { cn } from '@/lib/utils';
 
 interface EmailChannelLog {
@@ -306,12 +305,9 @@ export default function Logs({ channel, logs, stats, filter = 'all' }: Props) {
                                                                 {getStatusIcon(log.status)}
                                                                 <span
                                                                     className="text-muted-foreground"
-                                                                    title={format(new Date(log.created_at), 'PPpp', { locale: nl })}
+                                                                    title={formatDateTime(log.created_at)}
                                                                 >
-                                                                    {formatDistanceToNow(new Date(log.created_at), {
-                                                                        addSuffix: true,
-                                                                        locale: nl,
-                                                                    })}
+                                                                    {formatRelative(log.created_at)}
                                                                 </span>
                                                             </div>
                                                         </TableCell>
@@ -381,7 +377,7 @@ export default function Logs({ channel, logs, stats, filter = 'all' }: Props) {
                                 {selectedLog?.type_label}
                             </DialogTitle>
                             <DialogDescription>
-                                {selectedLog && format(new Date(selectedLog.created_at), 'EEEE d MMMM yyyy, HH:mm', { locale: nl })}
+                                {selectedLog && formatDateTime(selectedLog.created_at)}
                             </DialogDescription>
                         </DialogHeader>
 

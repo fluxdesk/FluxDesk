@@ -155,7 +155,7 @@ export default function TicketNumbers({ organization, settings }: Props) {
 
                                 <label
                                     htmlFor="use_random_numbers"
-                                    className="flex items-start space-x-3 rounded-lg border border-border/50 p-3 cursor-pointer transition-colors hover:bg-muted/50 dark:bg-input dark:border-white/10 dark:hover:bg-white/5"
+                                    className="flex items-start space-x-3 rounded-lg border border-border p-3 cursor-pointer transition-colors hover:bg-muted/50 dark:bg-input dark:border-white/10 dark:hover:bg-white/5"
                                 >
                                     <Switch
                                         id="use_random_numbers"

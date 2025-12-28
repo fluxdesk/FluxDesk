@@ -100,7 +100,7 @@ export function Mail({
             }}
             className="flex h-full flex-col"
         >
-            <div className="flex items-center justify-between px-4 py-2">
+            <div className="flex h-[52px] items-center justify-between px-4">
                 <h1 className="text-lg font-semibold">
                     {filters.folder && filters.folder !== 'inbox'
                         ? folders.find((f) => f.id === Number(filters.folder))?.name || 'Inbox'

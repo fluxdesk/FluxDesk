@@ -80,12 +80,12 @@
                 </p>
                 @if($ticket->sla_first_response_due_at && !$ticket->first_response_at)
                 <p style="margin: 0 0 4px; font-size: 14px; color: #92400e;">
-                    Reageer voor: <strong>{{ $ticket->sla_first_response_due_at->format('d-m-Y H:i') }}</strong>
+                    Reageer voor: <strong>{{ $ticket->sla_first_response_due_at->setTimezone($organization->settings?->timezone ?? 'UTC')->format('d-m-Y H:i') }}</strong>
                 </p>
                 @endif
                 @if($ticket->sla_resolution_due_at)
                 <p style="margin: 0; font-size: 14px; color: #92400e;">
-                    Opgelost voor: <strong>{{ $ticket->sla_resolution_due_at->format('d-m-Y H:i') }}</strong>
+                    Opgelost voor: <strong>{{ $ticket->sla_resolution_due_at->setTimezone($organization->settings?->timezone ?? 'UTC')->format('d-m-Y H:i') }}</strong>
                 </p>
                 @endif
             </td>

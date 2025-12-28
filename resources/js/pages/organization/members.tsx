@@ -32,8 +32,7 @@ import { Clock, Mail, Pencil, RefreshCw, Trash2, UserPlus, X } from 'lucide-reac
 import { useState } from 'react';
 import { useInitials } from '@/hooks/use-initials';
 import { toast } from 'sonner';
-import { formatDistanceToNow } from 'date-fns';
-import { nl } from 'date-fns/locale';
+import { formatRelative } from '@/lib/date';
 
 interface PendingInvitation {
     id: number;
@@ -170,8 +169,7 @@ function InvitationRow({ invitation }: { invitation: PendingInvitation }) {
         });
     };
 
-    const expiresAt = new Date(invitation.expires_at);
-    const expiresIn = formatDistanceToNow(expiresAt, { addSuffix: true, locale: nl });
+    const expiresIn = formatRelative(invitation.expires_at);
 
     return (
         <div className="flex items-center gap-4 rounded-lg border bg-amber-50/50 p-4 dark:bg-amber-950/20">
