@@ -376,6 +376,56 @@ export interface MailFolder {
     display_name: string;
 }
 
+// Webhook Types
+export type WebhookEventType =
+    | 'ticket.created'
+    | 'ticket.status_changed'
+    | 'ticket.priority_changed'
+    | 'ticket.assigned'
+    | 'ticket.sla_changed'
+    | 'message.created'
+    | 'message.reply_received';
+
+export type WebhookFormatType = 'standard' | 'discord' | 'slack';
+
+export interface Webhook {
+    id: number;
+    name: string;
+    url: string;
+    events: WebhookEventType[];
+    format: WebhookFormatType;
+    is_active: boolean;
+    description: string | null;
+    last_triggered_at: string | null;
+    failure_count: number;
+    was_auto_disabled: boolean;
+    created_at: string;
+    recent_deliveries?: WebhookDelivery[];
+}
+
+export interface WebhookDelivery {
+    id: number;
+    event_type: string;
+    response_status: number | null;
+    response_body?: string | null;
+    success: boolean;
+    duration_ms: number | null;
+    error?: string | null;
+    created_at: string;
+}
+
+export interface WebhookEventOption {
+    value: WebhookEventType;
+    label: string;
+    description: string;
+}
+
+export interface WebhookFormatOption {
+    value: WebhookFormatType;
+    label: string;
+    description: string;
+}
+
 // Notification Types
 export type NotificationType = 'mention' | 'assignment';
 

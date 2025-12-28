@@ -9,6 +9,7 @@ use App\Models\Status;
 use App\Models\TicketActivity;
 use App\Services\MentionService;
 use App\Services\NotificationService;
+use App\Services\Webhook\WebhookDispatcher;
 
 class MessageObserver
 {
@@ -80,6 +81,15 @@ class MessageObserver
                 $notificationService = app(NotificationService::class);
                 $notificationService->notifyMentions($message, $mentionedUsers);
             }
+        }
+
+        // Dispatch webhooks
+        $webhookDispatcher = app(WebhookDispatcher::class);
+        $webhookDispatcher->messageCreated($message);
+
+        // Dispatch reply received webhook for customer replies
+        if ($message->is_from_contact && $message->isReply()) {
+            $webhookDispatcher->replyReceived($message);
         }
     }
 }

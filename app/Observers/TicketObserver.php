@@ -11,8 +11,10 @@ use App\Models\Status;
 use App\Models\Ticket;
 use App\Models\TicketActivity;
 use App\Models\TicketFolder;
+use App\Models\User;
 use App\Services\NotificationService;
 use App\Services\OrganizationContext;
+use App\Services\Webhook\WebhookDispatcher;
 
 class TicketObserver
 {
@@ -84,10 +86,15 @@ class TicketObserver
 
         // Dispatch notification job (handles email import check internally)
         SendTicketNotificationJob::dispatch($ticket);
+
+        // Dispatch webhook
+        app(WebhookDispatcher::class)->ticketCreated($ticket);
     }
 
     public function updated(Ticket $ticket): void
     {
+        $webhookDispatcher = app(WebhookDispatcher::class);
+
         // Log status change
         if ($ticket->wasChanged('status_id')) {
             $oldStatus = Status::withoutGlobalScopes()->find($ticket->getOriginal('status_id'));
@@ -119,6 +126,9 @@ class TicketObserver
 
                 $ticket->saveQuietly();
             }
+
+            // Dispatch webhook
+            $webhookDispatcher->ticketStatusChanged($ticket, $oldStatus, $newStatus);
         }
 
         // Log priority change
@@ -135,12 +145,15 @@ class TicketObserver
                     'new' => $newPriority?->name,
                 ],
             ]);
+
+            // Dispatch webhook
+            $webhookDispatcher->ticketPriorityChanged($ticket, $oldPriority, $newPriority);
         }
 
         // Log assignment change and notify assignee
         if ($ticket->wasChanged('assigned_to')) {
             $oldAssignee = $ticket->getOriginal('assigned_to')
-                ? \App\Models\User::find($ticket->getOriginal('assigned_to'))
+                ? User::find($ticket->getOriginal('assigned_to'))
                 : null;
             $newAssignee = $ticket->assignee;
 
@@ -159,6 +172,9 @@ class TicketObserver
                 $assignedBy = auth()->user();
                 app(NotificationService::class)->notifyTicketAssigned($ticket, $assignedBy);
             }
+
+            // Dispatch webhook
+            $webhookDispatcher->ticketAssigned($ticket, $oldAssignee, $newAssignee);
         }
 
         // Log SLA change and recalculate due dates
@@ -178,6 +194,9 @@ class TicketObserver
                     'new' => $newSla?->name,
                 ],
             ]);
+
+            // Dispatch webhook
+            $webhookDispatcher->ticketSlaChanged($ticket, $oldSla, $newSla);
         }
     }
 

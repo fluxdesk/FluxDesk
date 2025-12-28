@@ -19,6 +19,7 @@ use App\Http\Controllers\Organization\SettingsController;
 use App\Http\Controllers\Organization\SlaController;
 use App\Http\Controllers\Organization\StatusController;
 use App\Http\Controllers\Organization\TagController;
+use App\Http\Controllers\Organization\WebhookController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\PersonalTagController;
 use App\Http\Controllers\Tickets\AttachmentController;
@@ -175,6 +176,17 @@ Route::middleware(['auth', 'verified', 'org.required'])->group(function () {
         Route::post('integrations/{integration}/test', [IntegrationController::class, 'test'])->name('integrations.test');
         Route::post('integrations/{integration}/toggle', [IntegrationController::class, 'toggle'])->name('integrations.toggle');
         Route::delete('integrations/{integration}', [IntegrationController::class, 'destroy'])->name('integrations.destroy');
+
+        // Webhooks
+        Route::get('webhooks', [WebhookController::class, 'index'])->name('webhooks.index');
+        Route::post('webhooks', [WebhookController::class, 'store'])->name('webhooks.store');
+        Route::patch('webhooks/{webhook}', [WebhookController::class, 'update'])->name('webhooks.update');
+        Route::delete('webhooks/{webhook}', [WebhookController::class, 'destroy'])->name('webhooks.destroy');
+        Route::post('webhooks/{webhook}/toggle', [WebhookController::class, 'toggle'])->name('webhooks.toggle');
+        Route::post('webhooks/{webhook}/regenerate-secret', [WebhookController::class, 'regenerateSecret'])->name('webhooks.regenerate-secret');
+        Route::get('webhooks/{webhook}/secret', [WebhookController::class, 'getSecret'])->name('webhooks.secret');
+        Route::post('webhooks/{webhook}/test', [WebhookController::class, 'test'])->name('webhooks.test');
+        Route::get('webhooks/{webhook}/deliveries', [WebhookController::class, 'deliveries'])->name('webhooks.deliveries');
     });
 });
 
