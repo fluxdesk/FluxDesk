@@ -6,6 +6,7 @@ import {
     Inbox,
     Users,
     LayoutDashboard,
+    Building,
     Building2,
     Settings,
     LogOut,
@@ -95,6 +96,7 @@ export function AppNav({ isCollapsed, folders: propFolders, currentFolder }: App
 
     const mainLinks = [
         { title: 'Contacten', label: '', icon: Users, href: '/contacts' },
+        { title: 'Bedrijven', label: '', icon: Building, href: '/companies' },
         { title: 'Statistieken', label: '', icon: LayoutDashboard, href: '/dashboard' },
     ];
 
@@ -106,6 +108,7 @@ export function AppNav({ isCollapsed, folders: propFolders, currentFolder }: App
 
     const isActive = (href: string) => {
         if (href === '/contacts') return currentPath.startsWith('/contacts');
+        if (href === '/companies') return currentPath.startsWith('/companies');
         if (href === '/dashboard') return currentPath === '/dashboard';
         if (href === '/organization/settings') return currentPath.startsWith('/organization');
         if (href === '/settings/profile') return currentPath.startsWith('/settings');

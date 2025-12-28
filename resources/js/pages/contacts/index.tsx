@@ -23,10 +23,10 @@ import {
 } from '@/components/ui/table';
 import { AppShell } from '@/layouts/app-shell';
 import { useInitials } from '@/hooks/use-initials';
-import type { Contact, PaginatedData, Sla } from '@/types';
+import type { Company, Contact, PaginatedData, Sla } from '@/types';
 import { Head, useForm, router } from '@inertiajs/react';
 import { toast } from 'sonner';
-import { Mail, Pencil, Phone, Plus, Search, Ticket, Trash2, UserPlus } from 'lucide-react';
+import { Building, Mail, Pencil, Phone, Plus, Search, Ticket, Trash2, UserPlus } from 'lucide-react';
 import { useState, useCallback } from 'react';
 import {
     Select,
@@ -35,6 +35,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Sheet } from '@/components/ui/sheet';
+import { CompanyFormSheet } from '@/pages/companies/index';
 
 interface ContactsFilters {
     search?: string;
@@ -44,9 +46,10 @@ interface Props {
     contacts: PaginatedData<Contact & { tickets_count: number }>;
     filters: ContactsFilters;
     slas: Sla[];
+    companies: Pick<Company, 'id' | 'name'>[];
 }
 
-export default function ContactsIndex({ contacts, filters, slas }: Props) {
+export default function ContactsIndex({ contacts, filters, slas, companies }: Props) {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [editingContact, setEditingContact] = useState<Contact | null>(null);
     const [deletingContact, setDeletingContact] = useState<(Contact & { tickets_count: number }) | null>(null);
@@ -96,7 +99,7 @@ export default function ContactsIndex({ contacts, filters, slas }: Props) {
                                     Contact toevoegen
                                 </Button>
                             </DialogTrigger>
-                            <ContactFormDialog slas={slas} onClose={() => setIsCreateOpen(false)} />
+                            <ContactFormDialog slas={slas} companies={companies} onClose={() => setIsCreateOpen(false)} />
                         </Dialog>
                     </div>
 
@@ -136,8 +139,9 @@ export default function ContactsIndex({ contacts, filters, slas }: Props) {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="w-[300px]">Contact</TableHead>
+                                    <TableHead className="w-[250px]">Contact</TableHead>
                                     <TableHead>E-mail</TableHead>
+                                    <TableHead>Bedrijf</TableHead>
                                     <TableHead>Telefoon</TableHead>
                                     <TableHead className="text-center">Tickets</TableHead>
                                     <TableHead className="w-[100px]"></TableHead>
@@ -161,6 +165,16 @@ export default function ContactsIndex({ contacts, filters, slas }: Props) {
                                                 <Mail className="h-3.5 w-3.5" />
                                                 {contact.email}
                                             </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            {contact.companyRelation ? (
+                                                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                                                    <Building className="h-3.5 w-3.5" />
+                                                    {contact.companyRelation.name}
+                                                </div>
+                                            ) : (
+                                                <span className="text-sm text-muted-foreground/50">—</span>
+                                            )}
                                         </TableCell>
                                         <TableCell>
                                             {contact.phone ? (
@@ -198,6 +212,7 @@ export default function ContactsIndex({ contacts, filters, slas }: Props) {
                                                     <ContactFormDialog
                                                         contact={contact}
                                                         slas={slas}
+                                                        companies={companies}
                                                         onClose={() => setEditingContact(null)}
                                                     />
                                                 </Dialog>
@@ -238,17 +253,22 @@ export default function ContactsIndex({ contacts, filters, slas }: Props) {
 function ContactFormDialog({
     contact,
     slas,
+    companies,
     onClose,
 }: {
     contact?: Contact;
     slas: Sla[];
+    companies: Pick<Company, 'id' | 'name'>[];
     onClose: () => void;
 }) {
+    const [isCreatingCompany, setIsCreatingCompany] = useState(false);
+    const [localCompanies, setLocalCompanies] = useState(companies);
     const { data, setData, post, patch, processing, errors, reset } = useForm({
         name: contact?.name || '',
         email: contact?.email || '',
         phone: contact?.phone || '',
         sla_id: contact?.sla_id?.toString() || '',
+        company_id: contact?.company_id?.toString() || '',
     });
 
     function handleSubmit(e: React.FormEvent) {
@@ -270,88 +290,138 @@ function ContactFormDialog({
         }
     }
 
+    const handleCompanyCreated = (newCompany: Company) => {
+        setLocalCompanies(prev => [...prev, { id: newCompany.id, name: newCompany.name }]);
+        setData('company_id', newCompany.id.toString());
+        setIsCreatingCompany(false);
+    };
+
     return (
-        <DialogContent>
-            <form onSubmit={handleSubmit}>
-                <DialogHeader>
-                    <DialogTitle>{contact ? 'Contact bewerken' : 'Contact toevoegen'}</DialogTitle>
-                    <DialogDescription>
-                        {contact
-                            ? 'Werk de contactgegevens bij.'
-                            : 'Voeg een nieuw klantcontact toe aan je organisatie.'}
-                    </DialogDescription>
-                </DialogHeader>
+        <>
+            <DialogContent>
+                <form onSubmit={handleSubmit}>
+                    <DialogHeader>
+                        <DialogTitle>{contact ? 'Contact bewerken' : 'Contact toevoegen'}</DialogTitle>
+                        <DialogDescription>
+                            {contact
+                                ? 'Werk de contactgegevens bij.'
+                                : 'Voeg een nieuw klantcontact toe aan je organisatie.'}
+                        </DialogDescription>
+                    </DialogHeader>
 
-                <div className="grid gap-4 py-4">
-                    <div className="grid gap-2">
-                        <Label htmlFor="name">Naam</Label>
-                        <Input
-                            id="name"
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
-                            placeholder="Jan Jansen"
-                        />
-                        <InputError message={errors.name} />
+                    <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="name">Naam</Label>
+                            <Input
+                                id="name"
+                                value={data.name}
+                                onChange={(e) => setData('name', e.target.value)}
+                                placeholder="Jan Jansen"
+                            />
+                            <InputError message={errors.name} />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="email">E-mail</Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                value={data.email}
+                                onChange={(e) => setData('email', e.target.value)}
+                                placeholder="jan@voorbeeld.nl"
+                            />
+                            <InputError message={errors.email} />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="phone">Telefoon (optioneel)</Label>
+                            <Input
+                                id="phone"
+                                type="tel"
+                                value={data.phone}
+                                onChange={(e) => setData('phone', e.target.value)}
+                                placeholder="+31 6 12345678"
+                            />
+                            <InputError message={errors.phone} />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="company" className="flex items-center justify-between">
+                                <span>Bedrijf</span>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 px-2 text-xs"
+                                    onClick={() => setIsCreatingCompany(true)}
+                                >
+                                    <Plus className="mr-1 h-3 w-3" />
+                                    Nieuw bedrijf
+                                </Button>
+                            </Label>
+                            <Select
+                                value={data.company_id || undefined}
+                                onValueChange={(value) => setData('company_id', value === '__none__' ? '' : value)}
+                            >
+                                <SelectTrigger id="company">
+                                    <SelectValue placeholder="Geen bedrijf" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="__none__">Geen bedrijf</SelectItem>
+                                    {localCompanies.map((company) => (
+                                        <SelectItem key={company.id} value={company.id.toString()}>
+                                            {company.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <InputError message={errors.company_id} />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="sla">SLA</Label>
+                            <Select
+                                value={data.sla_id || undefined}
+                                onValueChange={(value) => setData('sla_id', value === '__default__' ? '' : value)}
+                            >
+                                <SelectTrigger id="sla">
+                                    <SelectValue placeholder="Geen specifieke SLA" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="__default__">Geen specifieke SLA</SelectItem>
+                                    {slas.map((sla) => (
+                                        <SelectItem key={sla.id} value={sla.id.toString()}>
+                                            {sla.name}{sla.is_default ? ' (organisatie-standaard)' : ''}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <p className="text-sm text-muted-foreground">
+                                Kies een specifieke SLA voor dit contact, of gebruik de organisatie-standaard
+                            </p>
+                            <InputError message={errors.sla_id} />
+                        </div>
                     </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="email">E-mail</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
-                            placeholder="jan@voorbeeld.nl"
-                        />
-                        <InputError message={errors.email} />
-                    </div>
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={onClose}>
+                            Annuleren
+                        </Button>
+                        <Button type="submit" disabled={processing}>
+                            {contact ? 'Wijzigingen opslaan' : 'Contact toevoegen'}
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="phone">Telefoon (optioneel)</Label>
-                        <Input
-                            id="phone"
-                            type="tel"
-                            value={data.phone}
-                            onChange={(e) => setData('phone', e.target.value)}
-                            placeholder="+31 6 12345678"
-                        />
-                        <InputError message={errors.phone} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="sla">SLA</Label>
-                        <Select
-                            value={data.sla_id || undefined}
-                            onValueChange={(value) => setData('sla_id', value === '__default__' ? '' : value)}
-                        >
-                            <SelectTrigger id="sla">
-                                <SelectValue placeholder="Geen specifieke SLA" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="__default__">Geen specifieke SLA</SelectItem>
-                                {slas.map((sla) => (
-                                    <SelectItem key={sla.id} value={sla.id.toString()}>
-                                        {sla.name}{sla.is_default ? ' (organisatie-standaard)' : ''}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <p className="text-sm text-muted-foreground">
-                            Kies een specifieke SLA voor dit contact, of gebruik de organisatie-standaard
-                        </p>
-                        <InputError message={errors.sla_id} />
-                    </div>
-                </div>
-
-                <DialogFooter>
-                    <Button type="button" variant="outline" onClick={onClose}>
-                        Annuleren
-                    </Button>
-                    <Button type="submit" disabled={processing}>
-                        {contact ? 'Wijzigingen opslaan' : 'Contact toevoegen'}
-                    </Button>
-                </DialogFooter>
-            </form>
-        </DialogContent>
+            {/* Nested Company Creation Sheet */}
+            <Sheet open={isCreatingCompany} onOpenChange={setIsCreatingCompany}>
+                <CompanyFormSheet
+                    slas={slas}
+                    onClose={() => setIsCreatingCompany(false)}
+                    onSuccess={handleCompanyCreated}
+                />
+            </Sheet>
+        </>
     );
 }

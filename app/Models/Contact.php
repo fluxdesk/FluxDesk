@@ -16,6 +16,7 @@ class Contact extends Authenticatable
 
     protected $fillable = [
         'organization_id',
+        'company_id',
         'email',
         'name',
         'phone',
@@ -62,6 +63,11 @@ class Contact extends Authenticatable
     public function sla(): BelongsTo
     {
         return $this->belongsTo(Sla::class);
+    }
+
+    public function companyRelation(): BelongsTo
+    {
+        return $this->belongsTo(Company::class, 'company_id');
     }
 
     /**

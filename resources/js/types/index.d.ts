@@ -60,14 +60,35 @@ export interface User {
 }
 
 // Ticket System Types
+export interface Company {
+    id: number;
+    name: string;
+    email: string | null;
+    phone: string | null;
+    website: string | null;
+    address: string | null;
+    notes: string | null;
+    sla_id: number | null;
+    sla?: Sla;
+    domains: string[] | null;
+    contacts_count?: number;
+    tickets_count?: number;
+    contacts?: Contact[];
+    created_at: string;
+    updated_at: string;
+}
+
 export interface Contact {
     id: number;
     name: string | null;
     email: string;
     phone: string | null;
     company: string | null;
+    company_id: number | null;
+    companyRelation?: Company;
     sla_id: number | null;
     sla?: Sla;
+    tickets_count?: number;
     created_at: string;
     updated_at: string;
 }

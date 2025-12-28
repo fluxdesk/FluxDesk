@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FolderController;
@@ -82,6 +83,16 @@ Route::middleware(['auth', 'verified', 'org.required'])->group(function () {
         Route::post('contacts', [ContactController::class, 'store'])->name('contacts.store');
         Route::patch('contacts/{contact}', [ContactController::class, 'update'])->name('contacts.update');
         Route::delete('contacts/{contact}', [ContactController::class, 'destroy'])->name('contacts.destroy');
+
+        // Companies routes
+        Route::get('companies', [CompanyController::class, 'index'])->name('companies.index');
+        Route::post('companies', [CompanyController::class, 'store'])->name('companies.store');
+        Route::get('companies/{company}', [CompanyController::class, 'show'])->name('companies.show');
+        Route::patch('companies/{company}', [CompanyController::class, 'update'])->name('companies.update');
+        Route::delete('companies/{company}', [CompanyController::class, 'destroy'])->name('companies.destroy');
+        Route::get('companies/{company}/tickets', [CompanyController::class, 'tickets'])->name('companies.tickets');
+        Route::post('companies/{company}/contacts/{contact}', [CompanyController::class, 'linkContact'])->name('companies.link-contact');
+        Route::delete('companies/{company}/contacts/{contact}', [CompanyController::class, 'unlinkContact'])->name('companies.unlink-contact');
     });
 
     // Organization settings routes (admin only)
