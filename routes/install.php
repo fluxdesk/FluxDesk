@@ -26,6 +26,7 @@ Route::middleware([EnsureNotInstalled::class])
         Route::get('/database', [InstallController::class, 'database'])->name('database');
         Route::post('/database', [InstallController::class, 'storeDatabase'])->name('database.store');
         Route::post('/database/test', [InstallController::class, 'testConnection'])->name('database.test');
+        Route::post('/database/use-existing', [InstallController::class, 'useExistingDatabase'])->name('database.use-existing');
         Route::get('/database/run', [InstallController::class, 'runDatabase'])->name('database.run');
         Route::get('/database/stream', [InstallController::class, 'streamDatabaseSetup'])->name('database.stream');
 
