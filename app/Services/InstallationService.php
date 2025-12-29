@@ -172,8 +172,12 @@ class InstallationService
                 return ['success' => true, 'message' => 'SQLite connection successful'];
             }
 
+            // MariaDB uses the mysql driver
+            $actualDriver = $driver === 'mariadb' ? 'mysql' : $driver;
+
             // Check if PDO driver is loaded
-            $pdoDriver = $driver === 'mysql' ? 'pdo_mysql' : 'pdo_pgsql';
+            $pdoDriver = $actualDriver === 'mysql' ? 'pdo_mysql' : 'pdo_pgsql';
+
             if (! extension_loaded($pdoDriver)) {
                 return [
                     'success' => false,
@@ -182,14 +186,14 @@ class InstallationService
             }
 
             $connectionConfig = [
-                'driver' => $driver,
+                'driver' => $actualDriver,
                 'host' => $config['host'] ?? '127.0.0.1',
-                'port' => $config['port'] ?? ($driver === 'mysql' ? '3306' : '5432'),
+                'port' => $config['port'] ?? ($actualDriver === 'mysql' ? '3306' : '5432'),
                 'database' => $config['database'] ?? 'fluxdesk',
                 'username' => $config['username'] ?? '',
                 'password' => $config['password'] ?? '',
-                'charset' => $driver === 'mysql' ? 'utf8mb4' : 'utf8',
-                'collation' => $driver === 'mysql' ? 'utf8mb4_unicode_ci' : null,
+                'charset' => $actualDriver === 'mysql' ? 'utf8mb4' : 'utf8',
+                'collation' => $actualDriver === 'mysql' ? 'utf8mb4_unicode_ci' : null,
                 'prefix' => '',
                 'strict' => true,
             ];
