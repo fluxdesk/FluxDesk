@@ -110,9 +110,9 @@ class NotificationService
             return;
         }
 
-        // Skip if this is the first message on a new ticket from a contact
-        // (NewTicketNotification already handles notifying employees about new tickets)
-        if ($message->is_from_contact && $this->isFirstMessageOnTicket($message, $ticket)) {
+        // Skip if this is the first message on a new ticket
+        // (TicketReceivedNotification already notifies the contact, NewTicketNotification notifies employees)
+        if ($this->isFirstMessageOnTicket($message, $ticket)) {
             return;
         }
 

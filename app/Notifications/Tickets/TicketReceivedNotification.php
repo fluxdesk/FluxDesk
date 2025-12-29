@@ -39,6 +39,9 @@ class TicketReceivedNotification extends BaseTicketNotification
         // Get first message if available
         $firstMessage = $this->ticket->messages()->orderBy('created_at', 'asc')->first();
 
+        // Determine if ticket was created by an agent (has user_id on first message)
+        $createdByAgent = $firstMessage && $firstMessage->user_id !== null;
+
         // Get SLA data if sharing is enabled
         $slaData = $this->getSlaData();
         $averageReplyTime = $this->getAverageReplyTime();
@@ -53,6 +56,7 @@ class TicketReceivedNotification extends BaseTicketNotification
                 'actionUrl' => $magicLink,
                 'slaData' => $slaData,
                 'averageReplyTime' => $averageReplyTime,
+                'createdByAgent' => $createdByAgent,
             ],
         ];
     }

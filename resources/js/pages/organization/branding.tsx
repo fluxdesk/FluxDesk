@@ -9,7 +9,8 @@ import { type Organization, type OrganizationSettings } from '@/types';
 import { Transition } from '@headlessui/react';
 import { Head, useForm, router } from '@inertiajs/react';
 import { ColorPicker } from '@/components/common/color-picker';
-import { Trash2, Upload, ImageIcon, Mail, Palette } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Trash2, Upload, ImageIcon, Mail, Palette, Eye } from 'lucide-react';
 
 interface Props {
     organization: Organization;
@@ -22,6 +23,7 @@ export default function Branding({ organization, settings }: Props) {
         secondary_color: settings.secondary_color || '#6b7280',
         accent_color: settings.accent_color || '#10b981',
         email_background_color: settings.email_background_color || '#1A1A2E',
+        email_footer_text: settings.email_footer_text || '',
     });
 
     function handleSubmit(e: React.FormEvent) {
@@ -246,6 +248,115 @@ export default function Branding({ organization, settings }: Props) {
                                                 onChange={(color) => setData('email_background_color', color)}
                                             />
                                             <InputError message={errors.email_background_color} />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Email Footer Text */}
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-medium">E-mail voettekst</Label>
+                                    <Input
+                                        value={data.email_footer_text}
+                                        onChange={(e) => setData('email_footer_text', e.target.value)}
+                                        placeholder="Deze e-mail is verzonden via FluxDesk"
+                                        className="max-w-md"
+                                    />
+                                    <p className="text-xs text-muted-foreground">
+                                        Tekst onderaan elke uitgaande e-mail. Laat leeg om te verbergen.
+                                    </p>
+                                    <InputError message={errors.email_footer_text} />
+                                </div>
+
+                                {/* Email Preview Section */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2">
+                                        <Eye className="h-4 w-4 text-muted-foreground" />
+                                        <Label className="text-sm font-medium">E-mail voorbeeld</Label>
+                                    </div>
+                                    <div
+                                        className="overflow-hidden rounded-lg border"
+                                        style={{ backgroundColor: data.email_background_color }}
+                                    >
+                                        <div className="flex justify-center p-6 sm:p-8">
+                                            <div className="w-full max-w-[320px]">
+                                                {/* Logo */}
+                                                {settings.email_logo_path && (
+                                                    <div className="mb-4 text-center">
+                                                        <img
+                                                            src={`/storage/${settings.email_logo_path}`}
+                                                            alt="Logo"
+                                                            className="mx-auto h-8 w-auto"
+                                                        />
+                                                    </div>
+                                                )}
+
+                                                {/* Email card */}
+                                                <div className="overflow-hidden rounded-xl bg-white shadow-lg">
+                                                    {/* Header band */}
+                                                    <div
+                                                        className="px-5 py-4"
+                                                        style={{ backgroundColor: data.primary_color }}
+                                                    >
+                                                        <span className="text-sm font-semibold text-white">
+                                                            Ticket ontvangen
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Content */}
+                                                    <div className="space-y-4 p-5">
+                                                        <p className="text-sm leading-relaxed text-gray-700">
+                                                            Beste klant,
+                                                        </p>
+                                                        <p className="text-sm leading-relaxed text-gray-700">
+                                                            We hebben uw verzoek ontvangen en zullen zo snel mogelijk reageren.
+                                                        </p>
+
+                                                        {/* Ticket info card */}
+                                                        <div className="rounded-lg bg-gray-50 p-4">
+                                                            <div className="space-y-3">
+                                                                <div>
+                                                                    <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">
+                                                                        Ticketnummer
+                                                                    </span>
+                                                                    <p className="mt-0.5 text-sm font-semibold text-gray-900">
+                                                                        #12345
+                                                                    </p>
+                                                                </div>
+                                                                <div>
+                                                                    <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">
+                                                                        Onderwerp
+                                                                    </span>
+                                                                    <p className="mt-0.5 text-sm text-gray-700">
+                                                                        Voorbeeld onderwerp
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* CTA Button */}
+                                                        <div className="pt-2 text-center">
+                                                            <span
+                                                                className="inline-block rounded-lg px-6 py-2.5 text-sm font-semibold text-white"
+                                                                style={{ backgroundColor: data.primary_color }}
+                                                            >
+                                                                Bekijk ticket
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Footer */}
+                                                <div className="mt-4 text-center">
+                                                    <span className="text-xs text-gray-500">
+                                                        {organization.name}
+                                                    </span>
+                                                    {(data.email_footer_text || !settings.email_footer_text) && (
+                                                        <p className="mt-1 text-[10px] text-gray-400">
+                                                            {data.email_footer_text || 'Deze e-mail is verzonden via FluxDesk'}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

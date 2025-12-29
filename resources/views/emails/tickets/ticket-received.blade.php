@@ -16,7 +16,11 @@
     </p>
 
     <p style="margin: 0 0 24px; font-size: 15px; line-height: 1.6; color: #374151;">
-        We hebben uw verzoek ontvangen en zullen zo snel mogelijk reageren.
+        @if($createdByAgent ?? false)
+            We hebben voor u een nieuw ticket aangemaakt en zullen zo snel mogelijk reageren.
+        @else
+            We hebben uw verzoek ontvangen en zullen zo snel mogelijk reageren.
+        @endif
     </p>
 
     <!-- Ticket info card -->

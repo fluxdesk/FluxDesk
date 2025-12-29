@@ -225,10 +225,7 @@ export default function CacheSetup({ appName, currentConfig }: Props) {
                                 <SelectContent>
                                     {sessionDriverOptions.map((option) => (
                                         <SelectItem key={option.value} value={option.value}>
-                                            <div>
-                                                <p>{option.label}</p>
-                                                <p className="text-xs text-zinc-500">{option.description}</p>
-                                            </div>
+                                            {option.label}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -248,10 +245,7 @@ export default function CacheSetup({ appName, currentConfig }: Props) {
                                 <SelectContent>
                                     {queueConnectionOptions.map((option) => (
                                         <SelectItem key={option.value} value={option.value}>
-                                            <div>
-                                                <p>{option.label}</p>
-                                                <p className="text-xs text-zinc-500">{option.description}</p>
-                                            </div>
+                                            {option.label}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
