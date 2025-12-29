@@ -210,7 +210,6 @@ export default function DatabaseSetup({ appName, currentDriver, existingConfig }
                                         <span>{testMessage}</span>
                                     </div>
                                 )}
-
                                 {/* Skip option when test fails */}
                                 {connectionTested && !connectionSuccess && !usingExisting && (
                                     <div className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3">

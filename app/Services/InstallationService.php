@@ -177,6 +177,7 @@ class InstallationService
 
             // Check if PDO driver is loaded
             $pdoDriver = $actualDriver === 'mysql' ? 'pdo_mysql' : 'pdo_pgsql';
+
             if (! extension_loaded($pdoDriver)) {
                 return [
                     'success' => false,
