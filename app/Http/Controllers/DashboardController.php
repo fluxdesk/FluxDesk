@@ -225,9 +225,9 @@ class DashboardController extends Controller
     private function calculateChannelBreakdown(\Carbon\Carbon $startDate): array
     {
         $colors = [
-            'web' => 'hsl(var(--chart-1))',
-            'email' => 'hsl(var(--chart-2))',
-            'api' => 'hsl(var(--chart-3))',
+            'web' => 'oklch(0.837 0.128 66.29)',
+            'email' => 'oklch(0.705 0.213 47.604)',
+            'api' => 'oklch(0.646 0.222 41.116)',
         ];
 
         $icons = [
@@ -243,7 +243,7 @@ class DashboardController extends Controller
                     ->where('created_at', '>=', $startDate)
                     ->count(),
                 'icon' => $icons[$channel->value] ?? 'globe',
-                'color' => $colors[$channel->value] ?? 'hsl(var(--chart-1))',
+                'color' => $colors[$channel->value] ?? 'oklch(0.837 0.128 66.29)',
             ])
             ->toArray();
     }

@@ -110,22 +110,22 @@ const dateRanges = [
 const chartConfig = {
     created: {
         label: 'Aangemaakt',
-        color: 'hsl(var(--chart-1))',
+        color: 'var(--color-chart-1)',
     },
     resolved: {
         label: 'Opgelost',
-        color: 'hsl(var(--chart-2))',
+        color: 'var(--color-chart-2)',
     },
 } satisfies ChartConfig;
 
 const agentChartConfig = {
     total_assigned: {
         label: 'Toegewezen',
-        color: 'hsl(var(--chart-1))',
+        color: 'var(--color-chart-1)',
     },
     resolved_count: {
         label: 'Opgelost',
-        color: 'hsl(var(--chart-2))',
+        color: 'var(--color-chart-2)',
     },
 } satisfies ChartConfig;
 
