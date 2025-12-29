@@ -46,7 +46,8 @@ const databaseOptions = [
 ];
 
 const driverLabels: Record<string, string> = {
-    mysql: 'MySQL / MariaDB',
+    mysql: 'MySQL',
+    mariadb: 'MariaDB',
     pgsql: 'PostgreSQL',
     sqlite: 'SQLite',
 };
@@ -207,6 +208,24 @@ export default function DatabaseSetup({ appName, currentDriver, existingConfig }
                                             <XCircle className="size-4" />
                                         )}
                                         <span>{testMessage}</span>
+                                    </div>
+                                )}
+                                {/* Skip option when test fails */}
+                                {connectionTested && !connectionSuccess && !usingExisting && (
+                                    <div className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3">
+                                        <p className="text-sm text-amber-200">
+                                            If you're sure the database is configured correctly, you can skip the test and continue anyway.
+                                        </p>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setUsingExisting(true);
+                                                router.post('/install/database/use-existing');
+                                            }}
+                                            className="mt-2 text-sm font-medium text-amber-400 hover:text-amber-300"
+                                        >
+                                            Skip test and continue anyway →
+                                        </button>
                                     </div>
                                 )}
                             </div>

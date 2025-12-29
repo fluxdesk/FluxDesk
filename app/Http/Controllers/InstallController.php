@@ -91,7 +91,7 @@ class InstallController extends Controller
     public function storeDatabase(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'driver' => ['required', 'in:sqlite,mysql,pgsql'],
+            'driver' => ['required', 'in:sqlite,mysql,pgsql,mariadb'],
             'host' => ['required_unless:driver,sqlite', 'nullable', 'string'],
             'port' => ['required_unless:driver,sqlite', 'nullable', 'string'],
             'database' => ['required_unless:driver,sqlite', 'nullable', 'string'],
@@ -111,7 +111,7 @@ class InstallController extends Controller
     public function testConnection(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
-            'driver' => ['required', 'in:sqlite,mysql,pgsql'],
+            'driver' => ['required', 'in:sqlite,mysql,pgsql,mariadb'],
             'host' => ['required_unless:driver,sqlite', 'nullable', 'string'],
             'port' => ['required_unless:driver,sqlite', 'nullable', 'string'],
             'database' => ['required_unless:driver,sqlite', 'nullable', 'string'],
