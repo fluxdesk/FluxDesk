@@ -83,6 +83,7 @@ class SettingsController extends Controller
             'secondary_color' => ['nullable', 'string', 'max:7'],
             'accent_color' => ['nullable', 'string', 'max:7'],
             'email_background_color' => ['nullable', 'string', 'max:7'],
+            'email_footer_text' => ['nullable', 'string', 'max:255'],
         ]);
 
         $organization = $this->organizationContext->organization();
@@ -93,6 +94,7 @@ class SettingsController extends Controller
             'secondary_color',
             'accent_color',
             'email_background_color',
+            'email_footer_text',
         ]));
 
         return back()->with('success', 'Huisstijl opgeslagen.');

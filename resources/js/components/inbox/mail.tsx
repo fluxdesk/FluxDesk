@@ -28,7 +28,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { AppNav } from '@/components/inbox/app-nav';
 import { MailList, type ListDensity } from '@/components/inbox/mail-list';
 import { TicketView } from '@/components/inbox/ticket-view';
-import { CreateTicketDialog } from '@/components/tickets/create-ticket-dialog';
+import { CreateTicketView } from '@/components/inbox/create-ticket-view';
 import type { Ticket, Status, Priority, User, Contact, InboxFilters, PaginatedData, SharedData, TicketFolder, Tag, EmailChannel, Department } from '@/types';
 import { router, usePage } from '@inertiajs/react';
 import { useState, useCallback } from 'react';
@@ -68,7 +68,7 @@ export function Mail({
 }: MailProps) {
     const { unreadCount } = usePage<SharedData>().props;
     const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed);
-    const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const [isCreating, setIsCreating] = useState(false);
     const [search, setSearch] = useState(filters.search || '');
     const [density, setDensity] = useState<ListDensity>(() => {
         if (typeof window !== 'undefined') {
@@ -145,7 +145,7 @@ export function Mail({
                             </DropdownMenuRadioGroup>
                         </DropdownMenuContent>
                     </DropdownMenu>
-                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setIsCreateOpen(true)}>
+                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setIsCreating(true)}>
                         <Plus className="h-4 w-4" />
                     </Button>
                 </div>
@@ -177,7 +177,22 @@ export function Mail({
         <TooltipProvider delayDuration={0}>
             {/* Mobile Layout */}
             <div className="md:hidden h-screen flex flex-col">
-                {selectedTicket ? (
+                {isCreating ? (
+                    // Mobile: Show create ticket form fullscreen
+                    <div className="flex flex-col h-full overflow-hidden">
+                        <div className="flex-1 min-h-0">
+                            <CreateTicketView
+                                statuses={statuses}
+                                priorities={priorities}
+                                agents={agents}
+                                contacts={contacts}
+                                emailChannels={emailChannels}
+                                departments={departments}
+                                onCancel={() => setIsCreating(false)}
+                            />
+                        </div>
+                    </div>
+                ) : selectedTicket ? (
                     // Mobile: Show ticket conversation fullscreen
                     <div className="flex flex-col h-full overflow-hidden">
                         {/* Ticket view takes full height and handles its own scrolling */}
@@ -253,7 +268,17 @@ export function Mail({
 
                     {/* Ticket Detail */}
                     <ResizablePanel defaultSize={defaultLayout[2]} minSize={40}>
-                        {selectedTicket ? (
+                        {isCreating ? (
+                            <CreateTicketView
+                                statuses={statuses}
+                                priorities={priorities}
+                                agents={agents}
+                                contacts={contacts}
+                                emailChannels={emailChannels}
+                                departments={departments}
+                                onCancel={() => setIsCreating(false)}
+                            />
+                        ) : selectedTicket ? (
                             <TicketView
                                 ticket={selectedTicket}
                                 statuses={statuses}
@@ -276,17 +301,6 @@ export function Mail({
                     </ResizablePanel>
                 </ResizablePanelGroup>
             </div>
-
-            <CreateTicketDialog
-                open={isCreateOpen}
-                onOpenChange={setIsCreateOpen}
-                contacts={contacts}
-                statuses={statuses}
-                priorities={priorities}
-                agents={agents}
-                emailChannels={emailChannels}
-                departments={departments}
-            />
         </TooltipProvider>
     );
 }

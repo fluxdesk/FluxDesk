@@ -16,6 +16,7 @@ class OrganizationSettings extends Model
         'secondary_color',
         'accent_color',
         'email_background_color',
+        'email_footer_text',
         'ticket_prefix',
         'ticket_number_format',
         'use_random_numbers',

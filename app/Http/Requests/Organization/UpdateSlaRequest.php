@@ -17,6 +17,13 @@ class UpdateSlaRequest extends FormRequest
         return $this->isOrganizationAdmin();
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->priority_id === '' || $this->priority_id === null || $this->priority_id === 'all' || ! $this->has('priority_id')) {
+            $this->merge(['priority_id' => null]);
+        }
+    }
+
     /**
      * @return array<string, ValidationRule|array<mixed>|string>
      */
@@ -28,7 +35,7 @@ class UpdateSlaRequest extends FormRequest
             'resolution_hours' => ['sometimes', 'required', 'integer', 'min:1'],
             'business_hours_only' => ['boolean'],
             'is_default' => ['boolean'],
-            'priority_id' => ['nullable', 'integer', Rule::exists(Priority::class, 'id')],
+            'priority_id' => ['nullable', 'integer', Rule::exists(Priority::class, 'id')->whereNull('deleted_at')],
         ];
     }
 }

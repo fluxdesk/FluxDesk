@@ -92,9 +92,11 @@
                             <p style="margin: 0; font-size: 13px; color: #6b7280;">
                                 {{ $organization->name }}
                             </p>
+                            @if($organization->settings?->email_footer_text)
                             <p style="margin: 8px 0 0; font-size: 12px; color: #4b5563;">
-                                Deze e-mail is verzonden via FluxDesk
+                                {{ $organization->settings->email_footer_text }}
                             </p>
+                            @endif
                         </td>
                     </tr>
 

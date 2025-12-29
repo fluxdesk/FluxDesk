@@ -356,12 +356,17 @@ function SlaFormDialog({
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        const payload = {
-            ...data,
+        const payload: Record<string, unknown> = {
+            name: data.name,
             first_response_hours: parseInt(data.first_response_hours) || null,
             resolution_hours: parseInt(data.resolution_hours) || null,
-            priority_id: data.priority_id && data.priority_id !== 'all' ? parseInt(data.priority_id) : null,
+            business_hours_only: data.business_hours_only,
+            is_default: data.is_default,
         };
+
+        if (data.priority_id && data.priority_id !== 'all') {
+            payload.priority_id = parseInt(data.priority_id);
+        }
 
         if (sla) {
             patch(update(sla.id).url, {

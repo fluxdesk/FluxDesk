@@ -316,6 +316,7 @@ export interface OrganizationSettings {
     secondary_color: string | null;
     accent_color: string | null;
     email_background_color: string | null;
+    email_footer_text: string | null;
     ticket_prefix: string;
     ticket_number_format: string;
     use_random_numbers: boolean;

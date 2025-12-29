@@ -260,8 +260,8 @@ export function ComposerForm({ ticket, agents, onSuccess, noteStyle = false }: C
                 onDragLeave={handleDragLeave}
                 onDragOver={handleDragOver}
                 className={cn(
-                    'relative rounded-xl border border-border/50 bg-card shadow-lg transition-shadow',
-                    'hover:shadow-xl focus-within:shadow-xl focus-within:ring-1 focus-within:ring-ring/20',
+                    'relative rounded-xl border border-border/50 bg-card shadow-sm transition-shadow dark:shadow-lg',
+                    'hover:shadow-md focus-within:shadow-md dark:hover:shadow-xl dark:focus-within:shadow-xl focus-within:ring-1 focus-within:ring-ring/20',
                     isNote && 'border-amber-300/50 bg-amber-50/50 dark:border-amber-700/50 dark:bg-amber-900/20'
                 )}
             >
