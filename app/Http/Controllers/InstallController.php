@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\InstallationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -74,9 +75,13 @@ class InstallController extends Controller
             return redirect()->route('install.welcome');
         }
 
+        // Check for pre-configured database (Forge/Ploi deployments)
+        $existingConfig = $this->installationService->getDatabaseConfigFromEnv();
+
         return Inertia::render('install/database', [
             'appName' => config('app.name', 'FluxDesk'),
             'currentDriver' => config('database.default'),
+            'existingConfig' => $existingConfig,
         ]);
     }
 
@@ -86,7 +91,7 @@ class InstallController extends Controller
     public function storeDatabase(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'driver' => ['required', 'in:sqlite,mysql,pgsql'],
+            'driver' => ['required', 'in:sqlite,mysql,pgsql,mariadb'],
             'host' => ['required_unless:driver,sqlite', 'nullable', 'string'],
             'port' => ['required_unless:driver,sqlite', 'nullable', 'string'],
             'database' => ['required_unless:driver,sqlite', 'nullable', 'string'],
@@ -106,7 +111,7 @@ class InstallController extends Controller
     public function testConnection(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
-            'driver' => ['required', 'in:sqlite,mysql,pgsql'],
+            'driver' => ['required', 'in:sqlite,mysql,pgsql,mariadb'],
             'host' => ['required_unless:driver,sqlite', 'nullable', 'string'],
             'port' => ['required_unless:driver,sqlite', 'nullable', 'string'],
             'database' => ['required_unless:driver,sqlite', 'nullable', 'string'],
@@ -117,6 +122,24 @@ class InstallController extends Controller
         $result = $this->installationService->testDatabaseConnection($validated);
 
         return response()->json($result);
+    }
+
+    /**
+     * Use pre-configured database from .env (for Forge/Ploi deployments)
+     */
+    public function useExistingDatabase(): RedirectResponse
+    {
+        $config = $this->installationService->getDatabaseConfigFromEnv();
+
+        if (! $config || ! $config['configured']) {
+            return redirect()->route('install.database')
+                ->withErrors(['database' => 'No pre-configured database found.']);
+        }
+
+        // Store config in session for the streaming endpoint
+        session(['install_db_config' => $config]);
+
+        return redirect()->route('install.database.run');
     }
 
     /**

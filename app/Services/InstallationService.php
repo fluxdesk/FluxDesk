@@ -92,6 +92,46 @@ class InstallationService
     }
 
     /**
+     * Check if database is already configured in .env.
+     *
+     * @return array{driver: string, host?: string, port?: string, database?: string, username?: string, password?: string, configured: bool}|null
+     */
+    public function getDatabaseConfigFromEnv(): ?array
+    {
+        $driver = config('database.default');
+
+        if ($driver === 'sqlite') {
+            $dbPath = database_path('database.sqlite');
+
+            return [
+                'driver' => 'sqlite',
+                'database' => $dbPath,
+                'configured' => file_exists($dbPath),
+            ];
+        }
+
+        $host = config("database.connections.{$driver}.host");
+        $database = config("database.connections.{$driver}.database");
+        $username = config("database.connections.{$driver}.username");
+
+        // Check if essential values are set and not just defaults
+        // Forge/Ploi typically sets all these values
+        if ($host && $database && $username && $database !== 'laravel') {
+            return [
+                'driver' => $driver,
+                'host' => $host,
+                'port' => (string) config("database.connections.{$driver}.port"),
+                'database' => $database,
+                'username' => $username,
+                'password' => config("database.connections.{$driver}.password") ?? '',
+                'configured' => true,
+            ];
+        }
+
+        return null;
+    }
+
+    /**
      * Ensure .env file exists.
      */
     public function ensureEnvFile(): void
@@ -132,15 +172,27 @@ class InstallationService
                 return ['success' => true, 'message' => 'SQLite connection successful'];
             }
 
+            // MariaDB uses the mysql driver
+            $actualDriver = $driver === 'mariadb' ? 'mysql' : $driver;
+
+            // Check if PDO driver is loaded
+            $pdoDriver = $actualDriver === 'mysql' ? 'pdo_mysql' : 'pdo_pgsql';
+            if (! extension_loaded($pdoDriver)) {
+                return [
+                    'success' => false,
+                    'message' => "PHP extension '{$pdoDriver}' is not installed. Please install it and restart your web server.",
+                ];
+            }
+
             $connectionConfig = [
-                'driver' => $driver,
+                'driver' => $actualDriver,
                 'host' => $config['host'] ?? '127.0.0.1',
-                'port' => $config['port'] ?? ($driver === 'mysql' ? '3306' : '5432'),
+                'port' => $config['port'] ?? ($actualDriver === 'mysql' ? '3306' : '5432'),
                 'database' => $config['database'] ?? 'fluxdesk',
                 'username' => $config['username'] ?? '',
                 'password' => $config['password'] ?? '',
-                'charset' => $driver === 'mysql' ? 'utf8mb4' : 'utf8',
-                'collation' => $driver === 'mysql' ? 'utf8mb4_unicode_ci' : null,
+                'charset' => $actualDriver === 'mysql' ? 'utf8mb4' : 'utf8',
+                'collation' => $actualDriver === 'mysql' ? 'utf8mb4_unicode_ci' : null,
                 'prefix' => '',
                 'strict' => true,
             ];
@@ -150,9 +202,47 @@ class InstallationService
             $this->database->purge('_install_test');
 
             return ['success' => true, 'message' => 'Database connection successful'];
+        } catch (\PDOException $e) {
+            return ['success' => false, 'message' => $this->formatDatabaseError($e)];
         } catch (\Exception $e) {
             return ['success' => false, 'message' => $e->getMessage()];
         }
+    }
+
+    /**
+     * Format PDO exception into a user-friendly message.
+     */
+    private function formatDatabaseError(\PDOException $e): string
+    {
+        $message = $e->getMessage();
+        $code = $e->getCode();
+
+        // Connection refused
+        if (str_contains($message, 'Connection refused') || str_contains($message, 'No connection could be made')) {
+            return 'Connection refused. Please check that the database server is running and the host/port are correct.';
+        }
+
+        // Access denied (wrong credentials)
+        if (str_contains($message, 'Access denied') || $code === 1045) {
+            return 'Access denied. Please check your username and password.';
+        }
+
+        // Unknown database
+        if (str_contains($message, 'Unknown database') || str_contains($message, 'does not exist') || $code === 1049) {
+            return 'Database does not exist. Please create the database first or check the database name.';
+        }
+
+        // Host not found
+        if (str_contains($message, 'getaddrinfo') || str_contains($message, 'Name or service not known') || str_contains($message, 'No such host')) {
+            return 'Could not resolve host. Please check that the hostname is correct.';
+        }
+
+        // Timeout
+        if (str_contains($message, 'timed out') || str_contains($message, 'timeout')) {
+            return 'Connection timed out. The database server may be unreachable or behind a firewall.';
+        }
+
+        return $message;
     }
 
     /**
