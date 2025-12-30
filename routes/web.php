@@ -26,7 +26,6 @@ use App\Http\Controllers\PersonalTagController;
 use App\Http\Controllers\Tickets\AttachmentController;
 use App\Http\Controllers\Tickets\MessageController;
 use App\Http\Controllers\Tickets\TicketController;
-use App\Http\Controllers\UpgradeController;
 use Illuminate\Support\Facades\Route;
 
 // Home route - shows tenant landing page (resolves to default tenant)
@@ -199,25 +198,6 @@ Route::middleware(['auth', 'verified', 'org.required'])->group(function () {
         Route::post('webhooks/{webhook}/test', [WebhookController::class, 'test'])->name('webhooks.test');
         Route::get('webhooks/{webhook}/deliveries', [WebhookController::class, 'deliveries'])->name('webhooks.deliveries');
     });
-});
-
-// Upgrade routes (super admin only)
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('upgrade', [UpgradeController::class, 'index'])
-        ->name('upgrade')
-        ->can('viewUpgrades', App\Models\User::class);
-    Route::get('upgrade/run', [UpgradeController::class, 'run'])
-        ->name('upgrade.run')
-        ->can('viewUpgrades', App\Models\User::class);
-    Route::post('upgrade/check', [UpgradeController::class, 'check'])
-        ->name('upgrade.check')
-        ->can('viewUpgrades', App\Models\User::class);
-    Route::get('upgrade/status', [UpgradeController::class, 'status'])
-        ->name('upgrade.status')
-        ->can('viewUpgrades', App\Models\User::class);
-    Route::post('upgrade/execute', [UpgradeController::class, 'execute'])
-        ->name('upgrade.execute')
-        ->can('viewUpgrades', App\Models\User::class);
 });
 
 // Public invitation routes

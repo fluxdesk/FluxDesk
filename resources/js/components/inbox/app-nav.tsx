@@ -63,7 +63,6 @@ import InputError from '@/components/input-error';
 import { useInitials } from '@/hooks/use-initials';
 import { ColorPicker } from '@/components/common/color-picker';
 import { NotificationDropdown } from '@/components/notifications/notification-dropdown';
-import { UpdateNotification } from '@/components/update-available-modal';
 import type { SharedData, TicketFolder, Tag } from '@/types';
 import { toast } from 'sonner';
 
@@ -525,15 +524,10 @@ export function AppNav({ isCollapsed, folders: propFolders, currentFolder }: App
                     </div>
                 </ScrollArea>
 
-                {/* Update & Notifications */}
+                {/* Notifications */}
                 <div className="mt-auto">
                     <Separator />
                     <div className="p-2">
-                        {/* Update notification (only shows when update available) */}
-                        <div className="mb-1">
-                            <UpdateNotification isCollapsed={isCollapsed} />
-                        </div>
-                        {/* Notifications */}
                         <div className="mb-1">
                             <NotificationDropdown isCollapsed={isCollapsed} />
                         </div>

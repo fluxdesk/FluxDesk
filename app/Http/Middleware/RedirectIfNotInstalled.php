@@ -11,25 +11,17 @@ class RedirectIfNotInstalled
     /**
      * Handle an incoming request.
      *
-     * Redirects to the installation wizard if the application hasn't been installed yet.
-     * This provides a seamless first-run experience where users just need to visit
-     * the application URL and are automatically guided to setup.
+     * Shows an error page if the application hasn't been installed yet,
+     * instructing the user to run the CLI install command.
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Skip if already on an install route
-        if ($request->is('install*')) {
-            return $next($request);
+        if (! config('app.installed')) {
+            abort(503, 'FluxDesk is not installed. Run: php artisan fluxdesk:install');
         }
 
-        // Skip if application is already installed
-        if (config('app.installed')) {
-            return $next($request);
-        }
-
-        // Redirect to installation wizard
-        return redirect('/install');
+        return $next($request);
     }
 }
