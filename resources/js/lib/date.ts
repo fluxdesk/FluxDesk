@@ -11,7 +11,7 @@
 export function getTimezone(): string {
     // Access the timezone from the window's Inertia page props
     // This avoids needing to call usePage() which requires React context
-    const page = (window as any).__page;
+    const page = (window as unknown as { __page?: { props?: { timezone?: string } } }).__page;
     return page?.props?.timezone ?? 'UTC';
 }
 

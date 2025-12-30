@@ -33,6 +33,10 @@ class Webhook extends Model
     use BelongsToOrganization;
     use HasFactory;
 
+    protected $attributes = [
+        'format' => 'standard',
+    ];
+
     protected $fillable = [
         'organization_id',
         'name',

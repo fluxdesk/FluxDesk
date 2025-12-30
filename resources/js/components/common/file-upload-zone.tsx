@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useDropzone } from 'react-dropzone';
-import { X, Paperclip, FileText, Loader2, Image as ImageIcon, AlertCircle } from 'lucide-react';
+import { X, Paperclip, FileText, Loader2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -39,7 +39,7 @@ export function FileUploadZone({
     className,
     previewClassName,
 }: FileUploadZoneProps) {
-    const [uploadingIds, setUploadingIds] = React.useState<Set<string>>(new Set());
+    const [, setUploadingIds] = React.useState<Set<string>>(new Set());
 
     const onDrop = React.useCallback(async (acceptedFiles: File[]) => {
         const remainingSlots = maxFiles - files.length;
@@ -115,7 +115,7 @@ export function FileUploadZone({
 
                 return { ...f, uploading: false, error: 'Upload failed' };
             }));
-        } catch (error) {
+        } catch {
             // Mark all uploading files as failed
             onFilesChange(prev => prev.map(f => {
                 if (f.uploading && newUploadingIds.has(f.temp_id)) {
@@ -132,7 +132,7 @@ export function FileUploadZone({
         }
     }, [files, maxFiles, ticketId, onFilesChange]);
 
-    const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
         disabled,
         maxSize,
@@ -176,7 +176,6 @@ export function FileUploadZone({
     };
 
     const hasFiles = files.length > 0;
-    const canUploadMore = files.length < maxFiles;
 
     return (
         <div {...getRootProps()} className={cn('relative', className)}>

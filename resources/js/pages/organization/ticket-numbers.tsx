@@ -34,7 +34,7 @@ const formatVariables = [
     { variable: '{dd}', description: 'Dag (01-31)' },
 ];
 
-export default function TicketNumbers({ organization, settings }: Props) {
+export default function TicketNumbers({ settings }: Props) {
     const { data, setData, patch, processing, errors, recentlySuccessful } = useForm({
         ticket_prefix: settings.ticket_prefix || 'TKT',
         ticket_number_format: settings.ticket_number_format || '{prefix}-{number}',

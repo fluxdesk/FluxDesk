@@ -40,7 +40,7 @@ interface ComposerFormProps {
     noteStyle?: boolean;
 }
 
-export function ComposerForm({ ticket, agents, onSuccess, noteStyle = false }: ComposerFormProps) {
+export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
     const [messageType, setMessageType] = React.useState<'reply' | 'note'>('reply');
     const [files, setFiles] = React.useState<UploadedFile[]>([]);
     const [showPreview, setShowPreview] = React.useState(false);

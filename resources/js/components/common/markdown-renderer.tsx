@@ -20,7 +20,7 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
             remarkPlugins={[remarkGfm]}
             components={{
                 // Custom image renderer for inline images
-                img: ({ node, ...props }) => (
+                img: (props) => (
                     <img
                         {...props}
                         className="max-h-64 rounded-lg"
@@ -28,7 +28,7 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
                     />
                 ),
                 // Secure links - open in new tab
-                a: ({ node, ...props }) => (
+                a: (props) => (
                     <a
                         {...props}
                         target="_blank"
@@ -37,21 +37,21 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
                     />
                 ),
                 // Styled paragraphs for better spacing
-                p: ({ node, ...props }) => (
+                p: (props) => (
                     <p {...props} className="mb-2 last:mb-0" />
                 ),
                 // Styled lists
-                ul: ({ node, ...props }) => (
+                ul: (props) => (
                     <ul {...props} className="mb-2 ml-4 list-disc last:mb-0" />
                 ),
-                ol: ({ node, ...props }) => (
+                ol: (props) => (
                     <ol {...props} className="mb-2 ml-4 list-decimal last:mb-0" />
                 ),
-                li: ({ node, ...props }) => (
+                li: (props) => (
                     <li {...props} className="mb-1" />
                 ),
                 // Code styling
-                code: ({ node, className, children, ...props }) => {
+                code: ({ className, children, ...props }) => {
                     const isInline = !className;
                     return isInline ? (
                         <code
@@ -67,7 +67,7 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
                     );
                 },
                 // Pre for code blocks
-                pre: ({ node, ...props }) => (
+                pre: (props) => (
                     <pre
                         {...props}
                         className="mb-2 overflow-x-auto rounded-lg bg-muted p-3 text-sm last:mb-0"

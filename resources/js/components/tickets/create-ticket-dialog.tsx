@@ -31,7 +31,7 @@ import { cn } from '@/lib/utils';
 import { store } from '@/routes/inbox';
 import type { Contact, Status, Priority, User, EmailChannel, Department } from '@/types';
 import { useForm } from '@inertiajs/react';
-import { Check, ChevronDown, Plus, Mail, Building2 } from 'lucide-react';
+import { Check, ChevronDown, Plus, Mail } from 'lucide-react';
 import { useState, useMemo } from 'react';
 
 interface CreateTicketDialogProps {

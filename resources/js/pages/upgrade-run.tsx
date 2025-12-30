@@ -51,30 +51,32 @@ export default function UpgradeRun({ currentVersion, targetVersion }: Props) {
     }, [steps, logs]);
 
     // Calculate current step number based on completed steps
-    useEffect(() => {
-        const completedSteps = steps.filter((s) => s.status === 'completed').length;
-        const stepMapping: Record<string, number> = {
-            maintenance: 1,
-            fetch: 2,
-            pull: 2,
-            composer: 3,
-            npm_install: 3,
-            npm_build: 4,
-            migrate: 5,
-            cache_clear: 6,
-            cache_rebuild: 6,
-            version: 6,
-            maintenance_off: 6,
-            complete: 6,
-        };
+    const stepMapping: Record<string, number> = {
+        maintenance: 1,
+        fetch: 2,
+        pull: 2,
+        composer: 3,
+        npm_install: 3,
+        npm_build: 4,
+        migrate: 5,
+        cache_clear: 6,
+        cache_rebuild: 6,
+        version: 6,
+        maintenance_off: 6,
+        complete: 6,
+    };
 
+    // Compute displayStep from steps - will be used for rendering
+    const displayStep = (() => {
+        const completedSteps = steps.filter((s) => s.status === 'completed').length;
         const lastStep = steps[steps.length - 1];
         if (lastStep && stepMapping[lastStep.id]) {
-            setCurrentStep(stepMapping[lastStep.id]);
+            return stepMapping[lastStep.id];
         } else if (completedSteps > 0) {
-            setCurrentStep(Math.min(Math.ceil(completedSteps / 2), 6));
+            return Math.min(Math.ceil(completedSteps / 2), 6);
         }
-    }, [steps]);
+        return currentStep;
+    })();
 
     const handleEvent = useCallback((event: string, data: Record<string, unknown>) => {
         switch (event) {
@@ -221,7 +223,7 @@ export default function UpgradeRun({ currentVersion, targetVersion }: Props) {
         <UpgradeLayout
             currentVersion={currentVersion}
             targetVersion={targetVersion}
-            currentStep={currentStep}
+            currentStep={displayStep}
             stepTitle={
                 state === 'idle'
                     ? 'Klaar om te upgraden'

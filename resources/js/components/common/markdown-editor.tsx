@@ -19,11 +19,11 @@ interface MarkdownEditorProps {
     toolbarClassName?: string;
 }
 
-interface ToolbarAction {
+interface ToolbarActionConfig {
     icon: React.ComponentType<{ className?: string }>;
     label: string;
     shortcut?: string;
-    action: () => void;
+    type: 'bold' | 'italic' | 'strikethrough' | 'unordered-list' | 'ordered-list';
 }
 
 export function MarkdownEditor({
@@ -94,35 +94,26 @@ export function MarkdownEditor({
         }, 0);
     }, [value, onChange]);
 
-    const toolbarActions: ToolbarAction[] = React.useMemo(() => [
-        {
-            icon: Bold,
-            label: 'Vet',
-            shortcut: 'Ctrl+B',
-            action: () => insertMarkdown('**', '**'),
-        },
-        {
-            icon: Italic,
-            label: 'Cursief',
-            shortcut: 'Ctrl+I',
-            action: () => insertMarkdown('*', '*'),
-        },
-        {
-            icon: Strikethrough,
-            label: 'Doorgestreept',
-            action: () => insertMarkdown('~~', '~~'),
-        },
-        {
-            icon: List,
-            label: 'Opsommingslijst',
-            action: () => insertListItem('- '),
-        },
-        {
-            icon: ListOrdered,
-            label: 'Genummerde lijst',
-            action: () => insertListItem('1. '),
-        },
-    ], [insertMarkdown, insertListItem]);
+    // Handler for toolbar button clicks
+    const handleToolbarAction = React.useCallback((type: ToolbarActionConfig['type']) => {
+        switch (type) {
+            case 'bold':
+                insertMarkdown('**', '**');
+                break;
+            case 'italic':
+                insertMarkdown('*', '*');
+                break;
+            case 'strikethrough':
+                insertMarkdown('~~', '~~');
+                break;
+            case 'unordered-list':
+                insertListItem('- ');
+                break;
+            case 'ordered-list':
+                insertListItem('1. ');
+                break;
+        }
+    }, [insertMarkdown, insertListItem]);
 
     // Handle keyboard shortcuts
     const handleKeyDown = React.useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -153,28 +144,93 @@ export function MarkdownEditor({
                 'flex items-center gap-0.5 border-b px-2 py-1.5',
                 toolbarClassName
             )}>
-                {toolbarActions.map((action, index) => (
-                    <Tooltip key={index}>
-                        <TooltipTrigger asChild>
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 w-7 p-0"
-                                onClick={action.action}
-                                disabled={disabled}
-                            >
-                                <action.icon className="h-4 w-4" />
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom" className="text-xs">
-                            {action.label}
-                            {action.shortcut && (
-                                <span className="ml-2 text-muted-foreground">{action.shortcut}</span>
-                            )}
-                        </TooltipContent>
-                    </Tooltip>
-                ))}
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0"
+                            onClick={() => handleToolbarAction('bold')}
+                            disabled={disabled}
+                        >
+                            <Bold className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs">
+                        Vet
+                        <span className="ml-2 text-muted-foreground">Ctrl+B</span>
+                    </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0"
+                            onClick={() => handleToolbarAction('italic')}
+                            disabled={disabled}
+                        >
+                            <Italic className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs">
+                        Cursief
+                        <span className="ml-2 text-muted-foreground">Ctrl+I</span>
+                    </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0"
+                            onClick={() => handleToolbarAction('strikethrough')}
+                            disabled={disabled}
+                        >
+                            <Strikethrough className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs">
+                        Doorgestreept
+                    </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0"
+                            onClick={() => handleToolbarAction('unordered-list')}
+                            disabled={disabled}
+                        >
+                            <List className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs">
+                        Opsommingslijst
+                    </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0"
+                            onClick={() => handleToolbarAction('ordered-list')}
+                            disabled={disabled}
+                        >
+                            <ListOrdered className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs">
+                        Genummerde lijst
+                    </TooltipContent>
+                </Tooltip>
             </div>
 
             {/* Textarea with mentions */}
