@@ -25,6 +25,7 @@ class StoreMessageRequest extends FormRequest
         return [
             'body' => ['required', 'string', 'min:1'],
             'type' => ['sometimes', 'string', Rule::enum(MessageType::class)],
+            'ai_assisted' => ['sometimes', 'boolean'],
             'attachments' => ['sometimes', 'array', 'max:10'],
             'attachments.*.filename' => ['required_with:attachments', 'string'],
             'attachments.*.original_filename' => ['required_with:attachments', 'string'],

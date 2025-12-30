@@ -25,6 +25,7 @@ class Message extends Model
         'body_html',
         'raw_content',
         'is_from_contact',
+        'ai_assisted',
         'email_message_id',
         'email_provider_id',
         'email_in_reply_to',
@@ -42,6 +43,7 @@ class Message extends Model
         return [
             'type' => MessageType::class,
             'is_from_contact' => 'boolean',
+            'ai_assisted' => 'boolean',
             'email_status' => EmailStatus::class,
             'email_sent_at' => 'datetime',
         ];

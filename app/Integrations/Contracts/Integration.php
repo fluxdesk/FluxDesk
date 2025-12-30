@@ -51,6 +51,16 @@ abstract class Integration
     abstract public function authType(): string;
 
     /**
+     * Get the category for grouping integrations in the UI.
+     *
+     * @return string 'email', 'ai', or other category identifiers
+     */
+    public function category(): string
+    {
+        return 'general';
+    }
+
+    /**
      * Check if this integration uses OAuth.
      */
     public function isOAuth(): bool

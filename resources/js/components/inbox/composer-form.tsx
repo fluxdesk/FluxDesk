@@ -1,14 +1,17 @@
 import * as React from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Send, StickyNote, Paperclip, X, FileText, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Send, StickyNote, Paperclip, X, FileText, Loader2, AlertCircle, Eye, EyeOff, Sparkles, Wand2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { MarkdownEditor } from '@/components/common/markdown-editor';
 import { MarkdownRenderer } from '@/components/common/markdown-renderer';
 import type { Ticket, User } from '@/types';
 import { useForm } from '@inertiajs/react';
+import { suggest } from '@/actions/App/Http/Controllers/AIController';
+import { refactor } from '@/actions/App/Http/Controllers/AIController';
 
 interface UploadedFile {
     temp_id: string;
@@ -48,10 +51,20 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
     const dragCounter = React.useRef(0);
     const dropzoneRef = React.useRef<HTMLDivElement>(null);
 
+    // AI state
+    const [aiSuggesting, setAiSuggesting] = React.useState(false);
+    const [aiRefactoring, setAiRefactoring] = React.useState(false);
+    const [suggestions, setSuggestions] = React.useState<string[]>([]);
+    const [suggestionsOpen, setSuggestionsOpen] = React.useState(false);
+    const [aiError, setAiError] = React.useState<string | null>(null);
+    const [aiAvailable, setAiAvailable] = React.useState<boolean | null>(null);
+    const [aiUsed, setAiUsed] = React.useState(false);
+
     const { data, setData, post, processing, reset, transform } = useForm({
         body: '',
         type: 'reply' as 'reply' | 'note',
         attachments: [] as AttachmentData[],
+        ai_assisted: false,
     });
 
     const onDrop = React.useCallback(async (acceptedFiles: File[]) => {
@@ -224,12 +237,19 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
         e?.preventDefault();
         if (!data.body.trim() || processing) return;
 
+        // Update ai_assisted before submission
+        transform((formData) => ({
+            ...formData,
+            ai_assisted: aiUsed,
+        }));
+
         post(`/inbox/${ticket.id}/messages`, {
             preserveScroll: true,
             onSuccess: () => {
                 reset();
                 setFiles([]);
                 setMessageType('reply');
+                setAiUsed(false);
                 onSuccess?.();
             },
         });
@@ -241,6 +261,101 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
             handleSubmit();
         }
     };
+
+    // Check AI availability on mount
+    React.useEffect(() => {
+        const checkAI = async () => {
+            try {
+                const response = await fetch('/ai/status', {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    },
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setAiAvailable(data.configured && (data.suggested_replies_enabled || data.reply_refactor_enabled));
+                }
+            } catch {
+                setAiAvailable(false);
+            }
+        };
+        checkAI();
+    }, []);
+
+    const handleSuggest = React.useCallback(async () => {
+        if (aiSuggesting) return;
+        setAiSuggesting(true);
+        setAiError(null);
+        setSuggestions([]);
+
+        try {
+            const response = await fetch(suggest.url(ticket.id), {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                setAiError(data.error || 'Er ging iets mis');
+                return;
+            }
+
+            setSuggestions(data.suggestions || []);
+            setSuggestionsOpen(true);
+        } catch {
+            setAiError('Kon geen verbinding maken met AI service');
+        } finally {
+            setAiSuggesting(false);
+        }
+    }, [aiSuggesting, ticket.id]);
+
+    const handleRefactor = React.useCallback(async () => {
+        if (aiRefactoring || !data.body.trim()) return;
+        setAiRefactoring(true);
+        setAiError(null);
+
+        try {
+            const response = await fetch(refactor.url(), {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+                body: JSON.stringify({
+                    text: data.body,
+                    ticket_id: ticket.id,
+                }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                setAiError(result.error || 'Er ging iets mis');
+                return;
+            }
+
+            setData('body', result.text);
+            setAiUsed(true);
+        } catch {
+            setAiError('Kon geen verbinding maken met AI service');
+        } finally {
+            setAiRefactoring(false);
+        }
+    }, [aiRefactoring, data.body, ticket.id, setData]);
+
+    const selectSuggestion = React.useCallback((suggestion: string) => {
+        setData('body', suggestion);
+        setAiUsed(true);
+        setSuggestionsOpen(false);
+        setSuggestions([]);
+    }, [setData]);
 
     const formatSize = (bytes: number) => {
         if (bytes >= 1048576) return `${(bytes / 1048576).toFixed(1)} MB`;
@@ -447,6 +562,103 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
                                 {showPreview ? 'Bewerken' : 'Preview'}
                             </TooltipContent>
                         </Tooltip>
+
+                        {/* AI Buttons */}
+                        {aiAvailable && messageType === 'reply' && (
+                            <>
+                                <div className="mx-1 h-4 w-px bg-border/50" />
+
+                                {/* AI Suggest */}
+                                <Popover open={suggestionsOpen} onOpenChange={setSuggestionsOpen}>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-7 gap-1 px-2"
+                                                    onClick={handleSuggest}
+                                                    disabled={aiSuggesting || processing}
+                                                >
+                                                    {aiSuggesting ? (
+                                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                    ) : (
+                                                        <Sparkles className="h-3.5 w-3.5" />
+                                                    )}
+                                                    <span className="hidden text-xs sm:inline">Suggestie</span>
+                                                </Button>
+                                            </PopoverTrigger>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top" className="text-xs">
+                                            AI genereert suggesties
+                                        </TooltipContent>
+                                    </Tooltip>
+                                    <PopoverContent
+                                        align="start"
+                                        className="w-96 p-0"
+                                        onOpenAutoFocus={(e) => e.preventDefault()}
+                                    >
+                                        <div className="border-b px-3 py-2">
+                                            <p className="text-sm font-medium">AI Suggesties</p>
+                                            <p className="text-xs text-muted-foreground">
+                                                Kies een suggestie om te gebruiken
+                                            </p>
+                                        </div>
+                                        <div className="max-h-80 overflow-y-auto">
+                                            {suggestions.length === 0 && !aiError && (
+                                                <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    Laden...
+                                                </div>
+                                            )}
+                                            {aiError && (
+                                                <div className="flex items-center gap-2 px-3 py-4 text-sm text-destructive">
+                                                    <AlertCircle className="h-4 w-4" />
+                                                    {aiError}
+                                                </div>
+                                            )}
+                                            {suggestions.map((suggestion, index) => (
+                                                <button
+                                                    key={index}
+                                                    type="button"
+                                                    className="w-full border-b px-3 py-3 text-left text-sm transition-colors last:border-0 hover:bg-muted/50"
+                                                    onClick={() => selectSuggestion(suggestion)}
+                                                >
+                                                    <p className="line-clamp-4 whitespace-pre-wrap">
+                                                        {suggestion}
+                                                    </p>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </PopoverContent>
+                                </Popover>
+
+                                {/* AI Refactor */}
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-7 gap-1 px-2"
+                                            onClick={handleRefactor}
+                                            disabled={aiRefactoring || processing || !data.body.trim()}
+                                        >
+                                            {aiRefactoring ? (
+                                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                            ) : (
+                                                <Wand2 className="h-3.5 w-3.5" />
+                                            )}
+                                            <span className="hidden text-xs sm:inline">Verbeter</span>
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" className="text-xs">
+                                        AI verbetert je tekst
+                                    </TooltipContent>
+                                </Tooltip>
+                            </>
+                        )}
                     </div>
 
                     <div className="flex items-center gap-2">

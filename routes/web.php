@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AIController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\LandingController;
 use App\Http\Controllers\MagicLinkController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\Organization\AISettingsController;
 use App\Http\Controllers\Organization\DepartmentController;
 use App\Http\Controllers\Organization\EmailChannelController;
 use App\Http\Controllers\Organization\EmailChannelOAuthController;
@@ -56,6 +58,11 @@ Route::middleware(['auth', 'verified', 'org.required'])->group(function () {
         Route::post('inbox/{ticket}/tags', [TicketController::class, 'updateTags'])->name('inbox.tags');
         Route::post('inbox/{ticket}/merge', [TicketController::class, 'merge'])->name('inbox.merge');
         Route::post('inbox/{ticket}/messages', [MessageController::class, 'store'])->name('inbox.messages.store');
+
+        // AI routes
+        Route::post('ai/suggest/{ticket}', [AIController::class, 'suggest'])->name('ai.suggest');
+        Route::post('ai/refactor', [AIController::class, 'refactor'])->name('ai.refactor');
+        Route::get('ai/status', [AIController::class, 'status'])->name('ai.status');
 
         // Attachment routes
         Route::post('inbox/{ticket}/attachments', [AttachmentController::class, 'upload'])->name('inbox.attachments.upload');
@@ -186,6 +193,11 @@ Route::middleware(['auth', 'verified', 'org.required'])->group(function () {
         Route::post('integrations/{integration}/test', [IntegrationController::class, 'test'])->name('integrations.test');
         Route::post('integrations/{integration}/toggle', [IntegrationController::class, 'toggle'])->name('integrations.toggle');
         Route::delete('integrations/{integration}', [IntegrationController::class, 'destroy'])->name('integrations.destroy');
+
+        // AI Settings
+        Route::get('ai-settings', [AISettingsController::class, 'index'])->name('ai-settings.index');
+        Route::patch('ai-settings', [AISettingsController::class, 'update'])->name('ai-settings.update');
+        Route::get('ai-settings/models/{provider}', [AISettingsController::class, 'models'])->name('ai-settings.models');
 
         // Webhooks
         Route::get('webhooks', [WebhookController::class, 'index'])->name('webhooks.index');
