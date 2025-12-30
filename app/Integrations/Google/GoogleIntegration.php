@@ -39,6 +39,11 @@ class GoogleIntegration extends Integration
         return 'oauth';
     }
 
+    public function category(): string
+    {
+        return 'email';
+    }
+
     /**
      * @return array<array{name: string, label: string, type: string, required: bool, hint?: string}>
      */

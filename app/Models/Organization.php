@@ -83,6 +83,11 @@ class Organization extends Model
         return $this->hasOne(OrganizationSettings::class);
     }
 
+    public function aiSettings(): HasOne
+    {
+        return $this->hasOne(OrganizationAISettings::class);
+    }
+
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class)

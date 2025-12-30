@@ -56,6 +56,19 @@
         </tr>
     </table>
 
+    @if($message->ai_assisted && $organization->aiSettings?->disclosure_enabled && $organization->aiSettings?->disclosure_in_email)
+    <!-- AI Disclosure -->
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+        <tr>
+            <td style="padding: 12px 16px; background-color: #f0f9ff; border-radius: 8px; border-left: 3px solid #0284c7;">
+                <p style="margin: 0; font-size: 12px; color: #0369a1;">
+                    {{ $organization->aiSettings->disclosure_text ?? 'Dit antwoord is opgesteld met behulp van AI-technologie.' }}
+                </p>
+            </td>
+        </tr>
+    </table>
+    @endif
+
     @if($message->fileAttachments && $message->fileAttachments->count() > 0)
     <!-- Attachments -->
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">

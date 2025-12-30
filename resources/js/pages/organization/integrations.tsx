@@ -62,11 +62,20 @@ interface Integration {
     name: string;
     description: string;
     icon: string;
+    category: string;
     auth_type: 'oauth' | 'api_key';
     is_oauth: boolean;
     credential_fields: CredentialField[];
     configured: ConfiguredIntegration | null;
 }
+
+const CATEGORY_LABELS: Record<string, string> = {
+    email: 'E-mail',
+    ai: 'AI',
+    general: 'Overig',
+};
+
+const CATEGORY_ORDER = ['email', 'ai', 'general'];
 
 interface Props {
     integrations: Integration[];
@@ -77,17 +86,30 @@ export default function Integrations({ integrations }: Props) {
     const [deletingIntegration, setDeletingIntegration] = useState<Integration | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    // Sort integrations: active first, then verified, then configured, then unconfigured
-    const sortedIntegrations = [...integrations].sort((a, b) => {
-        const getScore = (i: Integration) => {
-            if (i.configured?.is_active && i.configured?.is_verified) return 4;
-            if (i.configured?.is_verified) return 3;
-            if (i.configured?.is_configured) return 2;
-            if (i.configured) return 1;
-            return 0;
-        };
-        return getScore(b) - getScore(a);
+    // Group integrations by category and sort within each group
+    const groupedIntegrations = integrations.reduce<Record<string, Integration[]>>((acc, integration) => {
+        const category = integration.category || 'general';
+        if (!acc[category]) acc[category] = [];
+        acc[category].push(integration);
+        return acc;
+    }, {});
+
+    // Sort integrations within each category: active first, then verified, then configured
+    Object.keys(groupedIntegrations).forEach((category) => {
+        groupedIntegrations[category].sort((a, b) => {
+            const getScore = (i: Integration) => {
+                if (i.configured?.is_active && i.configured?.is_verified) return 4;
+                if (i.configured?.is_verified) return 3;
+                if (i.configured?.is_configured) return 2;
+                if (i.configured) return 1;
+                return 0;
+            };
+            return getScore(b) - getScore(a);
+        });
     });
+
+    // Get categories in defined order
+    const sortedCategories = CATEGORY_ORDER.filter((cat) => groupedIntegrations[cat]?.length > 0);
 
     const handleDelete = () => {
         if (!deletingIntegration?.configured) return;
@@ -133,14 +155,23 @@ export default function Integrations({ integrations }: Props) {
                                     </p>
                                 </div>
                             ) : (
-                                <div className="divide-y">
-                                    {sortedIntegrations.map((integration) => (
-                                        <IntegrationItem
-                                            key={integration.identifier}
-                                            integration={integration}
-                                            onConfigure={() => setConfiguringIntegration(integration)}
-                                            onDelete={() => setDeletingIntegration(integration)}
-                                        />
+                                <div className="space-y-6">
+                                    {sortedCategories.map((category) => (
+                                        <div key={category}>
+                                            <h3 className="text-sm font-semibold text-muted-foreground mb-3">
+                                                {CATEGORY_LABELS[category] || category}
+                                            </h3>
+                                            <div className="divide-y rounded-lg border">
+                                                {groupedIntegrations[category].map((integration) => (
+                                                    <IntegrationItem
+                                                        key={integration.identifier}
+                                                        integration={integration}
+                                                        onConfigure={() => setConfiguringIntegration(integration)}
+                                                        onDelete={() => setDeletingIntegration(integration)}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
                                     ))}
                                 </div>
                             )}
@@ -247,13 +278,15 @@ function IntegrationItem({
                 return <MicrosoftIcon className="h-5 w-5" />;
             case 'google':
                 return <GoogleIcon className="h-5 w-5" />;
+            case 'openai':
+                return <OpenAIIcon className="h-5 w-5" />;
             default:
                 return <Plug className="h-5 w-5 text-muted-foreground" />;
         }
     };
 
     return (
-        <div className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
+        <div className="flex items-center justify-between p-4">
             <div className="flex items-center gap-4 min-w-0">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted">
                     {getIcon()}
@@ -416,6 +449,7 @@ function IntegrationConfigDialog({
                     <DialogTitle className="flex items-center gap-2">
                         {integration.icon === 'microsoft' && <MicrosoftIcon className="h-5 w-5" />}
                         {integration.icon === 'google' && <GoogleIcon className="h-5 w-5" />}
+                        {integration.icon === 'openai' && <OpenAIIcon className="h-5 w-5" />}
                         {integration.name} {integration.configured ? 'bewerken' : 'configureren'}
                     </DialogTitle>
                     <DialogDescription>
@@ -550,6 +584,17 @@ function GoogleIcon({ className }: { className?: string }) {
             <path
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 fill="#EA4335"
+            />
+        </svg>
+    );
+}
+
+function OpenAIIcon({ className }: { className?: string }) {
+    return (
+        <svg className={className} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path
+                d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.771.771 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973V11.6a.766.766 0 0 0 .388.676l5.815 3.355-2.02 1.168a.076.076 0 0 1-.071 0l-4.83-2.786A4.504 4.504 0 0 1 2.34 7.896zm16.597 3.855-5.833-3.387L15.119 7.2a.076.076 0 0 1 .071 0l4.83 2.791a4.494 4.494 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.407-.667zm2.01-3.023-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .028-.061l4.83-2.787a4.5 4.5 0 0 1 6.68 4.66zm-12.64 4.135-2.02-1.164a.08.08 0 0 1-.038-.057V6.075a4.5 4.5 0 0 1 7.375-3.453l-.142.08-4.778 2.758a.795.795 0 0 0-.393.681v6.737zm1.097-2.365 2.602-1.5 2.607 1.5v2.999l-2.597 1.5-2.607-1.5z"
+                fill="currentColor"
             />
         </svg>
     );

@@ -46,20 +46,6 @@ return Application::configure(basePath: dirname(__DIR__))
             RateLimiter::for('contact-creation', fn (Request $request) => Limit::perHour(30)->by($request->ip())
             );
 
-            // Installation routes MUST be registered before portal routes
-            // (portal has catch-all {organization} route that would match /install)
-            Route::middleware([
-                EncryptCookies::class,
-                AddQueuedCookiesToResponse::class,
-                StartSession::class,
-                ShareErrorsFromSession::class,
-                ValidateCsrfToken::class,
-                SubstituteBindings::class,
-                HandleAppearance::class,
-                HandleInertiaRequests::class,
-                AddLinkHeadersForPreloadedAssets::class,
-            ])->group(base_path('routes/install.php'));
-
             // Portal routes with custom middleware stack (not using full 'web' group)
             Route::middleware([
                 EncryptCookies::class,

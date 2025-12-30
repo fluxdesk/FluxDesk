@@ -25,6 +25,7 @@ class MessageController extends Controller
             'body' => $request->body,
             'body_html' => $this->renderMarkdown($request->body),
             'is_from_contact' => false,
+            'ai_assisted' => $request->boolean('ai_assisted'),
         ]);
 
         // Process attachments if provided

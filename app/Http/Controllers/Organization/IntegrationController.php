@@ -39,6 +39,7 @@ class IntegrationController extends Controller
                 'name' => $int->name(),
                 'description' => $int->description(),
                 'icon' => $int->icon(),
+                'category' => $int->category(),
                 'auth_type' => $int->authType(),
                 'is_oauth' => $int->isOAuth(),
                 'credential_fields' => $int->credentialFields(),

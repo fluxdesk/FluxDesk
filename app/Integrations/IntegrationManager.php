@@ -85,6 +85,35 @@ class IntegrationManager
     }
 
     /**
+     * Get integrations filtered by category.
+     *
+     * @return array<string, Integration>
+     */
+    public function byCategory(string $category): array
+    {
+        return array_filter(
+            $this->integrations,
+            fn (Integration $integration): bool => $integration->category() === $category
+        );
+    }
+
+    /**
+     * Get all integrations grouped by category.
+     *
+     * @return array<string, array<string, Integration>>
+     */
+    public function groupedByCategory(): array
+    {
+        $grouped = [];
+        foreach ($this->integrations as $identifier => $integration) {
+            $category = $integration->category();
+            $grouped[$category][$identifier] = $integration;
+        }
+
+        return $grouped;
+    }
+
+    /**
      * Get integration for an email provider.
      * Convenience method for email channel integration.
      */

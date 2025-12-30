@@ -24,7 +24,7 @@ use function Laravel\Prompts\warning;
 
 class InstallCommand extends Command
 {
-    protected $signature = 'app:install
+    protected $signature = 'fluxdesk:install
                             {--force : Force installation even if already installed}';
 
     protected $description = 'Interactive installation wizard for FluxDesk';
@@ -53,6 +53,67 @@ class InstallCommand extends Command
             }
         }
 
+        // Ask if .env is already configured manually
+        $manualEnv = confirm(
+            label: 'Have you already configured the .env file manually?',
+            default: false,
+            hint: 'If yes, we\'ll skip environment setup and just run migrations'
+        );
+
+        if ($manualEnv) {
+            return $this->runManualEnvInstall();
+        }
+
+        return $this->runGuidedInstall();
+    }
+
+    /**
+     * Run installation when .env is already configured manually.
+     */
+    protected function runManualEnvInstall(): int
+    {
+        // Copy .env.example if .env doesn't exist
+        if (! file_exists(base_path('.env'))) {
+            error('.env file not found. Please create one first or run guided setup.');
+
+            return 1;
+        }
+
+        info('Using existing .env configuration.');
+
+        // Test database connection
+        if (! $this->testExistingDatabaseConnection()) {
+            return 1;
+        }
+
+        // Run migrations
+        if (! $this->runMigrations()) {
+            return 1;
+        }
+
+        // Create admin user
+        $this->createAdminUser();
+
+        // Mark as installed
+        $this->envVariables['APP_INSTALLED'] = 'true';
+        $this->writeEnvironmentFile();
+
+        // Build frontend assets
+        $this->buildAssets();
+
+        outro('Installation complete!');
+
+        note('Start the development server with: composer run dev');
+        note('Or for production, configure your web server to point to the public directory.');
+
+        return 0;
+    }
+
+    /**
+     * Run guided installation with full environment configuration.
+     */
+    protected function runGuidedInstall(): int
+    {
         // Copy .env.example if .env doesn't exist
         if (! file_exists(base_path('.env'))) {
             copy(base_path('.env.example'), base_path('.env'));
@@ -99,6 +160,33 @@ class InstallCommand extends Command
         note('Or for production, configure your web server to point to the public directory.');
 
         return 0;
+    }
+
+    /**
+     * Test database connection using existing .env configuration.
+     */
+    protected function testExistingDatabaseConnection(): bool
+    {
+        $result = spin(function () {
+            try {
+                $this->database->connection()->getPdo();
+
+                return true;
+            } catch (\Exception $e) {
+                return $e->getMessage();
+            }
+        }, 'Testing database connection...');
+
+        if ($result !== true) {
+            error('Database connection failed: '.$result);
+            warning('Please check your .env database configuration and try again.');
+
+            return false;
+        }
+
+        info('Database connection successful.');
+
+        return true;
     }
 
     protected function generateAppKey(): void
