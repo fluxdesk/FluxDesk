@@ -98,7 +98,7 @@ class TicketObserver
         // Log status change
         if ($ticket->wasChanged('status_id')) {
             $oldStatus = Status::withoutGlobalScopes()->find($ticket->getOriginal('status_id'));
-            $newStatus = $ticket->status;
+            $newStatus = Status::withoutGlobalScopes()->find($ticket->status_id);
 
             TicketActivity::create([
                 'ticket_id' => $ticket->id,
@@ -134,7 +134,7 @@ class TicketObserver
         // Log priority change
         if ($ticket->wasChanged('priority_id')) {
             $oldPriority = Priority::withoutGlobalScopes()->find($ticket->getOriginal('priority_id'));
-            $newPriority = $ticket->priority;
+            $newPriority = Priority::withoutGlobalScopes()->find($ticket->priority_id);
 
             TicketActivity::create([
                 'ticket_id' => $ticket->id,
@@ -153,9 +153,11 @@ class TicketObserver
         // Log assignment change and notify assignee
         if ($ticket->wasChanged('assigned_to')) {
             $oldAssignee = $ticket->getOriginal('assigned_to')
-                ? User::find($ticket->getOriginal('assigned_to'))
+                ? User::withoutGlobalScopes()->find($ticket->getOriginal('assigned_to'))
                 : null;
-            $newAssignee = $ticket->assignee;
+            $newAssignee = $ticket->assigned_to
+                ? User::withoutGlobalScopes()->find($ticket->assigned_to)
+                : null;
 
             TicketActivity::create([
                 'ticket_id' => $ticket->id,

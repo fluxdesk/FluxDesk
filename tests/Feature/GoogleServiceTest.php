@@ -2,6 +2,7 @@
 
 use App\Enums\EmailProvider;
 use App\Enums\UserRole;
+use App\Models\Department;
 use App\Models\EmailChannel;
 use App\Models\Organization;
 use App\Models\OrganizationIntegration;
@@ -517,10 +518,15 @@ describe('Google Email Channel Creation', function () {
     });
 
     it('creates Google email channel via controller', function () {
+        $department = Department::where('organization_id', $this->organization->id)
+            ->where('is_default', true)
+            ->first();
+
         $response = $this->actingAs($this->adminUser)
             ->post('/organization/email-channels', [
                 'name' => 'Gmail Channel',
                 'provider' => EmailProvider::Google->value,
+                'department_id' => $department->id,
             ]);
 
         $response->assertRedirect();

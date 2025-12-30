@@ -650,10 +650,15 @@ describe('EmailChannel Controller', function () {
     });
 
     it('creates email channel', function () {
+        $department = Department::where('organization_id', $this->organization->id)
+            ->where('is_default', true)
+            ->first();
+
         $response = $this->actingAs($this->adminUser)
             ->post('/organization/email-channels', [
                 'name' => 'Sales',
                 'provider' => EmailProvider::Microsoft365->value,
+                'department_id' => $department->id,
             ]);
 
         $response->assertRedirect();

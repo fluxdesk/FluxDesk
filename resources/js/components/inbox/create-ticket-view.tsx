@@ -232,7 +232,7 @@ export function CreateTicketView({
         }
     };
 
-    const handleSubmit = useCallback(() => {
+    const handleSubmit = () => {
         if (!subject.trim()) {
             toast.error('Vul een onderwerp in');
             return;
@@ -277,7 +277,7 @@ export function CreateTicketView({
                 setIsSubmitting(false);
             },
         });
-    }, [subject, message, selectedContact, newContactEmail, newContactName, statusId, priorityId, departmentId, assignedTo, emailChannelId]);
+    };
 
     const hasFiles = files.length > 0;
     const canUploadMore = files.length < 10;

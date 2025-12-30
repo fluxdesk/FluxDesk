@@ -47,16 +47,56 @@
 
     @if($message)
     <!-- Message bubble -->
-    <p style="margin: 0 0 12px; font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">
-        Uw bericht
-    </p>
-    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
-        <tr>
-            <td style="background-color: #e5e7eb; border-radius: 12px; border-top-left-radius: 4px; padding: 16px 20px;">
-                <div style="margin: 0; font-size: 14px; line-height: 1.6; color: #374151;">{!! nl2br(e(html_to_text($message->body_html ?? $message->body, 500))) !!}</div>
-            </td>
-        </tr>
-    </table>
+    @if($createdByAgent ?? false)
+        {{-- Agent created ticket: show full message with formatting --}}
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+                <td>
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                        <tr>
+                            <td style="padding-bottom: 8px;">
+                                <span style="font-size: 13px; font-weight: 600; color: #374151;">{{ $message->user?->name ?? 'Support' }}</span>
+                                <span style="font-size: 12px; color: #9ca3af; margin-left: 8px;">{{ $message->created_at->setTimezone($organization->settings?->timezone ?? 'UTC')->format('d M, H:i') }}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: {{ $organization->settings?->primary_color ?? '#000000' }}; border-radius: 12px; border-top-right-radius: 4px; padding: 16px 20px;">
+                                @if($message->body_html)
+                                    <div style="margin: 0; font-size: 14px; line-height: 1.6; color: #ffffff;">
+                                        <style>
+                                            .email-message-content p { margin: 0 0 12px; }
+                                            .email-message-content p:last-child { margin-bottom: 0; }
+                                            .email-message-content strong, .email-message-content b { font-weight: 600; }
+                                            .email-message-content em, .email-message-content i { font-style: italic; }
+                                            .email-message-content ul, .email-message-content ol { margin: 0 0 12px; padding-left: 24px; }
+                                            .email-message-content ul:last-child, .email-message-content ol:last-child { margin-bottom: 0; }
+                                            .email-message-content li { margin-bottom: 4px; }
+                                            .email-message-content del { text-decoration: line-through; }
+                                        </style>
+                                        <div class="email-message-content">{!! $message->body_html !!}</div>
+                                    </div>
+                                @else
+                                    <div style="margin: 0; font-size: 14px; line-height: 1.6; color: #ffffff;">{!! nl2br(e($message->body)) !!}</div>
+                                @endif
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    @else
+        {{-- Contact created ticket: show truncated preview --}}
+        <p style="margin: 0 0 12px; font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">
+            Uw bericht
+        </p>
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+                <td style="background-color: #e5e7eb; border-radius: 12px; border-top-left-radius: 4px; padding: 16px 20px;">
+                    <div style="margin: 0; font-size: 14px; line-height: 1.6; color: #374151;">{!! nl2br(e(html_to_text($message->body_html ?? $message->body, 500))) !!}</div>
+                </td>
+            </tr>
+        </table>
+    @endif
     @endif
 
     @if(!empty($slaData) || !empty($averageReplyTime))

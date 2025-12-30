@@ -4,7 +4,6 @@ import DOMPurify from 'dompurify';
 import { ConfirmationDialog } from '@/components/common/confirmation-dialog';
 import { MergeTicketsWizard } from '@/components/tickets/merge-tickets-wizard';
 import { ComposerForm } from '@/components/inbox/composer-form';
-import { MarkdownRenderer } from '@/components/common/markdown-renderer';
 import * as React from 'react';
 import { formatDateTime, formatRelative } from '@/lib/date';
 import {
@@ -12,7 +11,6 @@ import {
     Trash2,
     Mail,
     MailOpen,
-    Send,
     StickyNote,
     Clock,
     AlertTriangle,
@@ -81,7 +79,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     Tooltip,
     TooltipContent,
