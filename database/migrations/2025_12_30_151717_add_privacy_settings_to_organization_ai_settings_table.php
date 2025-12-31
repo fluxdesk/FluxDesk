@@ -12,11 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('organization_ai_settings', function (Blueprint $table) {
-            // Privacy - Data fields to include/exclude
-            $table->boolean('include_customer_name')->default(true);
+            // Privacy - Data fields to include/exclude (GDPR-compliant defaults)
+            // Personal customer data defaults to false - requires explicit opt-in
+            $table->boolean('include_customer_name')->default(false);
             $table->boolean('include_agent_name')->default(true);
-            $table->boolean('include_ticket_subject')->default(true);
-            $table->boolean('include_message_history')->default(true);
+            $table->boolean('include_ticket_subject')->default(false);
+            $table->boolean('include_message_history')->default(false);
             $table->boolean('include_department_name')->default(true);
             $table->integer('message_history_limit')->default(10);
 

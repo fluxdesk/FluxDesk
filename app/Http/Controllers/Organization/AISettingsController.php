@@ -37,11 +37,11 @@ class AISettingsController extends Controller
             'auto_replies_enabled' => false,
             'auto_reply_delay_minutes' => 5,
             'auto_reply_business_hours_only' => true,
-            // Privacy defaults
-            'include_customer_name' => true,
+            // Privacy defaults (GDPR-compliant - personal data off by default)
+            'include_customer_name' => false,
             'include_agent_name' => true,
-            'include_ticket_subject' => true,
-            'include_message_history' => true,
+            'include_ticket_subject' => false,
+            'include_message_history' => false,
             'include_department_name' => true,
             'message_history_limit' => 10,
             // Disclosure defaults

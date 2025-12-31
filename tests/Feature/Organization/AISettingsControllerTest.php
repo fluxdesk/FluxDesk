@@ -198,11 +198,12 @@ describe('AI Settings Controller - Privacy Settings', function () {
             ->get('/organization/ai-settings');
 
         $response->assertSuccessful();
+        // GDPR-compliant defaults: personal customer data off by default
         $response->assertInertia(fn ($page) => $page
-            ->where('settings.include_customer_name', true)
+            ->where('settings.include_customer_name', false)
             ->where('settings.include_agent_name', true)
-            ->where('settings.include_ticket_subject', true)
-            ->where('settings.include_message_history', true)
+            ->where('settings.include_ticket_subject', false)
+            ->where('settings.include_message_history', false)
             ->where('settings.include_department_name', true)
             ->where('settings.message_history_limit', 10)
             ->where('settings.disclosure_enabled', false)
