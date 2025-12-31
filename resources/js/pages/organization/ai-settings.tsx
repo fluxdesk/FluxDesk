@@ -1,20 +1,22 @@
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
 import OrganizationLayout from '@/layouts/organization/layout';
 import { update } from '@/routes/organization/ai-settings';
 import { Transition } from '@headlessui/react';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { AlertCircle, Bot, ChevronDown, FileText, MessageSquare, Shield, Sparkles, Wand2, Zap } from 'lucide-react';
+import { Deferred, Head, Link, useForm } from '@inertiajs/react';
+import { AlertCircle, Bot, FileText, Info, MessageSquare, Shield, Sparkles, Wand2, Zap } from 'lucide-react';
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface AIProvider {
     identifier: string;
@@ -61,123 +63,136 @@ interface Props {
         disclosure_in_portal: boolean;
         disclosure_text: string | null;
     };
-    providers: AIProvider[];
-    usage: UsageStats;
-    usageByAction: Record<string, { count: number; tokens: number; cost: number }>;
+    providers?: AIProvider[];
+    usage?: UsageStats;
+    usageByAction?: Record<string, { count: number; tokens: number; cost: number }>;
     languages: Language[];
 }
 
-function FeatureCard({
+function PrivacyToggle({
+    label,
+    description,
+    checked,
+    onChange,
+    sensitive,
+    sensitiveTooltip,
+    children,
+}: {
+    label: string;
+    description?: string;
+    checked: boolean;
+    onChange: (checked: boolean) => void;
+    sensitive?: boolean;
+    sensitiveTooltip?: string;
+    children?: React.ReactNode;
+}) {
+    return (
+        <div className="flex items-center justify-between px-3 py-3">
+            <div className="flex items-center gap-2">
+                <span className="text-sm">{label}</span>
+                {sensitive && (
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <span className="flex h-4 w-4 items-center justify-center">
+                                <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                            </span>
+                        </TooltipTrigger>
+                        <TooltipContent>{sensitiveTooltip}</TooltipContent>
+                    </Tooltip>
+                )}
+                {description && (
+                    <span className="text-xs text-muted-foreground">({description})</span>
+                )}
+            </div>
+            <div className="flex items-center gap-3">
+                {children}
+                <Switch checked={checked} onCheckedChange={onChange} />
+            </div>
+        </div>
+    );
+}
+
+function FeatureToggle({
     icon: Icon,
     title,
     description,
-    enabled,
-    onToggle,
-    children,
+    checked,
+    onChange,
     badge,
+    children,
 }: {
     icon: React.ElementType;
     title: string;
     description: string;
-    enabled: boolean;
-    onToggle: (checked: boolean) => void;
-    children?: React.ReactNode;
+    checked: boolean;
+    onChange: (checked: boolean) => void;
     badge?: string;
+    children?: React.ReactNode;
 }) {
-    const [isOpen, setIsOpen] = React.useState(enabled);
-
-    React.useEffect(() => {
-        if (enabled) setIsOpen(true);
-    }, [enabled]);
-
     return (
-        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-            <div className="rounded-lg border bg-card">
-                <div className="flex items-center justify-between p-4">
-                    <div className="flex items-center gap-3">
-                        <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${enabled ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
-                            <Icon className="h-4 w-4" />
-                        </div>
-                        <div>
-                            <div className="flex items-center gap-2">
-                                <span className="font-medium">{title}</span>
-                                {badge && (
-                                    <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                                        {badge}
-                                    </span>
-                                )}
-                            </div>
-                            <p className="text-sm text-muted-foreground">{description}</p>
-                        </div>
+        <div className="rounded-lg border bg-card">
+            <div className="flex items-center justify-between p-4">
+                <div className="flex items-center gap-3">
+                    <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${checked ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                        <Icon className="h-4 w-4" />
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Switch checked={enabled} onCheckedChange={onToggle} />
-                        {children && (
-                            <CollapsibleTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                    <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                                </Button>
-                            </CollapsibleTrigger>
-                        )}
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <span className="font-medium">{title}</span>
+                            {badge && (
+                                <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                                    {badge}
+                                </span>
+                            )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">{description}</p>
                     </div>
                 </div>
-                {children && (
-                    <CollapsibleContent>
-                        <div className="border-t px-4 py-3 bg-muted/30">
-                            {children}
-                        </div>
-                    </CollapsibleContent>
-                )}
+                <Switch checked={checked} onCheckedChange={onChange} />
             </div>
-        </Collapsible>
+            {children && checked && (
+                <div className="border-t px-4 py-3 bg-muted/30">
+                    {children}
+                </div>
+            )}
+        </div>
     );
 }
 
-function SettingsSection({
-    icon: Icon,
-    title,
-    description,
-    children,
-    defaultOpen = true,
-}: {
-    icon: React.ElementType;
-    title: string;
-    description?: string;
-    children: React.ReactNode;
-    defaultOpen?: boolean;
-}) {
-    const [isOpen, setIsOpen] = React.useState(defaultOpen);
-
+function ProviderConfigSkeleton() {
     return (
-        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-            <div className="space-y-4">
-                <CollapsibleTrigger asChild>
-                    <button className="flex w-full items-center justify-between group">
-                        <div className="flex items-center gap-2">
-                            <Icon className="h-4 w-4 text-muted-foreground" />
-                            <h3 className="text-sm font-semibold">{title}</h3>
-                        </div>
-                        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                    </button>
-                </CollapsibleTrigger>
-                {description && !isOpen && (
-                    <p className="text-sm text-muted-foreground">{description}</p>
-                )}
-                <CollapsibleContent>
-                    <div className="space-y-4">
-                        {description && (
-                            <p className="text-sm text-muted-foreground">{description}</p>
-                        )}
-                        {children}
-                    </div>
-                </CollapsibleContent>
+        <div className="space-y-4 animate-pulse">
+            <Skeleton className="h-5 w-32" />
+            <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+                <div className="grid gap-2">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
             </div>
-        </Collapsible>
+        </div>
+    );
+}
+
+function UsageStatsSkeleton() {
+    return (
+        <div className="grid gap-4 sm:grid-cols-3">
+            {[...Array(3)].map((_, i) => (
+                <div key={i} className="text-center p-4 rounded-lg bg-muted/50">
+                    <Skeleton className="h-8 w-16 mx-auto mb-2" />
+                    <Skeleton className="h-4 w-20 mx-auto" />
+                </div>
+            ))}
+        </div>
     );
 }
 
 export default function AISettingsPage({ settings, providers, usage, languages }: Props) {
-    const activeProviders = providers.filter((p) => p.is_active);
+    const { t } = useTranslation('organization');
+    const activeProviders = providers?.filter((p) => p.is_active) ?? [];
     const hasActiveProvider = activeProviders.length > 0;
 
     const { data, setData, patch, processing, errors, recentlySuccessful } = useForm({
@@ -193,11 +208,11 @@ export default function AISettingsPage({ settings, providers, usage, languages }
         reply_refactor_enabled: settings.reply_refactor_enabled ?? true,
         auto_reply_delay_minutes: settings.auto_reply_delay_minutes || 5,
         auto_reply_business_hours_only: settings.auto_reply_business_hours_only ?? true,
-        // Privacy settings
-        include_customer_name: settings.include_customer_name ?? true,
+        // Privacy settings (GDPR-compliant defaults - personal data off)
+        include_customer_name: settings.include_customer_name ?? false,
         include_agent_name: settings.include_agent_name ?? true,
-        include_ticket_subject: settings.include_ticket_subject ?? true,
-        include_message_history: settings.include_message_history ?? true,
+        include_ticket_subject: settings.include_ticket_subject ?? false,
+        include_message_history: settings.include_message_history ?? false,
         include_department_name: settings.include_department_name ?? true,
         message_history_limit: settings.message_history_limit ?? 10,
         // Disclosure settings
@@ -207,7 +222,7 @@ export default function AISettingsPage({ settings, providers, usage, languages }
         disclosure_text: settings.disclosure_text || '',
     });
 
-    const selectedProvider = providers.find((p) => p.identifier === data.default_provider);
+    const selectedProvider = providers?.find((p) => p.identifier === data.default_provider);
     const availableModels = selectedProvider?.models || [];
 
     function handleSubmit(e: React.FormEvent) {
@@ -225,32 +240,34 @@ export default function AISettingsPage({ settings, providers, usage, languages }
 
     return (
         <AppLayout>
-            <Head title="AI Instellingen" />
+            <Head title={t('ai.page_title')} />
 
             <OrganizationLayout>
                 <div className="mx-auto max-w-4xl space-y-6">
-                    {!hasActiveProvider && (
-                        <Card className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
-                            <CardContent className="flex items-start gap-3 pt-6">
-                                <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
-                                <div>
-                                    <p className="font-medium text-amber-900 dark:text-amber-100">
-                                        Geen AI provider geconfigureerd
-                                    </p>
-                                    <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                                        Configureer eerst een AI integratie (zoals OpenAI of Claude) op de{' '}
-                                        <Link
-                                            href="/organization/integrations"
-                                            className="underline hover:no-underline"
-                                        >
-                                            Integraties
-                                        </Link>{' '}
-                                        pagina.
-                                    </p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
+                    <Deferred data="providers" fallback={null}>
+                        {!hasActiveProvider && (
+                            <Card className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
+                                <CardContent className="flex items-start gap-3 pt-6">
+                                    <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
+                                    <div>
+                                        <p className="font-medium text-amber-900 dark:text-amber-100">
+                                            {t('ai.no_provider_title')}
+                                        </p>
+                                        <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                                            {t('ai.no_provider_description_prefix')}{' '}
+                                            <Link
+                                                href="/organization/integrations"
+                                                className="underline hover:no-underline"
+                                            >
+                                                {t('ai.no_provider_integrations_link')}
+                                            </Link>{' '}
+                                            {t('ai.no_provider_description_suffix')}
+                                        </p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </Deferred>
 
                     <Card>
                         <CardHeader>
@@ -259,344 +276,342 @@ export default function AISettingsPage({ settings, providers, usage, languages }
                                     <Bot className="h-5 w-5 text-primary" />
                                 </div>
                                 <div>
-                                    <CardTitle className="text-lg">AI Instellingen</CardTitle>
+                                    <CardTitle className="text-lg">{t('ai.title')}</CardTitle>
                                     <CardDescription>
-                                        Configureer AI-functies voor suggesties en automatische antwoorden
+                                        {t('ai.description')}
                                     </CardDescription>
                                 </div>
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <form onSubmit={handleSubmit} className="space-y-8">
-                                {/* Provider Configuration */}
-                                <SettingsSection icon={Zap} title="Provider configuratie">
-                                    <div className="grid gap-4 sm:grid-cols-2">
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="default_provider">AI Provider</Label>
-                                            <Select
-                                                value={data.default_provider}
-                                                onValueChange={handleProviderChange}
-                                                disabled={!hasActiveProvider}
-                                            >
-                                                <SelectTrigger id="default_provider">
-                                                    <SelectValue placeholder="Selecteer provider" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {activeProviders.map((provider) => (
-                                                        <SelectItem
-                                                            key={provider.identifier}
-                                                            value={provider.identifier}
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                <Tabs defaultValue="features" className="w-full">
+                                    <TabsList className="mb-6">
+                                        <TabsTrigger value="features" className="gap-1.5">
+                                            <Sparkles className="h-3.5 w-3.5" />
+                                            {t('ai.tabs.features')}
+                                        </TabsTrigger>
+                                        <TabsTrigger value="instructions" className="gap-1.5">
+                                            <FileText className="h-3.5 w-3.5" />
+                                            {t('ai.tabs.instructions')}
+                                        </TabsTrigger>
+                                        <TabsTrigger value="privacy" className="gap-1.5">
+                                            <Shield className="h-3.5 w-3.5" />
+                                            {t('ai.tabs.privacy')}
+                                        </TabsTrigger>
+                                    </TabsList>
+
+                                    {/* Features Tab */}
+                                    <TabsContent value="features" className="space-y-6">
+                                        {/* Provider Configuration */}
+                                        <div className="space-y-4">
+                                            <h3 className="text-sm font-medium">{t('ai.provider.title')}</h3>
+                                            <Deferred data="providers" fallback={<ProviderConfigSkeleton />}>
+                                                <div className="grid gap-4 sm:grid-cols-2">
+                                                    <div className="grid gap-2">
+                                                        <Label htmlFor="default_provider">{t('ai.provider.label')}</Label>
+                                                        <Select
+                                                            value={data.default_provider}
+                                                            onValueChange={handleProviderChange}
+                                                            disabled={!hasActiveProvider}
                                                         >
-                                                            {provider.name}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <InputError message={errors.default_provider} />
-                                        </div>
+                                                            <SelectTrigger id="default_provider">
+                                                                <SelectValue placeholder={t('ai.provider.select_placeholder')} />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {activeProviders.map((provider) => (
+                                                                    <SelectItem
+                                                                        key={provider.identifier}
+                                                                        value={provider.identifier}
+                                                                    >
+                                                                        {provider.name}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <InputError message={errors.default_provider} />
+                                                    </div>
 
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="default_model">Model</Label>
-                                            <Select
-                                                value={data.default_model}
-                                                onValueChange={(value) => setData('default_model', value)}
-                                                disabled={!data.default_provider}
-                                            >
-                                                <SelectTrigger id="default_model">
-                                                    <SelectValue placeholder="Selecteer model" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {availableModels.map((model) => (
-                                                        <SelectItem key={model.id} value={model.id}>
-                                                            {model.name}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <InputError message={errors.default_model} />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="default_language">Standaard taal</Label>
-                                        <Select
-                                            value={data.default_language}
-                                            onValueChange={(value) => setData('default_language', value)}
-                                        >
-                                            <SelectTrigger id="default_language" className="max-w-xs">
-                                                <SelectValue placeholder="Selecteer taal" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {languages.map((lang) => (
-                                                    <SelectItem key={lang.code} value={lang.code}>
-                                                        {lang.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <InputError message={errors.default_language} />
-                                    </div>
-
-                                    <div className="flex flex-wrap gap-4 pt-2">
-                                        <label className="flex items-center gap-2 cursor-pointer">
-                                            <Switch
-                                                checked={data.detect_ticket_language}
-                                                onCheckedChange={(checked) => setData('detect_ticket_language', checked)}
-                                            />
-                                            <span className="text-sm">Detecteer tickettaal</span>
-                                        </label>
-                                        <label className="flex items-center gap-2 cursor-pointer">
-                                            <Switch
-                                                checked={data.match_ticket_language}
-                                                onCheckedChange={(checked) => setData('match_ticket_language', checked)}
-                                            />
-                                            <span className="text-sm">Match tickettaal</span>
-                                        </label>
-                                    </div>
-                                </SettingsSection>
-
-                                <Separator />
-
-                                {/* AI Features */}
-                                <SettingsSection icon={Sparkles} title="AI Functies" description="Schakel individuele AI-functies in of uit">
-                                    <div className="space-y-3">
-                                        <FeatureCard
-                                            icon={MessageSquare}
-                                            title="Suggesties"
-                                            description="Genereer automatisch antwoordsuggesties"
-                                            enabled={data.suggested_replies_enabled}
-                                            onToggle={(checked) => setData('suggested_replies_enabled', checked)}
-                                        />
-
-                                        <FeatureCard
-                                            icon={Wand2}
-                                            title="Tekst verbeteren"
-                                            description="Verbeter en herformuleer geschreven antwoorden"
-                                            enabled={data.reply_refactor_enabled}
-                                            onToggle={(checked) => setData('reply_refactor_enabled', checked)}
-                                        />
-
-                                        <FeatureCard
-                                            icon={Zap}
-                                            title="Automatische antwoorden"
-                                            description="Stuur automatisch AI-antwoorden naar nieuwe tickets"
-                                            enabled={data.auto_replies_enabled}
-                                            onToggle={(checked) => setData('auto_replies_enabled', checked)}
-                                            badge="Binnenkort"
-                                        >
-                                            <div className="space-y-3">
-                                                <div className="grid gap-2">
-                                                    <Label htmlFor="auto_reply_delay">Wachttijd (minuten)</Label>
-                                                    <Input
-                                                        id="auto_reply_delay"
-                                                        type="number"
-                                                        min={1}
-                                                        max={60}
-                                                        value={data.auto_reply_delay_minutes}
-                                                        onChange={(e) => setData('auto_reply_delay_minutes', parseInt(e.target.value) || 5)}
-                                                        className="max-w-[100px]"
-                                                        disabled={!data.auto_replies_enabled}
-                                                    />
-                                                    <p className="text-xs text-muted-foreground">
-                                                        Wacht dit aantal minuten voordat een automatisch antwoord wordt verzonden
-                                                    </p>
+                                                    <div className="grid gap-2">
+                                                        <Label htmlFor="default_model">{t('ai.model.label')}</Label>
+                                                        <Select
+                                                            value={data.default_model}
+                                                            onValueChange={(value) => setData('default_model', value)}
+                                                            disabled={!data.default_provider}
+                                                        >
+                                                            <SelectTrigger id="default_model">
+                                                                <SelectValue placeholder={t('ai.model.select_placeholder')} />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {availableModels.map((model) => (
+                                                                    <SelectItem key={model.id} value={model.id}>
+                                                                        {model.name}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <InputError message={errors.default_model} />
+                                                    </div>
                                                 </div>
+                                            </Deferred>
+
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="default_language">{t('ai.language.label')}</Label>
+                                                <Select
+                                                    value={data.default_language}
+                                                    onValueChange={(value) => setData('default_language', value)}
+                                                >
+                                                    <SelectTrigger id="default_language" className="max-w-xs">
+                                                        <SelectValue placeholder={t('ai.language.select_placeholder')} />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {languages.map((lang) => (
+                                                            <SelectItem key={lang.code} value={lang.code}>
+                                                                {lang.name}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <InputError message={errors.default_language} />
+                                            </div>
+
+                                            <div className="flex flex-wrap gap-4">
                                                 <label className="flex items-center gap-2 cursor-pointer">
                                                     <Switch
-                                                        checked={data.auto_reply_business_hours_only}
-                                                        onCheckedChange={(checked) => setData('auto_reply_business_hours_only', checked)}
-                                                        disabled={!data.auto_replies_enabled}
+                                                        checked={data.detect_ticket_language}
+                                                        onCheckedChange={(checked) => setData('detect_ticket_language', checked)}
                                                     />
-                                                    <span className="text-sm">Alleen tijdens kantooruren</span>
+                                                    <span className="text-sm">{t('ai.language.detect')}</span>
+                                                </label>
+                                                <label className="flex items-center gap-2 cursor-pointer">
+                                                    <Switch
+                                                        checked={data.match_ticket_language}
+                                                        onCheckedChange={(checked) => setData('match_ticket_language', checked)}
+                                                    />
+                                                    <span className="text-sm">{t('ai.language.match')}</span>
                                                 </label>
                                             </div>
-                                        </FeatureCard>
-                                    </div>
-                                </SettingsSection>
+                                        </div>
 
-                                <Separator />
+                                        {/* AI Features */}
+                                        <div className="space-y-3">
+                                            <h3 className="text-sm font-medium">{t('ai.features.title')}</h3>
 
-                                {/* Custom Instructions */}
-                                <SettingsSection icon={FileText} title="Aangepaste instructies" defaultOpen={false}>
-                                    <div className="space-y-4">
+                                            <FeatureToggle
+                                                icon={MessageSquare}
+                                                title={t('ai.features.suggestions.title')}
+                                                description={t('ai.features.suggestions.description')}
+                                                checked={data.suggested_replies_enabled}
+                                                onChange={(checked) => setData('suggested_replies_enabled', checked)}
+                                            />
+
+                                            <FeatureToggle
+                                                icon={Wand2}
+                                                title={t('ai.features.improve_text.title')}
+                                                description={t('ai.features.improve_text.description')}
+                                                checked={data.reply_refactor_enabled}
+                                                onChange={(checked) => setData('reply_refactor_enabled', checked)}
+                                            />
+
+                                            <FeatureToggle
+                                                icon={Zap}
+                                                title={t('ai.features.auto_replies.title')}
+                                                description={t('ai.features.auto_replies.description')}
+                                                checked={data.auto_replies_enabled}
+                                                onChange={(checked) => setData('auto_replies_enabled', checked)}
+                                                badge={t('ai.features.auto_replies.badge')}
+                                            >
+                                                <div className="space-y-3">
+                                                    <div className="grid gap-2">
+                                                        <Label htmlFor="auto_reply_delay">{t('ai.features.auto_replies.delay_label')}</Label>
+                                                        <Input
+                                                            id="auto_reply_delay"
+                                                            type="number"
+                                                            min={1}
+                                                            max={60}
+                                                            value={data.auto_reply_delay_minutes}
+                                                            onChange={(e) => setData('auto_reply_delay_minutes', parseInt(e.target.value) || 5)}
+                                                            className="max-w-[100px]"
+                                                        />
+                                                        <p className="text-xs text-muted-foreground">
+                                                            {t('ai.features.auto_replies.delay_description')}
+                                                        </p>
+                                                    </div>
+                                                    <label className="flex items-center gap-2 cursor-pointer">
+                                                        <Switch
+                                                            checked={data.auto_reply_business_hours_only}
+                                                            onCheckedChange={(checked) => setData('auto_reply_business_hours_only', checked)}
+                                                        />
+                                                        <span className="text-sm">{t('ai.features.auto_replies.business_hours_only')}</span>
+                                                    </label>
+                                                </div>
+                                            </FeatureToggle>
+                                        </div>
+                                    </TabsContent>
+
+                                    {/* Instructions Tab */}
+                                    <TabsContent value="instructions" className="space-y-6">
                                         <div className="grid gap-2">
-                                            <Label htmlFor="company_context">Bedrijfscontext</Label>
+                                            <Label htmlFor="company_context">{t('ai.instructions.company_context.label')}</Label>
                                             <Textarea
                                                 id="company_context"
                                                 value={data.company_context}
                                                 onChange={(e) => setData('company_context', e.target.value)}
-                                                placeholder="Beschrijf je bedrijf, producten of diensten zodat de AI relevantere antwoorden kan genereren..."
-                                                rows={3}
+                                                placeholder={t('ai.instructions.company_context.placeholder')}
+                                                rows={4}
                                             />
                                             <p className="text-xs text-muted-foreground">
-                                                Geef context over je bedrijf voor betere AI-antwoorden
+                                                {t('ai.instructions.company_context.description')}
                                             </p>
                                             <InputError message={errors.company_context} />
                                         </div>
 
                                         <div className="grid gap-2">
-                                            <Label htmlFor="system_instructions">Instructies</Label>
+                                            <Label htmlFor="system_instructions">{t('ai.instructions.system.label')}</Label>
                                             <Textarea
                                                 id="system_instructions"
                                                 value={data.system_instructions}
                                                 onChange={(e) => setData('system_instructions', e.target.value)}
-                                                placeholder="Bijv: Gebruik geen emdashes (—), wees beknopt, vermijd jargon..."
-                                                rows={3}
+                                                placeholder={t('ai.instructions.system.placeholder')}
+                                                rows={4}
                                             />
                                             <p className="text-xs text-muted-foreground">
-                                                Specifieke instructies voor de AI bij het genereren van antwoorden
+                                                {t('ai.instructions.system.description')}
                                             </p>
                                             <InputError message={errors.system_instructions} />
                                         </div>
-                                    </div>
-                                </SettingsSection>
+                                    </TabsContent>
 
-                                <Separator />
-
-                                {/* Privacy & Compliance */}
-                                <SettingsSection
-                                    icon={Shield}
-                                    title="Privacy & Gegevensbescherming"
-                                    description="Bepaal welke gegevens naar de AI-provider worden verzonden (GDPR/AI-Act)"
-                                    defaultOpen={false}
-                                >
-                                    <div className="space-y-4">
-                                        <div className="space-y-3">
-                                            <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                                Gegevens in AI-prompts
-                                            </h4>
-
-                                            <div className="grid gap-2 sm:grid-cols-2">
-                                                <label className="flex items-center justify-between rounded-lg border p-3 cursor-pointer hover:bg-muted/50">
-                                                    <span className="text-sm">Klantnaam</span>
-                                                    <Switch
-                                                        checked={data.include_customer_name}
-                                                        onCheckedChange={(checked) => setData('include_customer_name', checked)}
-                                                    />
-                                                </label>
-
-                                                <label className="flex items-center justify-between rounded-lg border p-3 cursor-pointer hover:bg-muted/50">
-                                                    <span className="text-sm">Medewerkersnaam</span>
-                                                    <Switch
-                                                        checked={data.include_agent_name}
-                                                        onCheckedChange={(checked) => setData('include_agent_name', checked)}
-                                                    />
-                                                </label>
-
-                                                <label className="flex items-center justify-between rounded-lg border p-3 cursor-pointer hover:bg-muted/50">
-                                                    <span className="text-sm">Ticket onderwerp</span>
-                                                    <Switch
-                                                        checked={data.include_ticket_subject}
-                                                        onCheckedChange={(checked) => setData('include_ticket_subject', checked)}
-                                                    />
-                                                </label>
-
-                                                <label className="flex items-center justify-between rounded-lg border p-3 cursor-pointer hover:bg-muted/50">
-                                                    <span className="text-sm">Afdelingsnaam</span>
-                                                    <Switch
-                                                        checked={data.include_department_name}
-                                                        onCheckedChange={(checked) => setData('include_department_name', checked)}
-                                                    />
-                                                </label>
+                                    {/* Privacy Tab */}
+                                    <TabsContent value="privacy" className="space-y-6">
+                                        {/* Data Sharing */}
+                                        <div className="space-y-2">
+                                            <div className="flex items-center gap-2">
+                                                <h3 className="text-sm font-medium">{t('ai.privacy.data_sharing.title')}</h3>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Info className="h-4 w-4 text-amber-500 cursor-help" />
+                                                    </TooltipTrigger>
+                                                    <TooltipContent className="max-w-xs">
+                                                        {t('ai.privacy.data_sharing.tooltip')}
+                                                    </TooltipContent>
+                                                </Tooltip>
                                             </div>
+                                            <p className="text-sm text-muted-foreground">
+                                                {t('ai.privacy.data_sharing.description')}
+                                            </p>
 
-                                            <label className="flex items-center justify-between rounded-lg border p-3 cursor-pointer hover:bg-muted/50">
-                                                <div className="space-y-0.5">
-                                                    <span className="text-sm font-medium">Berichtgeschiedenis</span>
-                                                    <p className="text-xs text-muted-foreground">
-                                                        Eerdere berichten meesturen naar AI
-                                                    </p>
-                                                </div>
-                                                <Switch
+                                            <div className="divide-y rounded-lg border">
+                                                <PrivacyToggle
+                                                    label={t('ai.privacy.fields.customer_name')}
+                                                    checked={data.include_customer_name}
+                                                    onChange={(checked) => setData('include_customer_name', checked)}
+                                                    sensitive
+                                                    sensitiveTooltip={t('ai.privacy.sensitive_tooltip')}
+                                                />
+                                                <PrivacyToggle
+                                                    label={t('ai.privacy.fields.agent_name')}
+                                                    checked={data.include_agent_name}
+                                                    onChange={(checked) => setData('include_agent_name', checked)}
+                                                />
+                                                <PrivacyToggle
+                                                    label={t('ai.privacy.fields.ticket_subject')}
+                                                    checked={data.include_ticket_subject}
+                                                    onChange={(checked) => setData('include_ticket_subject', checked)}
+                                                    sensitive
+                                                    sensitiveTooltip={t('ai.privacy.sensitive_tooltip')}
+                                                />
+                                                <PrivacyToggle
+                                                    label={t('ai.privacy.fields.department_name')}
+                                                    checked={data.include_department_name}
+                                                    onChange={(checked) => setData('include_department_name', checked)}
+                                                />
+                                                <PrivacyToggle
+                                                    label={t('ai.privacy.fields.message_history')}
+                                                    description={t('ai.privacy.fields.message_history_description')}
                                                     checked={data.include_message_history}
-                                                    onCheckedChange={(checked) => setData('include_message_history', checked)}
-                                                />
-                                            </label>
-
-                                            {data.include_message_history && (
-                                                <div className="grid gap-2 pl-4 border-l-2 border-muted ml-3">
-                                                    <Label htmlFor="message_history_limit">Max. berichten</Label>
-                                                    <Input
-                                                        id="message_history_limit"
-                                                        type="number"
-                                                        min={1}
-                                                        max={20}
-                                                        value={data.message_history_limit}
-                                                        onChange={(e) =>
-                                                            setData('message_history_limit', parseInt(e.target.value) || 10)
-                                                        }
-                                                        className="max-w-[100px]"
-                                                    />
-                                                    <p className="text-xs text-muted-foreground">
-                                                        Aantal berichten dat naar AI wordt gestuurd (1-20)
-                                                    </p>
-                                                    <InputError message={errors.message_history_limit} />
-                                                </div>
-                                            )}
+                                                    onChange={(checked) => setData('include_message_history', checked)}
+                                                    sensitive
+                                                    sensitiveTooltip={t('ai.privacy.sensitive_tooltip')}
+                                                >
+                                                    {data.include_message_history && (
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-xs text-muted-foreground">max</span>
+                                                            <Input
+                                                                type="number"
+                                                                min={1}
+                                                                max={20}
+                                                                value={data.message_history_limit}
+                                                                onChange={(e) =>
+                                                                    setData('message_history_limit', parseInt(e.target.value) || 10)
+                                                                }
+                                                                className="h-7 w-14 text-center"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </PrivacyToggle>
+                                            </div>
                                         </div>
 
-                                        <Separator />
-
+                                        {/* AI Disclosure */}
                                         <div className="space-y-3">
-                                            <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                                AI-melding aan klanten
-                                            </h4>
+                                            <h3 className="text-sm font-medium">{t('ai.privacy.disclosure.title')}</h3>
+                                            <p className="text-sm text-muted-foreground">
+                                                {t('ai.privacy.disclosure.description')}
+                                            </p>
 
-                                            <label className="flex items-center justify-between rounded-lg border p-3 cursor-pointer hover:bg-muted/50">
-                                                <div className="space-y-0.5">
-                                                    <span className="text-sm font-medium">AI-melding inschakelen</span>
-                                                    <p className="text-xs text-muted-foreground">
-                                                        Toon klanten wanneer AI is gebruikt
-                                                    </p>
-                                                </div>
-                                                <Switch
-                                                    checked={data.disclosure_enabled}
-                                                    onCheckedChange={(checked) => setData('disclosure_enabled', checked)}
-                                                />
-                                            </label>
+                                            <div className="rounded-lg border p-4 space-y-4">
+                                                <label className="flex items-center justify-between cursor-pointer">
+                                                    <span className="text-sm font-medium">{t('ai.privacy.disclosure.enable')}</span>
+                                                    <Switch
+                                                        checked={data.disclosure_enabled}
+                                                        onCheckedChange={(checked) => setData('disclosure_enabled', checked)}
+                                                    />
+                                                </label>
 
-                                            {data.disclosure_enabled && (
-                                                <div className="space-y-3 pl-4 border-l-2 border-muted ml-3">
-                                                    <div className="flex flex-wrap gap-4">
-                                                        <label className="flex items-center gap-2 cursor-pointer">
-                                                            <Switch
-                                                                checked={data.disclosure_in_email}
-                                                                onCheckedChange={(checked) => setData('disclosure_in_email', checked)}
+                                                {data.disclosure_enabled && (
+                                                    <div className="space-y-4 pt-2 border-t">
+                                                        <div className="flex flex-wrap gap-4">
+                                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                                <Switch
+                                                                    checked={data.disclosure_in_email}
+                                                                    onCheckedChange={(checked) => setData('disclosure_in_email', checked)}
+                                                                />
+                                                                <span className="text-sm">{t('ai.privacy.disclosure.in_email')}</span>
+                                                            </label>
+                                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                                <Switch
+                                                                    checked={data.disclosure_in_portal}
+                                                                    onCheckedChange={(checked) => setData('disclosure_in_portal', checked)}
+                                                                />
+                                                                <span className="text-sm">{t('ai.privacy.disclosure.in_portal')}</span>
+                                                            </label>
+                                                        </div>
+
+                                                        <div className="grid gap-2">
+                                                            <Label htmlFor="disclosure_text">{t('ai.privacy.disclosure.custom_text_label')}</Label>
+                                                            <Textarea
+                                                                id="disclosure_text"
+                                                                value={data.disclosure_text}
+                                                                onChange={(e) => setData('disclosure_text', e.target.value)}
+                                                                placeholder={t('ai.privacy.disclosure.custom_text_placeholder')}
+                                                                rows={2}
                                                             />
-                                                            <span className="text-sm">In e-mail</span>
-                                                        </label>
-                                                        <label className="flex items-center gap-2 cursor-pointer">
-                                                            <Switch
-                                                                checked={data.disclosure_in_portal}
-                                                                onCheckedChange={(checked) => setData('disclosure_in_portal', checked)}
-                                                            />
-                                                            <span className="text-sm">In klantenportaal</span>
-                                                        </label>
+                                                            <p className="text-xs text-muted-foreground">
+                                                                {t('ai.privacy.disclosure.custom_text_description')}
+                                                            </p>
+                                                            <InputError message={errors.disclosure_text} />
+                                                        </div>
                                                     </div>
-
-                                                    <div className="grid gap-2">
-                                                        <Label htmlFor="disclosure_text">Aangepaste meldingstekst</Label>
-                                                        <Textarea
-                                                            id="disclosure_text"
-                                                            value={data.disclosure_text}
-                                                            onChange={(e) => setData('disclosure_text', e.target.value)}
-                                                            placeholder="Dit antwoord is opgesteld met behulp van AI-technologie."
-                                                            rows={2}
-                                                        />
-                                                        <p className="text-xs text-muted-foreground">
-                                                            Laat leeg voor standaardtekst
-                                                        </p>
-                                                        <InputError message={errors.disclosure_text} />
-                                                    </div>
-                                                </div>
-                                            )}
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                </SettingsSection>
+                                    </TabsContent>
+                                </Tabs>
 
                                 <div className="flex items-center gap-4 pt-2">
                                     <Button type="submit" disabled={processing}>
-                                        Opslaan
+                                        {t('common.save')}
                                     </Button>
                                     <Transition
                                         show={recentlySuccessful}
@@ -605,40 +620,51 @@ export default function AISettingsPage({ settings, providers, usage, languages }
                                         leave="transition ease-in-out"
                                         leaveTo="opacity-0"
                                     >
-                                        <p className="text-sm text-muted-foreground">Opgeslagen</p>
+                                        <p className="text-sm text-muted-foreground">{t('common.saved')}</p>
                                     </Transition>
                                 </div>
                             </form>
                         </CardContent>
                     </Card>
 
-                    {usage.total_requests > 0 && (
+                    <Deferred data="usage" fallback={
                         <Card>
                             <CardHeader>
-                                <CardTitle className="text-lg">Gebruik deze maand</CardTitle>
+                                <CardTitle className="text-lg">{t('ai.usage.title')}</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <div className="grid gap-4 sm:grid-cols-3">
-                                    <div className="text-center p-4 rounded-lg bg-muted/50">
-                                        <p className="text-2xl font-bold">{usage.total_requests}</p>
-                                        <p className="text-sm text-muted-foreground">Verzoeken</p>
-                                    </div>
-                                    <div className="text-center p-4 rounded-lg bg-muted/50">
-                                        <p className="text-2xl font-bold">
-                                            {(usage.total_tokens / 1000).toFixed(1)}k
-                                        </p>
-                                        <p className="text-sm text-muted-foreground">Tokens</p>
-                                    </div>
-                                    <div className="text-center p-4 rounded-lg bg-muted/50">
-                                        <p className="text-2xl font-bold">
-                                            ${usage.total_cost.toFixed(2)}
-                                        </p>
-                                        <p className="text-sm text-muted-foreground">Geschatte kosten</p>
-                                    </div>
-                                </div>
+                                <UsageStatsSkeleton />
                             </CardContent>
                         </Card>
-                    )}
+                    }>
+                        {usage && usage.total_requests > 0 && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="text-lg">{t('ai.usage.title')}</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="grid gap-4 sm:grid-cols-3">
+                                        <div className="text-center p-4 rounded-lg bg-muted/50">
+                                            <p className="text-2xl font-bold">{usage.total_requests}</p>
+                                            <p className="text-sm text-muted-foreground">{t('ai.usage.requests')}</p>
+                                        </div>
+                                        <div className="text-center p-4 rounded-lg bg-muted/50">
+                                            <p className="text-2xl font-bold">
+                                                {(usage.total_tokens / 1000).toFixed(1)}k
+                                            </p>
+                                            <p className="text-sm text-muted-foreground">{t('ai.usage.tokens')}</p>
+                                        </div>
+                                        <div className="text-center p-4 rounded-lg bg-muted/50">
+                                            <p className="text-2xl font-bold">
+                                                ${usage.total_cost.toFixed(2)}
+                                            </p>
+                                            <p className="text-sm text-muted-foreground">{t('ai.usage.estimated_cost')}</p>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </Deferred>
                 </div>
             </OrganizationLayout>
         </AppLayout>

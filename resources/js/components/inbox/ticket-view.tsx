@@ -88,6 +88,7 @@ import { useInitials } from '@/hooks/use-initials';
 import type { Ticket, Status, Priority, User, Contact, Message, TicketFolder, Tag } from '@/types';
 import { router } from '@inertiajs/react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface TicketViewProps {
     ticket: Ticket;
@@ -102,6 +103,7 @@ interface TicketViewProps {
 }
 
 export function TicketView({ ticket, statuses, priorities, agents, contacts, folders = [], currentFolder, allTickets = [] }: TicketViewProps) {
+    const { t } = useTranslation('ticket');
     const getInitials = useInitials();
     const [isChangeContactOpen, setIsChangeContactOpen] = React.useState(false);
     const [isDetailsOpen, setIsDetailsOpen] = React.useState(false);
@@ -457,7 +459,7 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                         <div className="rounded-lg border bg-card p-4">
                             <div className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label className="text-xs text-muted-foreground">Status</Label>
+                                    <Label className="text-xs text-muted-foreground">{t('details.status')}</Label>
                                     <Select value={String(ticket.status_id)} onValueChange={(v) => updateTicket('status_id', v)}>
                                         <SelectTrigger className="h-9">
                                             <SelectValue />
@@ -476,7 +478,7 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-xs text-muted-foreground">Prioriteit</Label>
+                                    <Label className="text-xs text-muted-foreground">{t('details.priority')}</Label>
                                     <Select value={String(ticket.priority_id)} onValueChange={(v) => updateTicket('priority_id', v)}>
                                         <SelectTrigger className="h-9">
                                             <SelectValue />
@@ -495,17 +497,17 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-xs text-muted-foreground">Toegewezen aan</Label>
+                                    <Label className="text-xs text-muted-foreground">{t('details.assigned_to')}</Label>
                                     <Select
                                         value={ticket.assigned_to ? String(ticket.assigned_to) : 'unassigned'}
                                         onValueChange={(v) => updateTicket('assigned_to', v === 'unassigned' ? null : v)}
                                     >
                                         <SelectTrigger className="h-9">
-                                            <SelectValue placeholder="Niet toegewezen" />
+                                            <SelectValue placeholder={t('details.unassigned')} />
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="unassigned">
-                                                <span className="text-muted-foreground">Niet toegewezen</span>
+                                                <span className="text-muted-foreground">{t('details.unassigned')}</span>
                                             </SelectItem>
                                             {agents.map((agent) => (
                                                 <SelectItem key={agent.id} value={String(agent.id)}>
@@ -537,11 +539,11 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                                     {ticket.sla_first_response_due_at && (
                                         <div className="space-y-2">
                                             <div className="flex items-center justify-between">
-                                                <span className="text-xs text-muted-foreground">Eerste reactie</span>
+                                                <span className="text-xs text-muted-foreground">{t('sla.first_response')}</span>
                                                 {ticket.first_response_at ? (
                                                     <span className="flex items-center gap-1.5 text-xs font-medium text-green-600">
                                                         <CheckCircle className="h-3.5 w-3.5" />
-                                                        Klaar
+                                                        {t('sla.done')}
                                                     </span>
                                                 ) : (
                                                     <span className={cn('text-xs font-medium', isOverdue && 'text-destructive')}>
@@ -555,11 +557,11 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                                     {ticket.sla_resolution_due_at && (
                                         <div className="space-y-2">
                                             <div className="flex items-center justify-between">
-                                                <span className="text-xs text-muted-foreground">Oplossing</span>
+                                                <span className="text-xs text-muted-foreground">{t('sla.resolution')}</span>
                                                 {ticket.resolved_at ? (
                                                     <span className="flex items-center gap-1.5 text-xs font-medium text-green-600">
                                                         <CheckCircle className="h-3.5 w-3.5" />
-                                                        Klaar
+                                                        {t('sla.done')}
                                                     </span>
                                                 ) : (
                                                     <span className={cn('text-xs font-medium', resolutionOverdue && 'text-destructive')}>
@@ -579,7 +581,7 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                             <div className="rounded-lg border bg-card p-4">
                                 <div className="mb-3 flex items-center gap-2">
                                     <TagIcon className="h-4 w-4 text-muted-foreground" />
-                                    <span className="text-xs font-medium text-muted-foreground">Tags</span>
+                                    <span className="text-xs font-medium text-muted-foreground">{t('details.tags')}</span>
                                 </div>
                                 <div className="flex flex-wrap gap-1.5">
                                     {ticket.tags.map((tag) => (
@@ -599,26 +601,26 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                         <div className="rounded-lg border bg-card p-4">
                             <div className="mb-3 flex items-center gap-2">
                                 <Calendar className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-xs font-medium text-muted-foreground">Tijdlijn</span>
+                                <span className="text-xs font-medium text-muted-foreground">{t('timeline.title')}</span>
                             </div>
                             <div className="space-y-2.5">
                                 <div className="flex items-center justify-between text-sm">
-                                    <span className="text-muted-foreground">Aangemaakt</span>
+                                    <span className="text-muted-foreground">{t('timeline.created')}</span>
                                     <span>{formatDateTime(ticket.created_at)}</span>
                                 </div>
                                 <div className="flex items-center justify-between text-sm">
-                                    <span className="text-muted-foreground">Bijgewerkt</span>
+                                    <span className="text-muted-foreground">{t('timeline.updated')}</span>
                                     <span>{formatRelative(ticket.updated_at)}</span>
                                 </div>
                                 {ticket.first_response_at && (
                                     <div className="flex items-center justify-between text-sm">
-                                        <span className="text-muted-foreground">Eerste reactie</span>
+                                        <span className="text-muted-foreground">{t('timeline.first_response')}</span>
                                         <span>{formatDateTime(ticket.first_response_at)}</span>
                                     </div>
                                 )}
                                 {ticket.resolved_at && (
                                     <div className="flex items-center justify-between text-sm">
-                                        <span className="text-muted-foreground">Opgelost</span>
+                                        <span className="text-muted-foreground">{t('timeline.resolved')}</span>
                                         <span>{formatDateTime(ticket.resolved_at)}</span>
                                     </div>
                                 )}
@@ -751,7 +753,7 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label className="text-xs text-muted-foreground">Prioriteit</Label>
+                                        <Label className="text-xs text-muted-foreground">{t('details.priority')}</Label>
                                         <Select value={String(ticket.priority_id)} onValueChange={(v) => updateTicket('priority_id', v)}>
                                             <SelectTrigger className="h-9">
                                                 <SelectValue />
@@ -770,17 +772,17 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label className="text-xs text-muted-foreground">Toegewezen aan</Label>
+                                        <Label className="text-xs text-muted-foreground">{t('details.assigned_to')}</Label>
                                         <Select
                                             value={ticket.assigned_to ? String(ticket.assigned_to) : 'unassigned'}
                                             onValueChange={(v) => updateTicket('assigned_to', v === 'unassigned' ? null : v)}
                                         >
                                             <SelectTrigger className="h-9">
-                                                <SelectValue placeholder="Niet toegewezen" />
+                                                <SelectValue placeholder={t('details.unassigned')} />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="unassigned">
-                                                    <span className="text-muted-foreground">Niet toegewezen</span>
+                                                    <span className="text-muted-foreground">{t('details.unassigned')}</span>
                                                 </SelectItem>
                                                 {agents.map((agent) => (
                                                     <SelectItem key={agent.id} value={String(agent.id)}>
@@ -812,11 +814,11 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                                         {ticket.sla_first_response_due_at && (
                                             <div className="space-y-2">
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-xs text-muted-foreground">Eerste reactie</span>
+                                                    <span className="text-xs text-muted-foreground">{t('sla.first_response')}</span>
                                                     {ticket.first_response_at ? (
                                                         <span className="flex items-center gap-1.5 text-xs font-medium text-green-600">
                                                             <CheckCircle className="h-3.5 w-3.5" />
-                                                            Klaar
+                                                            {t('sla.done')}
                                                         </span>
                                                     ) : (
                                                         <span className={cn('text-xs font-medium', isOverdue && 'text-destructive')}>
@@ -830,11 +832,11 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                                         {ticket.sla_resolution_due_at && (
                                             <div className="space-y-2">
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-xs text-muted-foreground">Oplossing</span>
+                                                    <span className="text-xs text-muted-foreground">{t('sla.resolution')}</span>
                                                     {ticket.resolved_at ? (
                                                         <span className="flex items-center gap-1.5 text-xs font-medium text-green-600">
                                                             <CheckCircle className="h-3.5 w-3.5" />
-                                                            Klaar
+                                                            {t('sla.done')}
                                                         </span>
                                                     ) : (
                                                         <span className={cn('text-xs font-medium', resolutionOverdue && 'text-destructive')}>
@@ -854,7 +856,7 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                                 <div className="rounded-lg border bg-card p-4">
                                     <div className="mb-3 flex items-center gap-2">
                                         <TagIcon className="h-4 w-4 text-muted-foreground" />
-                                        <span className="text-xs font-medium text-muted-foreground">Tags</span>
+                                        <span className="text-xs font-medium text-muted-foreground">{t('details.tags')}</span>
                                     </div>
                                     <div className="flex flex-wrap gap-1.5">
                                         {ticket.tags.map((tag) => (
@@ -874,26 +876,26 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                             <div className="rounded-lg border bg-card p-4">
                                 <div className="mb-3 flex items-center gap-2">
                                     <Calendar className="h-4 w-4 text-muted-foreground" />
-                                    <span className="text-xs font-medium text-muted-foreground">Tijdlijn</span>
+                                    <span className="text-xs font-medium text-muted-foreground">{t('timeline.title')}</span>
                                 </div>
                                 <div className="space-y-2.5">
                                     <div className="flex items-center justify-between text-sm">
-                                        <span className="text-muted-foreground">Aangemaakt</span>
+                                        <span className="text-muted-foreground">{t('timeline.created')}</span>
                                         <span>{formatDateTime(ticket.created_at)}</span>
                                     </div>
                                     <div className="flex items-center justify-between text-sm">
-                                        <span className="text-muted-foreground">Bijgewerkt</span>
+                                        <span className="text-muted-foreground">{t('timeline.updated')}</span>
                                         <span>{formatRelative(ticket.updated_at)}</span>
                                     </div>
                                     {ticket.first_response_at && (
                                         <div className="flex items-center justify-between text-sm">
-                                            <span className="text-muted-foreground">Eerste reactie</span>
+                                            <span className="text-muted-foreground">{t('timeline.first_response')}</span>
                                             <span>{formatDateTime(ticket.first_response_at)}</span>
                                         </div>
                                     )}
                                     {ticket.resolved_at && (
                                         <div className="flex items-center justify-between text-sm">
-                                            <span className="text-muted-foreground">Opgelost</span>
+                                            <span className="text-muted-foreground">{t('timeline.resolved')}</span>
                                             <span>{formatDateTime(ticket.resolved_at)}</span>
                                         </div>
                                     )}

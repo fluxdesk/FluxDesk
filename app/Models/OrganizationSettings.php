@@ -23,6 +23,7 @@ class OrganizationSettings extends Model
         'random_number_length',
         'next_ticket_number',
         'timezone',
+        'email_locale',
         'business_hours',
         'system_email_channel_id',
         'system_emails_enabled',

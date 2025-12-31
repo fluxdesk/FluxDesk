@@ -6,25 +6,28 @@ import { Spinner } from '@/components/ui/spinner';
 import AuthLayout from '@/layouts/auth-layout';
 import { store } from '@/routes/password/confirm';
 import { Form, Head } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 
 export default function ConfirmPassword() {
+    const { t } = useTranslation('auth');
+
     return (
         <AuthLayout
-            title="Bevestig je wachtwoord"
-            description="Dit is een beveiligd gedeelte. Bevestig je wachtwoord om verder te gaan."
+            title={t('confirm_password.title')}
+            description={t('confirm_password.description')}
         >
-            <Head title="Bevestig wachtwoord" />
+            <Head title={t('confirm_password.page_title')} />
 
             <Form {...store.form()} resetOnSuccess={['password']}>
                 {({ processing, errors }) => (
                     <div className="space-y-6">
                         <div className="grid gap-2">
-                            <Label htmlFor="password">Wachtwoord</Label>
+                            <Label htmlFor="password">{t('confirm_password.password')}</Label>
                             <Input
                                 id="password"
                                 type="password"
                                 name="password"
-                                placeholder="Wachtwoord"
+                                placeholder={t('confirm_password.password_placeholder')}
                                 autoComplete="current-password"
                                 autoFocus
                             />
@@ -39,7 +42,7 @@ export default function ConfirmPassword() {
                                 data-test="confirm-password-button"
                             >
                                 {processing && <Spinner />}
-                                Bevestigen
+                                {t('confirm_password.submit')}
                             </Button>
                         </div>
                     </div>

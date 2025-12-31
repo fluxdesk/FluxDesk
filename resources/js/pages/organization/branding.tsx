@@ -11,6 +11,7 @@ import { Head, useForm, router } from '@inertiajs/react';
 import { ColorPicker } from '@/components/common/color-picker';
 import { Input } from '@/components/ui/input';
 import { Trash2, Upload, ImageIcon, Mail, Palette, Eye } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     organization: Organization;
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export default function Branding({ organization, settings }: Props) {
+    const { t } = useTranslation('organization');
     const { data, setData, patch, processing, errors, recentlySuccessful } = useForm({
         primary_color: settings.primary_color || '#3b82f6',
         secondary_color: settings.secondary_color || '#6b7280',
@@ -65,7 +67,7 @@ export default function Branding({ organization, settings }: Props) {
 
     return (
         <AppLayout>
-            <Head title="Huisstijl" />
+            <Head title={t('branding.page_title')} />
 
             <OrganizationLayout>
                 <div className="mx-auto max-w-4xl space-y-6">
@@ -76,9 +78,9 @@ export default function Branding({ organization, settings }: Props) {
                                     <Palette className="h-5 w-5 text-primary" />
                                 </div>
                                 <div>
-                                    <CardTitle className="text-lg">Huisstijl</CardTitle>
+                                    <CardTitle className="text-lg">{t('branding.title')}</CardTitle>
                                     <CardDescription>
-                                        Logo's en kleuren van je organisatie
+                                        {t('branding.description')}
                                     </CardDescription>
                                 </div>
                             </div>
@@ -87,13 +89,13 @@ export default function Branding({ organization, settings }: Props) {
                             <form onSubmit={handleSubmit} className="space-y-8">
                                 {/* Logos Section */}
                                 <div>
-                                    <Label className="mb-4 block text-sm font-medium">Logo's</Label>
+                                    <Label className="mb-4 block text-sm font-medium">{t('branding.logos')}</Label>
                                     <div className="grid gap-6 sm:grid-cols-2">
                                         {/* Main Logo */}
                                         <div className="space-y-3">
                                             <div className="flex items-center gap-2">
                                                 <ImageIcon className="h-4 w-4 text-muted-foreground" />
-                                                <span className="text-sm">App logo</span>
+                                                <span className="text-sm">{t('branding.app_logo')}</span>
                                             </div>
                                             {settings.logo_path ? (
                                                 <div className="space-y-3">
@@ -108,7 +110,7 @@ export default function Branding({ organization, settings }: Props) {
                                                         <label className="cursor-pointer">
                                                             <div className="flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs hover:bg-muted">
                                                                 <Upload className="h-3.5 w-3.5" />
-                                                                Wijzigen
+                                                                {t('branding.change')}
                                                             </div>
                                                             <input
                                                                 type="file"
@@ -125,7 +127,7 @@ export default function Branding({ organization, settings }: Props) {
                                                             className="h-auto px-2.5 py-1.5 text-xs text-destructive hover:text-destructive"
                                                         >
                                                             <Trash2 className="mr-1 h-3.5 w-3.5" />
-                                                            Verwijder
+                                                            {t('branding.delete')}
                                                         </Button>
                                                     </div>
                                                 </div>
@@ -136,8 +138,8 @@ export default function Branding({ organization, settings }: Props) {
                                                             {organization.name.charAt(0)}
                                                         </div>
                                                         <div className="text-xs">
-                                                            <p className="font-medium text-muted-foreground">Upload logo</p>
-                                                            <p className="text-muted-foreground/60">PNG, JPG, SVG</p>
+                                                            <p className="font-medium text-muted-foreground">{t('branding.upload_logo')}</p>
+                                                            <p className="text-muted-foreground/60">{t('branding.upload_formats')}</p>
                                                         </div>
                                                     </div>
                                                     <input
@@ -154,7 +156,7 @@ export default function Branding({ organization, settings }: Props) {
                                         <div className="space-y-3">
                                             <div className="flex items-center gap-2">
                                                 <Mail className="h-4 w-4 text-muted-foreground" />
-                                                <span className="text-sm">E-mail logo</span>
+                                                <span className="text-sm">{t('branding.email_logo')}</span>
                                             </div>
                                             {settings.email_logo_path ? (
                                                 <div className="space-y-3">
@@ -169,7 +171,7 @@ export default function Branding({ organization, settings }: Props) {
                                                         <label className="cursor-pointer">
                                                             <div className="flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs hover:bg-muted">
                                                                 <Upload className="h-3.5 w-3.5" />
-                                                                Wijzigen
+                                                                {t('branding.change')}
                                                             </div>
                                                             <input
                                                                 type="file"
@@ -186,7 +188,7 @@ export default function Branding({ organization, settings }: Props) {
                                                             className="h-auto px-2.5 py-1.5 text-xs text-destructive hover:text-destructive"
                                                         >
                                                             <Trash2 className="mr-1 h-3.5 w-3.5" />
-                                                            Verwijder
+                                                            {t('branding.delete')}
                                                         </Button>
                                                     </div>
                                                 </div>
@@ -197,8 +199,8 @@ export default function Branding({ organization, settings }: Props) {
                                                             <Mail className="h-5 w-5 text-muted-foreground/50" />
                                                         </div>
                                                         <div className="text-xs">
-                                                            <p className="font-medium text-muted-foreground">Upload logo</p>
-                                                            <p className="text-muted-foreground/60">PNG, JPG, SVG</p>
+                                                            <p className="font-medium text-muted-foreground">{t('branding.upload_logo')}</p>
+                                                            <p className="text-muted-foreground/60">{t('branding.upload_formats')}</p>
                                                         </div>
                                                     </div>
                                                     <input
@@ -215,10 +217,10 @@ export default function Branding({ organization, settings }: Props) {
 
                                 {/* Colors Section */}
                                 <div className="space-y-4">
-                                    <Label className="text-sm font-medium">Kleuren</Label>
+                                    <Label className="text-sm font-medium">{t('branding.colors')}</Label>
                                     <div className="grid gap-4 sm:grid-cols-4">
                                         <div className="space-y-2">
-                                            <Label className="text-xs text-muted-foreground">Primair</Label>
+                                            <Label className="text-xs text-muted-foreground">{t('branding.primary')}</Label>
                                             <ColorPicker
                                                 value={data.primary_color}
                                                 onChange={(color) => setData('primary_color', color)}
@@ -226,7 +228,7 @@ export default function Branding({ organization, settings }: Props) {
                                             <InputError message={errors.primary_color} />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label className="text-xs text-muted-foreground">Secundair</Label>
+                                            <Label className="text-xs text-muted-foreground">{t('branding.secondary')}</Label>
                                             <ColorPicker
                                                 value={data.secondary_color}
                                                 onChange={(color) => setData('secondary_color', color)}
@@ -234,7 +236,7 @@ export default function Branding({ organization, settings }: Props) {
                                             <InputError message={errors.secondary_color} />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label className="text-xs text-muted-foreground">Accent</Label>
+                                            <Label className="text-xs text-muted-foreground">{t('branding.accent')}</Label>
                                             <ColorPicker
                                                 value={data.accent_color}
                                                 onChange={(color) => setData('accent_color', color)}
@@ -242,7 +244,7 @@ export default function Branding({ organization, settings }: Props) {
                                             <InputError message={errors.accent_color} />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label className="text-xs text-muted-foreground">E-mail achtergrond</Label>
+                                            <Label className="text-xs text-muted-foreground">{t('branding.email_background')}</Label>
                                             <ColorPicker
                                                 value={data.email_background_color}
                                                 onChange={(color) => setData('email_background_color', color)}
@@ -254,15 +256,15 @@ export default function Branding({ organization, settings }: Props) {
 
                                 {/* Email Footer Text */}
                                 <div className="space-y-2">
-                                    <Label className="text-sm font-medium">E-mail voettekst</Label>
+                                    <Label className="text-sm font-medium">{t('branding.email_footer')}</Label>
                                     <Input
                                         value={data.email_footer_text}
                                         onChange={(e) => setData('email_footer_text', e.target.value)}
-                                        placeholder="Deze e-mail is verzonden via FluxDesk"
+                                        placeholder={t('branding.email_footer_placeholder')}
                                         className="max-w-md"
                                     />
                                     <p className="text-xs text-muted-foreground">
-                                        Tekst onderaan elke uitgaande e-mail. Laat leeg om te verbergen.
+                                        {t('branding.email_footer_description')}
                                     </p>
                                     <InputError message={errors.email_footer_text} />
                                 </div>
@@ -271,7 +273,7 @@ export default function Branding({ organization, settings }: Props) {
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-2">
                                         <Eye className="h-4 w-4 text-muted-foreground" />
-                                        <Label className="text-sm font-medium">E-mail voorbeeld</Label>
+                                        <Label className="text-sm font-medium">{t('branding.email_preview')}</Label>
                                     </div>
                                     <div
                                         className="overflow-hidden rounded-lg border"
@@ -298,17 +300,17 @@ export default function Branding({ organization, settings }: Props) {
                                                         style={{ backgroundColor: data.primary_color }}
                                                     >
                                                         <span className="text-sm font-semibold text-white">
-                                                            Ticket ontvangen
+                                                            {t('branding.preview_ticket_received')}
                                                         </span>
                                                     </div>
 
                                                     {/* Content */}
                                                     <div className="space-y-4 p-5">
                                                         <p className="text-sm leading-relaxed text-gray-700">
-                                                            Beste klant,
+                                                            {t('branding.preview_greeting')}
                                                         </p>
                                                         <p className="text-sm leading-relaxed text-gray-700">
-                                                            We hebben uw verzoek ontvangen en zullen zo snel mogelijk reageren.
+                                                            {t('branding.preview_message')}
                                                         </p>
 
                                                         {/* Ticket info card */}
@@ -316,7 +318,7 @@ export default function Branding({ organization, settings }: Props) {
                                                             <div className="space-y-3">
                                                                 <div>
                                                                     <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">
-                                                                        Ticketnummer
+                                                                        {t('branding.preview_ticket_number')}
                                                                     </span>
                                                                     <p className="mt-0.5 text-sm font-semibold text-gray-900">
                                                                         #12345
@@ -324,10 +326,10 @@ export default function Branding({ organization, settings }: Props) {
                                                                 </div>
                                                                 <div>
                                                                     <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">
-                                                                        Onderwerp
+                                                                        {t('branding.preview_subject')}
                                                                     </span>
                                                                     <p className="mt-0.5 text-sm text-gray-700">
-                                                                        Voorbeeld onderwerp
+                                                                        {t('branding.preview_subject_example')}
                                                                     </p>
                                                                 </div>
                                                             </div>
@@ -339,7 +341,7 @@ export default function Branding({ organization, settings }: Props) {
                                                                 className="inline-block rounded-lg px-6 py-2.5 text-sm font-semibold text-white"
                                                                 style={{ backgroundColor: data.primary_color }}
                                                             >
-                                                                Bekijk ticket
+                                                                {t('branding.preview_view_ticket')}
                                                             </span>
                                                         </div>
                                                     </div>
@@ -352,7 +354,7 @@ export default function Branding({ organization, settings }: Props) {
                                                     </span>
                                                     {(data.email_footer_text || !settings.email_footer_text) && (
                                                         <p className="mt-1 text-[10px] text-gray-400">
-                                                            {data.email_footer_text || 'Deze e-mail is verzonden via FluxDesk'}
+                                                            {data.email_footer_text || t('branding.email_footer_placeholder')}
                                                         </p>
                                                     )}
                                                 </div>
@@ -364,7 +366,7 @@ export default function Branding({ organization, settings }: Props) {
                                 {/* Save Button */}
                                 <div className="flex items-center gap-4 pt-2">
                                     <Button type="submit" disabled={processing}>
-                                        Opslaan
+                                        {t('common.save')}
                                     </Button>
                                     <Transition
                                         show={recentlySuccessful}
@@ -373,7 +375,7 @@ export default function Branding({ organization, settings }: Props) {
                                         leave="transition ease-in-out"
                                         leaveTo="opacity-0"
                                     >
-                                        <p className="text-sm text-muted-foreground">Opgeslagen</p>
+                                        <p className="text-sm text-muted-foreground">{t('common.saved')}</p>
                                     </Transition>
                                 </div>
                             </form>

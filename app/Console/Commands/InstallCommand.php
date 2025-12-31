@@ -91,6 +91,17 @@ class InstallCommand extends Command
             return 1;
         }
 
+        // Ask for locale if not already set
+        $this->envVariables['APP_LOCALE'] = select(
+            label: 'Default language',
+            options: [
+                'en' => 'English',
+                'nl' => 'Nederlands',
+            ],
+            default: config('app.locale', 'en'),
+            hint: 'Used for default data (statuses, priorities, etc.) and system emails'
+        );
+
         // Create admin user
         $this->createAdminUser();
 
@@ -230,6 +241,16 @@ class InstallCommand extends Command
         );
 
         $this->envVariables['APP_DEBUG'] = $this->envVariables['APP_ENV'] === 'local' ? 'true' : 'false';
+
+        $this->envVariables['APP_LOCALE'] = select(
+            label: 'Default language',
+            options: [
+                'en' => 'English',
+                'nl' => 'Nederlands',
+            ],
+            default: 'en',
+            hint: 'Used for default data (statuses, priorities, etc.) and system emails'
+        );
     }
 
     protected function configureDatabase(): bool
@@ -600,7 +621,9 @@ class InstallCommand extends Command
             hint: 'Your company or team name'
         );
 
-        spin(function () use ($name, $email, $password, $organizationName) {
+        $locale = $this->envVariables['APP_LOCALE'] ?? 'en';
+
+        spin(function () use ($name, $email, $password, $organizationName, $locale) {
             // Create user
             $user = User::create([
                 'name' => $name,
@@ -610,11 +633,13 @@ class InstallCommand extends Command
                 'email_verified_at' => now(),
             ]);
 
-            // Create organization
-            $organization = Organization::create([
+            // Create organization with locale for the observer
+            $organization = new Organization([
                 'name' => $organizationName,
                 'slug' => Str::slug($organizationName),
             ]);
+            $organization->initialLocale = $locale;
+            $organization->save();
 
             // Attach user as admin
             $user->organizations()->attach($organization->id, [

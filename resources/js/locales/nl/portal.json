@@ -1,0 +1,95 @@
+{
+    "title": "Klantenportaal",
+    "nav": {
+        "my_tickets": "Mijn tickets",
+        "new_ticket": "Nieuw ticket",
+        "profile": "Profiel",
+        "logout": "Uitloggen"
+    },
+    "login": {
+        "title": "Inloggen",
+        "description": "Voer je e-mailadres in om een inloglink te ontvangen",
+        "email": "E-mailadres",
+        "email_placeholder": "naam@voorbeeld.nl",
+        "submit": "Inloglink versturen",
+        "submitting": "Versturen...",
+        "sent": "We hebben je een e-mail gestuurd met een inloglink",
+        "check_email": "Controleer je e-mail voor de inloglink",
+        "check_email_title": "Controleer je e-mail",
+        "check_email_description": "We hebben een inloglink naar je e-mailadres gestuurd. Klik op de link om in te loggen.",
+        "link_valid_duration": "De link is 1 uur geldig",
+        "try_again": "Opnieuw proberen"
+    },
+    "dashboard": {
+        "page_title": "Dashboard",
+        "title": "Mijn tickets",
+        "welcome": "Welkom terug, {{name}}!",
+        "default_customer": "klant",
+        "description": "Bekijk en beheer al je support tickets op één plek.",
+        "ticket_count_one": "{{count}} ticket",
+        "ticket_count_other": "{{count}} tickets",
+        "message_count_one": "{{count}} bericht",
+        "message_count_other": "{{count}} berichten",
+        "empty": {
+            "title": "Geen tickets gevonden",
+            "description": "Je hebt nog geen support tickets. Maak een nieuw ticket aan als je hulp nodig hebt."
+        },
+        "create_ticket": "Nieuw ticket aanmaken"
+    },
+    "tickets": {
+        "view": "Ticket bekijken",
+        "status": "Status",
+        "created": "Aangemaakt",
+        "created_at": "Aangemaakt op {{date}}",
+        "updated": "Laatst bijgewerkt",
+        "reply": "Beantwoorden",
+        "reply_placeholder": "Typ je bericht...",
+        "send_reply": "Antwoord versturen",
+        "sending": "Versturen...",
+        "send": "Versturen",
+        "reply_sent": "Antwoord verzonden",
+        "messages": "Berichten",
+        "no_messages": "Geen berichten gevonden.",
+        "closed_message": "Dit ticket is gesloten. Maak een nieuw ticket aan als je verdere hulp nodig hebt.",
+        "create_new": "Nieuw ticket aanmaken",
+        "you": "Jij",
+        "support": "Support"
+    },
+    "create_ticket": {
+        "page_title": "Nieuw ticket",
+        "title": "Nieuw support ticket",
+        "description": "Beschrijf je vraag of probleem zo duidelijk mogelijk. We reageren zo snel mogelijk.",
+        "back_to_overview": "Terug naar overzicht",
+        "subject": "Onderwerp",
+        "subject_placeholder": "Korte omschrijving van je vraag",
+        "department": "Afdeling",
+        "department_placeholder": "Selecteer een afdeling",
+        "message": "Bericht",
+        "message_placeholder": "Beschrijf je vraag of probleem in detail...",
+        "submit": "Ticket aanmaken",
+        "submitting": "Aanmaken...",
+        "cancel": "Annuleren",
+        "created": "Ticket succesvol aangemaakt"
+    },
+    "profile": {
+        "page_title": "Profiel",
+        "title": "Mijn profiel",
+        "description": "Beheer je contactgegevens. Je e-mailadres kan niet worden gewijzigd.",
+        "name": "Naam",
+        "name_placeholder": "Je naam",
+        "email": "E-mailadres",
+        "email_readonly_hint": "Je e-mailadres kan niet worden gewijzigd.",
+        "phone": "Telefoonnummer",
+        "phone_placeholder": "+31 6 12345678",
+        "company": "Bedrijfsnaam",
+        "company_placeholder": "Je bedrijf",
+        "language": {
+            "title": "Taal",
+            "description": "Kies je voorkeurstaal",
+            "label": "Weergavetaal"
+        },
+        "save": "Opslaan",
+        "saving": "Opslaan...",
+        "saved": "Profiel bijgewerkt"
+    }
+}

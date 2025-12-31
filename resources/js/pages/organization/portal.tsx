@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,6 +25,7 @@ interface Props {
 }
 
 export default function Portal({ organization, settings }: Props) {
+    const { t } = useTranslation('organization');
     const [copied, setCopied] = React.useState(false);
     const [copiedDomain, setCopiedDomain] = React.useState(false);
     const [verifying, setVerifying] = React.useState(false);
@@ -75,7 +77,7 @@ export default function Portal({ organization, settings }: Props) {
 
     return (
         <AppLayout>
-            <Head title="Klantenportaal" />
+            <Head title={t('portal.page_title')} />
 
             <OrganizationLayout>
                 <div className="mx-auto max-w-4xl space-y-6">
@@ -87,9 +89,9 @@ export default function Portal({ organization, settings }: Props) {
                                     <Globe className="h-5 w-5 text-primary" />
                                 </div>
                                 <div className="flex-1">
-                                    <CardTitle className="text-lg">Klantenportaal</CardTitle>
+                                    <CardTitle className="text-lg">{t('portal.title')}</CardTitle>
                                     <CardDescription>
-                                        Beheer de toegang tot het klantenportaal
+                                        {t('portal.description')}
                                     </CardDescription>
                                 </div>
                             </div>
@@ -100,12 +102,12 @@ export default function Portal({ organization, settings }: Props) {
                                 <div className="flex items-center justify-between rounded-lg border p-4">
                                     <div className="space-y-0.5">
                                         <Label htmlFor="portal_enabled" className="text-base font-medium">
-                                            Portaal inschakelen
+                                            {t('portal.enable_portal')}
                                         </Label>
                                         <p className="text-sm text-muted-foreground">
                                             {data.portal_enabled
-                                                ? 'Klanten kunnen inloggen en tickets bekijken'
-                                                : 'Het klantenportaal is uitgeschakeld'}
+                                                ? t('portal.enabled_description')
+                                                : t('portal.disabled_description')}
                                         </p>
                                     </div>
                                     <Switch
@@ -117,16 +119,16 @@ export default function Portal({ organization, settings }: Props) {
 
                                 {/* URL Slug */}
                                 <div className="space-y-2">
-                                    <Label htmlFor="slug">URL-slug</Label>
+                                    <Label htmlFor="slug">{t('portal.url_slug')}</Label>
                                     <Input
                                         id="slug"
                                         value={data.slug}
                                         onChange={(e) => setData('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                                        placeholder="mijn-organisatie"
+                                        placeholder={t('portal.slug_placeholder')}
                                         className="max-w-xs font-mono"
                                     />
                                     <p className="text-xs text-muted-foreground">
-                                        Alleen kleine letters, cijfers en koppeltekens
+                                        {t('portal.slug_help')}
                                     </p>
                                     <InputError message={errors.slug} />
                                 </div>
@@ -153,7 +155,7 @@ export default function Portal({ organization, settings }: Props) {
                                                         )}
                                                     </Button>
                                                 </TooltipTrigger>
-                                                <TooltipContent>Kopieer URL</TooltipContent>
+                                                <TooltipContent>{t('portal.copy_url')}</TooltipContent>
                                             </Tooltip>
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
@@ -167,7 +169,7 @@ export default function Portal({ organization, settings }: Props) {
                                                         <ExternalLink className="h-4 w-4" />
                                                     </Button>
                                                 </TooltipTrigger>
-                                                <TooltipContent>Open portaal</TooltipContent>
+                                                <TooltipContent>{t('portal.open_portal')}</TooltipContent>
                                             </Tooltip>
                                         </div>
                                     </div>
@@ -175,7 +177,7 @@ export default function Portal({ organization, settings }: Props) {
 
                                 <div className="flex items-center gap-4 pt-2">
                                     <Button type="submit" disabled={processing}>
-                                        Opslaan
+                                        {t('common.save')}
                                     </Button>
                                     <Transition
                                         show={recentlySuccessful}
@@ -184,7 +186,7 @@ export default function Portal({ organization, settings }: Props) {
                                         leave="transition ease-in-out"
                                         leaveTo="opacity-0"
                                     >
-                                        <p className="text-sm text-muted-foreground">Opgeslagen</p>
+                                        <p className="text-sm text-muted-foreground">{t('common.saved')}</p>
                                     </Transition>
                                 </div>
                             </form>
@@ -199,9 +201,9 @@ export default function Portal({ organization, settings }: Props) {
                                     <Link2 className="h-5 w-5 text-blue-500" />
                                 </div>
                                 <div>
-                                    <CardTitle className="text-lg">Eigen domein</CardTitle>
+                                    <CardTitle className="text-lg">{t('portal.custom_domain_title')}</CardTitle>
                                     <CardDescription>
-                                        Gebruik je eigen domein voor het klantenportaal
+                                        {t('portal.custom_domain_description')}
                                     </CardDescription>
                                 </div>
                             </div>
@@ -209,16 +211,16 @@ export default function Portal({ organization, settings }: Props) {
                         <CardContent>
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="custom_domain">Domeinnaam</Label>
+                                    <Label htmlFor="custom_domain">{t('portal.domain_name')}</Label>
                                     <Input
                                         id="custom_domain"
                                         value={data.custom_domain}
                                         onChange={(e) => setData('custom_domain', e.target.value.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, ''))}
-                                        placeholder="support.jouwbedrijf.nl"
+                                        placeholder={t('portal.domain_placeholder')}
                                         className="max-w-sm font-mono"
                                     />
                                     <p className="text-xs text-muted-foreground">
-                                        Voer het domein in zonder https:// of trailing slash
+                                        {t('portal.domain_help')}
                                     </p>
                                     <InputError message={errors.custom_domain} />
                                 </div>
@@ -246,7 +248,7 @@ export default function Portal({ organization, settings }: Props) {
                                                             )}
                                                         </Button>
                                                     </TooltipTrigger>
-                                                    <TooltipContent>Kopieer URL</TooltipContent>
+                                                    <TooltipContent>{t('portal.copy_url')}</TooltipContent>
                                                 </Tooltip>
                                             </div>
                                         </div>
@@ -256,10 +258,10 @@ export default function Portal({ organization, settings }: Props) {
                                                 <ShieldCheck className="h-5 w-5 text-green-600 dark:text-green-400 shrink-0" />
                                                 <div className="flex-1">
                                                     <p className="text-sm font-medium text-green-800 dark:text-green-200">
-                                                        DNS geverifieerd
+                                                        {t('portal.dns_verified')}
                                                     </p>
                                                     <p className="text-sm text-green-700 dark:text-green-300">
-                                                        Je eigen domein is correct geconfigureerd en actief.
+                                                        {t('portal.dns_verified_description')}
                                                     </p>
                                                 </div>
                                                 <Button
@@ -280,11 +282,13 @@ export default function Portal({ organization, settings }: Props) {
                                                     <div className="flex-1 space-y-3">
                                                         <div>
                                                             <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
-                                                                DNS-configuratie vereist
+                                                                {t('portal.dns_required')}
                                                             </p>
                                                             <p className="mt-1 text-sm text-amber-700 dark:text-amber-300">
-                                                                Voeg een CNAME-record toe voor <code className="rounded bg-amber-100 px-1 py-0.5 font-mono text-xs dark:bg-amber-900/50">{data.custom_domain}</code> dat
-                                                                verwijst naar <code className="rounded bg-amber-100 px-1 py-0.5 font-mono text-xs dark:bg-amber-900/50">{typeof window !== 'undefined' ? window.location.host : 'jouw-fluxdesk-domein'}</code>
+                                                                {t('portal.dns_required_description_prefix')}{' '}
+                                                                <code className="rounded bg-amber-100 px-1 py-0.5 font-mono text-xs dark:bg-amber-900/50">{data.custom_domain}</code>{' '}
+                                                                {t('portal.dns_required_description_points_to')}{' '}
+                                                                <code className="rounded bg-amber-100 px-1 py-0.5 font-mono text-xs dark:bg-amber-900/50">{typeof window !== 'undefined' ? window.location.host : 'your-fluxdesk-domain'}</code>
                                                             </p>
                                                         </div>
                                                         {!domainModified && settings.custom_domain && (
@@ -299,19 +303,19 @@ export default function Portal({ organization, settings }: Props) {
                                                                 {verifying ? (
                                                                     <>
                                                                         <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                                                                        Verifiëren...
+                                                                        {t('portal.verifying')}
                                                                     </>
                                                                 ) : (
                                                                     <>
                                                                         <ShieldCheck className="h-4 w-4 mr-2" />
-                                                                        DNS verifiëren
+                                                                        {t('portal.verify_dns')}
                                                                     </>
                                                                 )}
                                                             </Button>
                                                         )}
                                                         {domainModified && (
                                                             <p className="text-xs text-amber-600 dark:text-amber-400">
-                                                                Sla eerst de wijzigingen op voordat je de DNS kunt verifiëren.
+                                                                {t('portal.save_first')}
                                                             </p>
                                                         )}
                                                     </div>
@@ -323,7 +327,7 @@ export default function Portal({ organization, settings }: Props) {
 
                                 <div className="flex items-center gap-4 pt-2">
                                     <Button type="submit" disabled={processing}>
-                                        Opslaan
+                                        {t('common.save')}
                                     </Button>
                                     <Transition
                                         show={recentlySuccessful}
@@ -332,7 +336,7 @@ export default function Portal({ organization, settings }: Props) {
                                         leave="transition ease-in-out"
                                         leaveTo="opacity-0"
                                     >
-                                        <p className="text-sm text-muted-foreground">Opgeslagen</p>
+                                        <p className="text-sm text-muted-foreground">{t('common.saved')}</p>
                                     </Transition>
                                 </div>
                             </form>

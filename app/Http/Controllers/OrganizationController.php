@@ -31,6 +31,7 @@ class OrganizationController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'locale' => ['required', 'string', 'in:en,nl'],
             'slug' => [
                 'nullable',
                 'string',
@@ -50,10 +51,13 @@ class OrganizationController extends Controller
             $slug = $originalSlug.'-'.$counter++;
         }
 
-        $organization = Organization::create([
+        // Create organization with locale for the observer
+        $organization = new Organization([
             'name' => $validated['name'],
             'slug' => $slug,
         ]);
+        $organization->initialLocale = $validated['locale'];
+        $organization->save();
 
         // Attach user as admin
         $request->user()->organizations()->attach($organization->id, [

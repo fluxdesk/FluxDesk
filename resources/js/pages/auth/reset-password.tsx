@@ -1,12 +1,12 @@
-import { update } from '@/routes/password';
-import { Form, Head } from '@inertiajs/react';
-
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import AuthLayout from '@/layouts/auth-layout';
+import { update } from '@/routes/password';
+import { Form, Head } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 
 interface ResetPasswordProps {
     token: string;
@@ -14,12 +14,14 @@ interface ResetPasswordProps {
 }
 
 export default function ResetPassword({ token, email }: ResetPasswordProps) {
+    const { t } = useTranslation('auth');
+
     return (
         <AuthLayout
-            title="Wachtwoord resetten"
-            description="Kies een nieuw wachtwoord"
+            title={t('reset_password.title')}
+            description={t('reset_password.description')}
         >
-            <Head title="Wachtwoord resetten" />
+            <Head title={t('reset_password.page_title')} />
 
             <Form
                 {...update.form()}
@@ -29,7 +31,7 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
                 {({ processing, errors }) => (
                     <div className="grid gap-6">
                         <div className="grid gap-2">
-                            <Label htmlFor="email">E-mail</Label>
+                            <Label htmlFor="email">{t('reset_password.email')}</Label>
                             <Input
                                 id="email"
                                 type="email"
@@ -46,7 +48,7 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="password">Wachtwoord</Label>
+                            <Label htmlFor="password">{t('reset_password.password')}</Label>
                             <Input
                                 id="password"
                                 type="password"
@@ -54,14 +56,14 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
                                 autoComplete="new-password"
                                 className="mt-1 block w-full"
                                 autoFocus
-                                placeholder="Wachtwoord"
+                                placeholder={t('reset_password.password_placeholder')}
                             />
                             <InputError message={errors.password} />
                         </div>
 
                         <div className="grid gap-2">
                             <Label htmlFor="password_confirmation">
-                                Bevestig wachtwoord
+                                {t('reset_password.password_confirmation')}
                             </Label>
                             <Input
                                 id="password_confirmation"
@@ -69,7 +71,7 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
                                 name="password_confirmation"
                                 autoComplete="new-password"
                                 className="mt-1 block w-full"
-                                placeholder="Bevestig wachtwoord"
+                                placeholder={t('reset_password.password_confirmation_placeholder')}
                             />
                             <InputError
                                 message={errors.password_confirmation}
@@ -84,7 +86,7 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
                             data-test="reset-password-button"
                         >
                             {processing && <Spinner />}
-                            Wachtwoord resetten
+                            {t('reset_password.submit')}
                         </Button>
                     </div>
                 )}

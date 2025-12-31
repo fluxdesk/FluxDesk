@@ -1,0 +1,170 @@
+{
+    "title": "Contacten",
+    "description": "Beheer je klantencontacten",
+    "search_placeholder": "Zoek contacten...",
+    "count": "{{count}} contact",
+    "count_plural": "{{count}} contacten",
+    "total": "totaal",
+    "empty": {
+        "title": "Geen contacten",
+        "description": "Voeg je eerste contact toe om te beginnen"
+    },
+    "create": {
+        "title": "Nieuw contact",
+        "description": "Voeg een nieuw contact toe aan je organisatie"
+    },
+    "edit": {
+        "title": "Contact bewerken",
+        "description": "Werk de contactgegevens bij."
+    },
+    "delete_disabled_has_tickets": "Kan contact met bestaande tickets niet verwijderen",
+    "fields": {
+        "name": "Naam",
+        "name_placeholder": "Jan Jansen",
+        "email": "E-mailadres",
+        "email_placeholder": "jan@voorbeeld.nl",
+        "phone": "Telefoon (optioneel)",
+        "phone_placeholder": "+31 6 12345678",
+        "company": "Bedrijf",
+        "new_company": "Nieuw bedrijf",
+        "no_company": "Geen bedrijf",
+        "sla": "SLA",
+        "no_sla": "Geen specifieke SLA",
+        "sla_default_label": "(organisatie-standaard)",
+        "sla_hint": "Kies een specifieke SLA voor dit contact, of gebruik de organisatie-standaard",
+        "notes": "Notities",
+        "notes_placeholder": "Interne notities..."
+    },
+    "table": {
+        "contact": "Contact",
+        "email": "E-mail",
+        "company": "Bedrijf",
+        "phone": "Telefoon",
+        "tickets": "Tickets"
+    },
+    "actions": {
+        "add": "Contact toevoegen",
+        "create": "Aanmaken",
+        "update": "Opslaan",
+        "delete": "Verwijderen",
+        "cancel": "Annuleren",
+        "view_tickets": "Tickets bekijken",
+        "send_email": "E-mail versturen"
+    },
+    "notifications": {
+        "created": "Contact aangemaakt",
+        "updated": "Contact bijgewerkt",
+        "deleted": "Contact verwijderd",
+        "delete_failed": "Contact verwijderen mislukt"
+    },
+    "delete_dialog": {
+        "title": "Contact verwijderen",
+        "description": "Weet je zeker dat je {{name}} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt."
+    },
+    "companies": {
+        "title": "Bedrijven",
+        "page_title": "Bedrijven",
+        "description": "Beheer bedrijven en hun contacten",
+        "search_placeholder": "Zoek bedrijven...",
+        "count": "{{count}} bedrijf",
+        "count_plural": "{{count}} bedrijven",
+        "total": "totaal",
+        "empty": {
+            "title": "Nog geen bedrijven",
+            "description": "Voeg je eerste bedrijf toe om contacten te groeperen"
+        },
+        "create": {
+            "title": "Nieuw bedrijf",
+            "description": "Voeg een nieuw bedrijf toe aan je organisatie.",
+            "button": "Bedrijf toevoegen"
+        },
+        "edit": {
+            "title": "Bedrijf bewerken",
+            "description": "Wijzig de gegevens van dit bedrijf.",
+            "button": "Bewerken"
+        },
+        "delete": {
+            "button": "Verwijderen",
+            "title": "Bedrijf verwijderen",
+            "description": "Weet je zeker dat je {{name}} wilt verwijderen? Gekoppelde contacten worden ontkoppeld maar niet verwijderd.",
+            "confirm": "Verwijderen"
+        },
+        "fields": {
+            "name": "Bedrijfsnaam",
+            "name_required": "Bedrijfsnaam",
+            "name_placeholder": "Acme B.V.",
+            "email": "E-mail",
+            "email_placeholder": "info@acme.nl",
+            "phone": "Telefoon",
+            "phone_placeholder": "+31 20 1234567",
+            "website": "Website",
+            "website_placeholder": "https://acme.nl",
+            "domains": "E-maildomeinen",
+            "domains_placeholder": "acme.nl, acme.com...",
+            "domains_hint": "Contacten met deze e-maildomeinen worden automatisch gekoppeld.",
+            "address": "Adres",
+            "address_placeholder": "Straatnaam 123\n1234 AB Amsterdam",
+            "notes": "Notities",
+            "notes_placeholder": "Interne notities...",
+            "sla": "SLA",
+            "sla_default": "Standaard organisatie SLA",
+            "sla_default_label": "(standaard)"
+        },
+        "table": {
+            "company": "Bedrijf",
+            "domains": "Domeinen",
+            "contacts": "Contacten",
+            "tickets": "Tickets",
+            "sla": "SLA"
+        },
+        "detail": {
+            "company_info": "Bedrijfsgegevens",
+            "email": "E-mail",
+            "phone": "Telefoon",
+            "website": "Website",
+            "address": "Adres",
+            "sla": "SLA",
+            "no_info": "Geen gegevens ingevuld",
+            "notes": "Notities",
+            "contacts": "contacten",
+            "tickets_total": "tickets totaal",
+            "open": "open"
+        },
+        "contacts": {
+            "title": "Contacten",
+            "description": "Alle contacten die aan dit bedrijf gekoppeld zijn",
+            "empty": "Nog geen contacten gekoppeld",
+            "link_button": "Contact koppelen",
+            "link_title": "Contact koppelen",
+            "link_description": "Selecteer een contact om aan dit bedrijf te koppelen.",
+            "select_placeholder": "Selecteer een contact",
+            "link": "Koppelen",
+            "unlink": "Ontkoppelen",
+            "unlink_title": "Contact ontkoppelen",
+            "unlink_description": "Weet je zeker dat je {{name}} wilt ontkoppelen van dit bedrijf?",
+            "unlink_confirm": "Ontkoppelen",
+            "linked": "Contact gekoppeld aan bedrijf",
+            "unlinked": "Contact ontkoppeld van bedrijf",
+            "link_failed": "Contact koppelen mislukt",
+            "unlink_failed": "Contact ontkoppelen mislukt"
+        },
+        "tickets": {
+            "title": "Recente tickets",
+            "description": "De meest recente tickets van dit bedrijf",
+            "empty": "Nog geen tickets",
+            "view_all": "Bekijk alle {{count}} tickets",
+            "table": {
+                "ticket": "Ticket",
+                "contact": "Contact",
+                "status": "Status",
+                "priority": "Prioriteit"
+            }
+        },
+        "notifications": {
+            "created": "Bedrijf aangemaakt",
+            "updated": "Bedrijf bijgewerkt",
+            "deleted": "Bedrijf verwijderd",
+            "delete_failed": "Bedrijf verwijderen mislukt"
+        }
+    }
+}

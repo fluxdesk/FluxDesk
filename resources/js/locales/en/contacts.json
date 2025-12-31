@@ -1,0 +1,170 @@
+{
+    "title": "Contacts",
+    "description": "Manage your customer contacts",
+    "search_placeholder": "Search contacts...",
+    "count": "{{count}} contact",
+    "count_plural": "{{count}} contacts",
+    "total": "total",
+    "empty": {
+        "title": "No contacts",
+        "description": "Add your first contact to get started"
+    },
+    "create": {
+        "title": "New contact",
+        "description": "Add a new contact to your organization"
+    },
+    "edit": {
+        "title": "Edit contact",
+        "description": "Update the contact details."
+    },
+    "delete_disabled_has_tickets": "Cannot delete contact with existing tickets",
+    "fields": {
+        "name": "Name",
+        "name_placeholder": "John Doe",
+        "email": "Email address",
+        "email_placeholder": "john@example.com",
+        "phone": "Phone (optional)",
+        "phone_placeholder": "+1 234 567 890",
+        "company": "Company",
+        "new_company": "New company",
+        "no_company": "No company",
+        "sla": "SLA",
+        "no_sla": "No specific SLA",
+        "sla_default_label": "(organization default)",
+        "sla_hint": "Choose a specific SLA for this contact, or use the organization default",
+        "notes": "Notes",
+        "notes_placeholder": "Internal notes..."
+    },
+    "table": {
+        "contact": "Contact",
+        "email": "Email",
+        "company": "Company",
+        "phone": "Phone",
+        "tickets": "Tickets"
+    },
+    "actions": {
+        "add": "Add contact",
+        "create": "Create",
+        "update": "Save",
+        "delete": "Delete",
+        "cancel": "Cancel",
+        "view_tickets": "View tickets",
+        "send_email": "Send email"
+    },
+    "notifications": {
+        "created": "Contact created",
+        "updated": "Contact updated",
+        "deleted": "Contact deleted",
+        "delete_failed": "Failed to delete contact"
+    },
+    "delete_dialog": {
+        "title": "Delete contact",
+        "description": "Are you sure you want to delete {{name}}? This action cannot be undone."
+    },
+    "companies": {
+        "title": "Companies",
+        "page_title": "Companies",
+        "description": "Manage companies and their contacts",
+        "search_placeholder": "Search companies...",
+        "count": "{{count}} company",
+        "count_plural": "{{count}} companies",
+        "total": "total",
+        "empty": {
+            "title": "No companies yet",
+            "description": "Add your first company to group contacts"
+        },
+        "create": {
+            "title": "New company",
+            "description": "Add a new company to your organization.",
+            "button": "Add company"
+        },
+        "edit": {
+            "title": "Edit company",
+            "description": "Edit this company's information.",
+            "button": "Edit"
+        },
+        "delete": {
+            "button": "Delete",
+            "title": "Delete company",
+            "description": "Are you sure you want to delete {{name}}? Linked contacts will be unlinked but not deleted.",
+            "confirm": "Delete"
+        },
+        "fields": {
+            "name": "Company name",
+            "name_required": "Company name",
+            "name_placeholder": "Acme Inc.",
+            "email": "Email",
+            "email_placeholder": "info@acme.com",
+            "phone": "Phone",
+            "phone_placeholder": "+1 234 567 890",
+            "website": "Website",
+            "website_placeholder": "https://acme.com",
+            "domains": "Email domains",
+            "domains_placeholder": "acme.com, acme.org...",
+            "domains_hint": "Contacts with these email domains will be automatically linked.",
+            "address": "Address",
+            "address_placeholder": "123 Main Street\n12345 City",
+            "notes": "Notes",
+            "notes_placeholder": "Internal notes...",
+            "sla": "SLA",
+            "sla_default": "Default organization SLA",
+            "sla_default_label": "(default)"
+        },
+        "table": {
+            "company": "Company",
+            "domains": "Domains",
+            "contacts": "Contacts",
+            "tickets": "Tickets",
+            "sla": "SLA"
+        },
+        "detail": {
+            "company_info": "Company information",
+            "email": "Email",
+            "phone": "Phone",
+            "website": "Website",
+            "address": "Address",
+            "sla": "SLA",
+            "no_info": "No information provided",
+            "notes": "Notes",
+            "contacts": "contacts",
+            "tickets_total": "tickets total",
+            "open": "open"
+        },
+        "contacts": {
+            "title": "Contacts",
+            "description": "All contacts linked to this company",
+            "empty": "No contacts linked yet",
+            "link_button": "Link contact",
+            "link_title": "Link contact",
+            "link_description": "Select a contact to link to this company.",
+            "select_placeholder": "Select a contact",
+            "link": "Link",
+            "unlink": "Unlink",
+            "unlink_title": "Unlink contact",
+            "unlink_description": "Are you sure you want to unlink {{name}} from this company?",
+            "unlink_confirm": "Unlink",
+            "linked": "Contact linked to company",
+            "unlinked": "Contact unlinked from company",
+            "link_failed": "Failed to link contact",
+            "unlink_failed": "Failed to unlink contact"
+        },
+        "tickets": {
+            "title": "Recent tickets",
+            "description": "Most recent tickets from this company",
+            "empty": "No tickets yet",
+            "view_all": "View all {{count}} tickets",
+            "table": {
+                "ticket": "Ticket",
+                "contact": "Contact",
+                "status": "Status",
+                "priority": "Priority"
+            }
+        },
+        "notifications": {
+            "created": "Company created",
+            "updated": "Company updated",
+            "deleted": "Company deleted",
+            "delete_failed": "Failed to delete company"
+        }
+    }
+}

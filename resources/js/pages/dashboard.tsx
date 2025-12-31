@@ -15,6 +15,7 @@ import {
 import { AppShell } from '@/layouts/app-shell';
 import type { Ticket } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import {
     AlertTriangle,
     CheckCircle2,
@@ -100,40 +101,16 @@ interface Props {
     ticketsByChannel: ChannelData[];
 }
 
-const dateRanges = [
-    { value: '24h', label: 'Afgelopen 24 uur' },
-    { value: '7d', label: 'Afgelopen 7 dagen' },
-    { value: '30d', label: 'Afgelopen 30 dagen' },
-    { value: '90d', label: 'Afgelopen 3 maanden' },
-];
+const DATE_RANGE_KEYS = ['24h', '7d', '30d', '90d'] as const;
 
-const chartConfig = {
-    created: {
-        label: 'Aangemaakt',
-        color: 'var(--color-chart-1)',
-    },
-    resolved: {
-        label: 'Opgelost',
-        color: 'var(--color-chart-2)',
-    },
-} satisfies ChartConfig;
-
-const agentChartConfig = {
-    total_assigned: {
-        label: 'Toegewezen',
-        color: 'var(--color-chart-1)',
-    },
-    resolved_count: {
-        label: 'Opgelost',
-        color: 'var(--color-chart-2)',
-    },
-} satisfies ChartConfig;
-
-function formatTime(hours: number): string {
-    if (hours === 0) return '0u';
-    if (hours < 1) return `${Math.round(hours * 60)}m`;
-    if (hours < 24) return `${Math.round(hours)}u`;
-    return `${Math.round(hours / 24)}d`;
+function useFormatTime() {
+    const { t } = useTranslation('dashboard');
+    return (hours: number): string => {
+        if (hours === 0) return t('time.hours', { count: 0 });
+        if (hours < 1) return t('time.minutes', { count: Math.round(hours * 60) });
+        if (hours < 24) return t('time.hours', { count: Math.round(hours) });
+        return t('time.days', { count: Math.round(hours / 24) });
+    };
 }
 
 export default function Dashboard({
@@ -149,22 +126,34 @@ export default function Dashboard({
     trends,
     ticketsByChannel,
 }: Props) {
+    const { t } = useTranslation('dashboard');
     const handleRangeChange = (value: string) => {
         router.get('/dashboard', { range: value }, { preserveState: true, preserveScroll: true });
     };
 
+    const chartConfig = {
+        created: {
+            label: t('charts.created'),
+            color: 'var(--color-chart-1)',
+        },
+        resolved: {
+            label: t('charts.resolved'),
+            color: 'var(--color-chart-2)',
+        },
+    } satisfies ChartConfig;
+
     return (
         <AppShell>
-            <Head title="Statistieken" />
+            <Head title={t('page_title')} />
 
             <div className="flex min-h-full flex-col">
                 {/* Header - Fixed */}
                 <div className="shrink-0 border-b px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="text-xl font-semibold tracking-tight">Statistieken</h1>
+                            <h1 className="text-xl font-semibold tracking-tight">{t('title')}</h1>
                             <p className="text-sm text-muted-foreground">
-                                Overzicht van je supporttickets
+                                {t('description')}
                             </p>
                         </div>
                         <Select value={selectedRange} onValueChange={handleRangeChange}>
@@ -172,9 +161,9 @@ export default function Dashboard({
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                {dateRanges.map((range) => (
-                                    <SelectItem key={range.value} value={range.value}>
-                                        {range.label}
+                                {DATE_RANGE_KEYS.map((rangeKey) => (
+                                    <SelectItem key={rangeKey} value={rangeKey}>
+                                        {t(`date_ranges.${rangeKey}`)}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -186,30 +175,30 @@ export default function Dashboard({
                     {/* Row 1: Metric Cards */}
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                         <MetricCard
-                            title="Open tickets"
+                            title={t('metrics.open_tickets')}
                             value={metrics.open_tickets}
-                            description={`${metrics.total_tickets} tickets totaal`}
+                            description={t('metrics.total_tickets', { count: metrics.total_tickets })}
                             icon={Inbox}
                             variant="default"
                         />
                         <MetricCard
-                            title="Niet toegewezen"
+                            title={t('metrics.unassigned')}
                             value={metrics.unassigned_tickets}
-                            description="Wacht op toewijzing"
+                            description={t('metrics.awaiting_assignment')}
                             icon={Users}
                             variant={metrics.unassigned_tickets > 0 ? 'warning' : 'default'}
                         />
                         <MetricCard
-                            title="SLA overschreden"
+                            title={t('metrics.sla_breached')}
                             value={metrics.overdue_tickets}
-                            description="Deadline verstreken"
+                            description={t('metrics.deadline_passed')}
                             icon={AlertTriangle}
                             variant={metrics.overdue_tickets > 0 ? 'destructive' : 'default'}
                         />
                         <MetricCard
-                            title="Opgelost deze week"
+                            title={t('metrics.resolved_this_week')}
                             value={metrics.resolved_this_week}
-                            description={`${metrics.tickets_this_week} nieuw deze week`}
+                            description={t('metrics.new_this_week', { count: metrics.tickets_this_week })}
                             icon={CheckCircle2}
                             variant="success"
                         />
@@ -226,9 +215,9 @@ export default function Dashboard({
                         {/* Tickets Over Time */}
                         <Card>
                             <CardHeader className="pb-2">
-                                <CardTitle className="text-base">Ticketactiviteit</CardTitle>
+                                <CardTitle className="text-base">{t('activity.title')}</CardTitle>
                                 <CardDescription>
-                                    {dateRanges.find((r) => r.value === selectedRange)?.label || 'Afgelopen 7 dagen'}
+                                    {t(`date_ranges.${selectedRange}`) || t('date_ranges.7d')}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
@@ -282,8 +271,8 @@ export default function Dashboard({
                         {/* Tickets by Status */}
                         <Card>
                             <CardHeader>
-                                <CardTitle className="text-base">Tickets per status</CardTitle>
-                                <CardDescription>Huidige verdeling</CardDescription>
+                                <CardTitle className="text-base">{t('activity.tickets_per_status')}</CardTitle>
+                                <CardDescription>{t('activity.current_distribution')}</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <div className="flex items-center justify-center">
@@ -340,10 +329,10 @@ export default function Dashboard({
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-base">
                                     <AlertTriangle className="h-4 w-4 text-destructive" />
-                                    SLA-waarschuwingen
+                                    {t('sla.title')}
                                 </CardTitle>
                                 <CardDescription>
-                                    Tickets met risico of deadline overschreden
+                                    {t('sla.description')}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
@@ -351,7 +340,7 @@ export default function Dashboard({
                                     <div className="flex flex-col items-center justify-center py-8 text-center">
                                         <CheckCircle2 className="mb-2 h-8 w-8 text-green-500" />
                                         <p className="text-sm text-muted-foreground">
-                                            Alle tickets zijn binnen SLA
+                                            {t('sla.all_within_sla')}
                                         </p>
                                     </div>
                                 ) : (
@@ -380,15 +369,15 @@ export default function Dashboard({
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-base">
                                     <TicketIcon className="h-4 w-4" />
-                                    Recente tickets
+                                    {t('recent_tickets.title')}
                                 </CardTitle>
-                                <CardDescription>Laatste activiteit</CardDescription>
+                                <CardDescription>{t('recent_tickets.description')}</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 {recentTickets.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center py-8 text-center">
                                         <Inbox className="mb-2 h-8 w-8 text-muted-foreground" />
-                                        <p className="text-sm text-muted-foreground">Nog geen tickets</p>
+                                        <p className="text-sm text-muted-foreground">{t('recent_tickets.empty')}</p>
                                     </div>
                                 ) : (
                                     <div className="space-y-2">
@@ -477,26 +466,28 @@ function MetricCard({
 }
 
 function ResponseTimeCard({ metrics }: { metrics: ResponseTimeMetrics }) {
+    const { t } = useTranslation('dashboard');
+    const formatTime = useFormatTime();
     return (
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                     <Clock className="h-4 w-4" />
-                    Responstijden
+                    {t('response_times.title')}
                 </CardTitle>
-                <CardDescription>Gemiddelde tijden in deze periode</CardDescription>
+                <CardDescription>{t('response_times.description')}</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-2">
-                        <p className="text-sm text-muted-foreground">Eerste reactie</p>
+                        <p className="text-sm text-muted-foreground">{t('response_times.first_response')}</p>
                         <p className="text-3xl font-bold">{formatTime(metrics.avgFirstResponse)}</p>
-                        <p className="text-xs text-muted-foreground">gemiddeld</p>
+                        <p className="text-xs text-muted-foreground">{t('response_times.average')}</p>
                     </div>
                     <div className="space-y-2">
-                        <p className="text-sm text-muted-foreground">Oplostijd</p>
+                        <p className="text-sm text-muted-foreground">{t('response_times.resolution_time')}</p>
                         <p className="text-3xl font-bold">{formatTime(metrics.avgResolution)}</p>
-                        <p className="text-xs text-muted-foreground">gemiddeld</p>
+                        <p className="text-xs text-muted-foreground">{t('response_times.average')}</p>
                     </div>
                 </div>
             </CardContent>
@@ -505,16 +496,17 @@ function ResponseTimeCard({ metrics }: { metrics: ResponseTimeMetrics }) {
 }
 
 function TrendCard({ trends }: { trends: Trends }) {
+    const { t } = useTranslation('dashboard');
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="text-base">Vergelijking vorige periode</CardTitle>
-                <CardDescription>Ten opzichte van dezelfde periode ervoor</CardDescription>
+                <CardTitle className="text-base">{t('trends.title')}</CardTitle>
+                <CardDescription>{t('trends.description')}</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="grid grid-cols-2 gap-6">
-                    <TrendItem label="Nieuwe tickets" current={trends.created.current} change={trends.created.change} />
-                    <TrendItem label="Opgeloste tickets" current={trends.resolved.current} change={trends.resolved.change} />
+                    <TrendItem label={t('trends.new_tickets')} current={trends.created.current} change={trends.created.change} />
+                    <TrendItem label={t('trends.resolved_tickets')} current={trends.resolved.current} change={trends.resolved.change} />
                 </div>
             </CardContent>
         </Card>
@@ -544,20 +536,31 @@ function TrendItem({ label, current, change }: { label: string; current: number;
 }
 
 function AgentPerformanceCard({ agents }: { agents: AgentPerformance[] }) {
+    const { t } = useTranslation('dashboard');
+    const agentChartConfig = {
+        total_assigned: {
+            label: t('charts.assigned'),
+            color: 'var(--color-chart-1)',
+        },
+        resolved_count: {
+            label: t('charts.resolved'),
+            color: 'var(--color-chart-2)',
+        },
+    } satisfies ChartConfig;
     return (
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                     <Users className="h-4 w-4" />
-                    Prestaties per medewerker
+                    {t('agent_performance.title')}
                 </CardTitle>
-                <CardDescription>Tickets toegewezen en opgelost</CardDescription>
+                <CardDescription>{t('agent_performance.description')}</CardDescription>
             </CardHeader>
             <CardContent>
                 {agents.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-8 text-center">
                         <Users className="mb-2 h-8 w-8 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">Geen ticketactiviteit in deze periode</p>
+                        <p className="text-sm text-muted-foreground">{t('agent_performance.no_activity')}</p>
                     </div>
                 ) : (
                     <ChartContainer config={agentChartConfig} className="h-[200px] w-full">
@@ -584,6 +587,7 @@ function AgentPerformanceCard({ agents }: { agents: AgentPerformance[] }) {
 }
 
 function ChannelBreakdownCard({ data }: { data: ChannelData[] }) {
+    const { t } = useTranslation('dashboard');
     const icons: Record<string, React.ElementType> = {
         globe: Globe,
         mail: Mail,
@@ -595,14 +599,14 @@ function ChannelBreakdownCard({ data }: { data: ChannelData[] }) {
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="text-base">Tickets per kanaal</CardTitle>
-                <CardDescription>Verdeling over invoerkanalen</CardDescription>
+                <CardTitle className="text-base">{t('channels.title')}</CardTitle>
+                <CardDescription>{t('channels.description')}</CardDescription>
             </CardHeader>
             <CardContent>
                 {!hasData ? (
                     <div className="flex flex-col items-center justify-center py-8 text-center">
                         <Globe className="mb-2 h-8 w-8 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">Geen tickets in deze periode</p>
+                        <p className="text-sm text-muted-foreground">{t('channels.no_tickets')}</p>
                     </div>
                 ) : (
                     <div className="flex items-center justify-center">
@@ -651,6 +655,7 @@ function SlaTicketRow({
     ticket: Ticket;
     variant: 'breached' | 'at-risk';
 }) {
+    const { t } = useTranslation('dashboard');
     const deadline = new Date(ticket.sla_deadline!);
     const now = new Date();
     const diff = deadline.getTime() - now.getTime();
@@ -659,8 +664,8 @@ function SlaTicketRow({
 
     const timeText =
         variant === 'breached'
-            ? `${hours}u ${minutes}m te laat`
-            : `${hours}u ${minutes}m over`;
+            ? t('sla.overdue', { hours, minutes })
+            : t('sla.remaining', { hours, minutes });
 
     return (
         <Link

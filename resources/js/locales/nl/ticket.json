@@ -1,0 +1,112 @@
+{
+    "title": "Ticket",
+    "details": {
+        "title": "Ticketdetails",
+        "number": "Ticketnummer",
+        "subject": "Onderwerp",
+        "status": "Status",
+        "priority": "Prioriteit",
+        "assigned_to": "Toegewezen aan",
+        "department": "Afdeling",
+        "created": "Aangemaakt",
+        "updated": "Laatst bijgewerkt",
+        "contact": "Contact",
+        "company": "Bedrijf",
+        "tags": "Tags",
+        "sla": "SLA",
+        "unassigned": "Niet toegewezen",
+        "unknown": "Onbekend"
+    },
+    "messages": {
+        "title": "Berichten",
+        "reply": "Beantwoorden",
+        "internal_note": "Interne notitie",
+        "add_note": "Interne notitie toevoegen",
+        "placeholder": "Typ je bericht...",
+        "send": "Versturen",
+        "empty": "Nog geen berichten"
+    },
+    "actions": {
+        "assign": "Toewijzen",
+        "assign_to": "Toewijzen aan {{name}}",
+        "unassign": "Toewijzing verwijderen",
+        "change_status": "Status wijzigen",
+        "change_priority": "Prioriteit wijzigen",
+        "add_tag": "Tag toevoegen",
+        "remove_tag": "Tag verwijderen",
+        "close": "Ticket sluiten",
+        "reopen": "Ticket heropenen",
+        "delete": "Ticket verwijderen",
+        "merge": "Tickets samenvoegen"
+    },
+    "notifications": {
+        "assigned": "Ticket toegewezen",
+        "status_changed": "Status gewijzigd",
+        "priority_changed": "Prioriteit gewijzigd",
+        "closed": "Ticket gesloten",
+        "reopened": "Ticket heropend",
+        "deleted": "Ticket verwijderd",
+        "reply_sent": "Antwoord verzonden",
+        "note_added": "Notitie toegevoegd"
+    },
+    "sla": {
+        "first_response": "Eerste reactie",
+        "resolution": "Oplossing",
+        "done": "Klaar"
+    },
+    "timeline": {
+        "title": "Tijdlijn",
+        "created": "Aangemaakt",
+        "updated": "Bijgewerkt",
+        "first_response": "Eerste reactie",
+        "resolved": "Opgelost"
+    },
+    "create": {
+        "title": "Nieuw ticket",
+        "subject": "Onderwerp",
+        "subject_placeholder": "Onderwerp",
+        "description": "Beschrijving",
+        "contact": "Contact",
+        "priority": "Prioriteit",
+        "department": "Afdeling",
+        "send_via": "Verzenden via",
+        "select_department": "Selecteer afdeling",
+        "select_channel": "Selecteer kanaal",
+        "submit": "Aanmaken",
+        "creating": "Aanmaken...",
+        "created": "Ticket aangemaakt",
+        "error": "Er is een fout opgetreden",
+        "select_contact": "Selecteer contact",
+        "select_contact_hint": "Selecteer een contact",
+        "click_to_choose": "Klik om te kiezen",
+        "write_first_message": "Schrijf hieronder je eerste bericht",
+        "message_to": "Bericht aan {{name}}...",
+        "write_message": "Schrijf je bericht...",
+        "drop_files": "Bestanden hier neerzetten",
+        "add_attachments": "Bijlagen toevoegen ({{current}}/10)",
+        "max_attachments": "Maximum bereikt (10)",
+        "preview": "Preview",
+        "edit": "Bewerken",
+        "preview_empty": "Typ iets om de preview te zien...",
+        "validation": {
+            "subject_required": "Vul een onderwerp in",
+            "message_required": "Vul een bericht in",
+            "contact_required": "Selecteer of voer een contact in"
+        }
+    },
+    "contact_dialog": {
+        "title": "Contact selecteren",
+        "description": "Kies een bestaand contact of voer een nieuw e-mailadres in.",
+        "new_contact": "Nieuw contact",
+        "email_placeholder": "E-mailadres",
+        "name_placeholder": "Naam (optioneel)",
+        "use_contact": "Gebruik dit contact",
+        "or_existing": "of kies bestaand",
+        "search_placeholder": "Zoek contacten...",
+        "no_contacts": "Geen contacten gevonden",
+        "change_title": "Contact wijzigen",
+        "change_description": "Selecteer een ander contact voor dit ticket.",
+        "search_label": "Zoek contacten",
+        "search_hint": "Zoek op naam of e-mail..."
+    }
+}

@@ -1,0 +1,131 @@
+{
+    "title": "Instellingen",
+    "nav": {
+        "sidebar_description": "Beheer je account",
+        "profile": "Profiel",
+        "password": "Wachtwoord",
+        "two_factor": "Tweestapsverificatie",
+        "notifications": "Notificaties",
+        "appearance": "Weergave"
+    },
+    "profile": {
+        "page_title": "Profielinstellingen",
+        "title": "Profielgegevens",
+        "description": "Wijzig je naam en e-mailadres",
+        "name": "Naam",
+        "name_placeholder": "Volledige naam",
+        "email": "E-mailadres",
+        "email_placeholder": "E-mailadres",
+        "email_not_verified": "Je e-mailadres is nog niet geverifieerd.",
+        "resend_verification": "Verificatie-e-mail opnieuw versturen",
+        "verification_sent": "Een nieuwe verificatielink is verstuurd.",
+        "save": "Wijzigingen opslaan",
+        "saved": "Profiel bijgewerkt",
+        "error": "Profiel bijwerken mislukt",
+        "language": {
+            "title": "Taal",
+            "description": "Kies je voorkeurstaal voor de interface",
+            "label": "Weergavetaal"
+        },
+        "danger_zone": {
+            "title": "Gevarenzone",
+            "description": "Verwijder je account en al je gegevens permanent"
+        }
+    },
+    "password": {
+        "page_title": "Wachtwoordinstellingen",
+        "title": "Wachtwoord wijzigen",
+        "description": "Gebruik een lang, willekeurig wachtwoord voor extra veiligheid",
+        "current": "Huidig wachtwoord",
+        "current_placeholder": "Voer huidig wachtwoord in",
+        "new": "Nieuw wachtwoord",
+        "new_placeholder": "Voer nieuw wachtwoord in",
+        "confirm": "Bevestig wachtwoord",
+        "confirm_placeholder": "Bevestig nieuw wachtwoord",
+        "submit": "Wachtwoord wijzigen",
+        "saved": "Wachtwoord bijgewerkt",
+        "error": "Wachtwoord bijwerken mislukt"
+    },
+    "appearance": {
+        "page_title": "Weergave-instellingen",
+        "title": "Thema",
+        "description": "Kies hoe de applicatie eruitziet",
+        "light": "Licht",
+        "light_description": "Lichte achtergrond met donkere tekst",
+        "dark": "Donker",
+        "dark_description": "Donkere achtergrond met lichte tekst",
+        "system": "Systeem",
+        "system_description": "Volgt je systeemvoorkeur",
+        "changed": "Thema gewijzigd naar {{theme}}"
+    },
+    "notifications": {
+        "page_title": "Notificatie-instellingen",
+        "title": "E-mailnotificaties",
+        "description": "Kies welke meldingen je wilt ontvangen voor {{organization}}",
+        "new_ticket": "Nieuwe tickets",
+        "new_ticket_description": "Ontvang een melding wanneer een nieuw ticket wordt aangemaakt",
+        "contact_reply": "Klantreacties",
+        "contact_reply_description": "Ontvang een melding wanneer een klant reageert op een ticket",
+        "internal_note": "Interne notities",
+        "internal_note_description": "Ontvang een melding wanneer een collega een interne notitie plaatst",
+        "ticket_assigned": "Ticket toewijzing",
+        "ticket_assigned_description": "Ontvang een melding wanneer een ticket aan je wordt toegewezen",
+        "mention": "Vermeldingen",
+        "mention_description": "Ontvang een melding wanneer iemand je @vermeldt in een bericht",
+        "sla_warning": "SLA-waarschuwingen",
+        "sla_warning_description": "Ontvang een melding wanneer een SLA-deadline nadert",
+        "save": "Instellingen opslaan",
+        "saving": "Opslaan...",
+        "saved": "Notificatie-instellingen opgeslagen",
+        "error": "Er ging iets mis bij het opslaan"
+    },
+    "two_factor": {
+        "page_title": "Tweestapsverificatie",
+        "title": "Tweestapsverificatie",
+        "description": "Voeg een extra beveiligingslaag toe aan je account",
+        "status_enabled": "Ingeschakeld",
+        "status_disabled": "Uitgeschakeld",
+        "enabled_description": "Tweestapsverificatie is ingeschakeld. Bij het inloggen word je gevraagd om een veilige PIN, die je kunt ophalen uit je authenticator app.",
+        "disabled_description": "Schakel tweestapsverificatie in voor een extra beveiligingslaag. Je hebt een TOTP-compatibele authenticator app nodig zoals Google Authenticator of Authy.",
+        "enable": "2FA inschakelen",
+        "disable": "2FA uitschakelen",
+        "continue_setup": "Doorgaan met instellen",
+        "enabled_success": "Tweestapsverificatie ingeschakeld",
+        "disabled_success": "Tweestapsverificatie uitgeschakeld",
+        "disable_error": "Tweestapsverificatie uitschakelen mislukt",
+        "recovery": {
+            "title": "2FA Herstelcodes",
+            "description": "Met herstelcodes kun je toegang krijgen als je je 2FA-apparaat kwijt bent. Bewaar ze in een veilige wachtwoordmanager.",
+            "show": "Herstelcodes bekijken",
+            "hide": "Herstelcodes verbergen",
+            "regenerate": "Codes opnieuw genereren",
+            "info": "Elke herstelcode kan één keer worden gebruikt om toegang te krijgen tot je account en wordt daarna verwijderd. Heb je meer nodig? Klik op Codes opnieuw genereren hierboven."
+        },
+        "setup": {
+            "title": "Tweestapsverificatie inschakelen",
+            "title_verify": "Verificatiecode controleren",
+            "title_enabled": "Tweestapsverificatie ingeschakeld",
+            "description": "Scan de QR-code of voer de sleutel in je authenticator app in om tweestapsverificatie af te ronden",
+            "description_verify": "Voer de 6-cijferige code uit je authenticator app in",
+            "description_enabled": "Tweestapsverificatie is nu ingeschakeld. Scan de QR-code of voer de sleutel in je authenticator app in.",
+            "manual_entry": "of voer de code handmatig in",
+            "continue": "Doorgaan",
+            "close": "Sluiten",
+            "back": "Terug",
+            "confirm": "Bevestigen"
+        }
+    },
+    "delete_account": {
+        "title": "Account verwijderen",
+        "description": "Verwijder je account en al je gegevens",
+        "warning": "Waarschuwing",
+        "warning_text": "Let op, dit kan niet ongedaan worden gemaakt.",
+        "button": "Account verwijderen",
+        "dialog_title": "Weet je zeker dat je je account wilt verwijderen?",
+        "dialog_description": "Zodra je account is verwijderd, worden ook alle gegevens permanent verwijderd. Voer je wachtwoord in om te bevestigen dat je je account permanent wilt verwijderen.",
+        "password": "Wachtwoord",
+        "password_placeholder": "Wachtwoord",
+        "cancel": "Annuleren",
+        "confirm": "Account verwijderen"
+    }
+}

@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { Link, router, usePage, useForm } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import {
     Inbox,
     Users,
@@ -62,7 +63,9 @@ import {
 import InputError from '@/components/input-error';
 import { useInitials } from '@/hooks/use-initials';
 import { ColorPicker } from '@/components/common/color-picker';
+import { LanguageSelect } from '@/components/common/language-select';
 import { NotificationDropdown } from '@/components/notifications/notification-dropdown';
+import { SUPPORTED_LOCALES } from '@/i18n/config';
 import type { SharedData, TicketFolder, Tag } from '@/types';
 import { toast } from 'sonner';
 
@@ -83,6 +86,7 @@ const folderIcons: Record<string, React.ComponentType<{ className?: string }>> =
 };
 
 export function AppNav({ isCollapsed, folders: propFolders, currentFolder }: AppNavProps) {
+    const { t } = useTranslation('common');
     const { auth, organization, organizations, isAdmin, inboxCount, folders: sharedFolders } = usePage<SharedData>().props;
     // Use props if provided, otherwise fall back to shared data
     const folders = propFolders ?? sharedFolders ?? [];
@@ -94,15 +98,15 @@ export function AppNav({ isCollapsed, folders: propFolders, currentFolder }: App
     const [dragOverFolderId, setDragOverFolderId] = React.useState<number | string | null>(null);
 
     const mainLinks = [
-        { title: 'Contacten', label: '', icon: Users, href: '/contacts' },
-        { title: 'Bedrijven', label: '', icon: Building, href: '/companies' },
-        { title: 'Statistieken', label: '', icon: LayoutDashboard, href: '/dashboard' },
+        { title: t('nav.contacts'), label: '', icon: Users, href: '/contacts' },
+        { title: t('nav.companies'), label: '', icon: Building, href: '/companies' },
+        { title: t('nav.dashboard'), label: '', icon: LayoutDashboard, href: '/dashboard' },
     ];
 
     // Only show organization settings for admins
     const bottomLinks = [
-        ...(isAdmin ? [{ title: 'Organisatie', label: '', icon: Building2, href: '/organization/settings' }] : []),
-        { title: 'Instellingen', label: '', icon: Settings, href: '/settings/profile' },
+        ...(isAdmin ? [{ title: t('nav.organization'), label: '', icon: Building2, href: '/organization/settings' }] : []),
+        { title: t('nav.settings'), label: '', icon: Settings, href: '/settings/profile' },
     ];
 
     const isActive = (href: string) => {
@@ -151,7 +155,7 @@ export function AppNav({ isCollapsed, folders: propFolders, currentFolder }: App
             const folderIdValue = folderId === 'inbox' ? null : folderId;
             router.post(`/inbox/${ticketId}/move`, { folder_id: folderIdValue }, {
                 preserveState: true,
-                onSuccess: () => toast.success('Ticket verplaatst'),
+                onSuccess: () => toast.success(t('folder_dialog.ticket_moved')),
             });
         }
     };
@@ -193,7 +197,7 @@ export function AppNav({ isCollapsed, folders: propFolders, currentFolder }: App
                                         </span>
                                     )}
                                     <span className={cn('ml-2 truncate', isCollapsed && 'hidden')}>
-                                        {organization?.name || 'Organisatie'}
+                                        {organization?.name || t('nav.organization')}
                                     </span>
                                 </span>
                                 <ChevronsUpDown className={cn('ml-auto h-4 w-4 shrink-0 opacity-50', isCollapsed && 'hidden')} />
@@ -201,7 +205,7 @@ export function AppNav({ isCollapsed, folders: propFolders, currentFolder }: App
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start" className="w-64">
                             <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-                                Wissel van organisatie
+                                {t('nav.switch_organization')}
                             </DropdownMenuLabel>
                             {organizations.map((org) => (
                                 <DropdownMenuItem
@@ -225,7 +229,7 @@ export function AppNav({ isCollapsed, folders: propFolders, currentFolder }: App
                                 <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded border border-dashed">
                                     <Plus className="h-3 w-3" />
                                 </div>
-                                <span>Organisatie aanmaken</span>
+                                <span>{t('nav.create_organization')}</span>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -240,7 +244,7 @@ export function AppNav({ isCollapsed, folders: propFolders, currentFolder }: App
                         <div className="px-2">
                             {!isCollapsed && (
                                 <div className="flex items-center justify-between px-2 py-1">
-                                    <span className="text-xs font-medium text-muted-foreground">Mappen</span>
+                                    <span className="text-xs font-medium text-muted-foreground">{t('nav.folders')}</span>
                                     <Button
                                         variant="ghost"
                                         size="icon"
@@ -356,11 +360,11 @@ export function AppNav({ isCollapsed, folders: propFolders, currentFolder }: App
                                                 <ContextMenuContent className="w-48">
                                                     <ContextMenuItem onClick={() => setEditingFolder(folder)}>
                                                         <Pencil className="mr-2 h-4 w-4" />
-                                                        Hernoemen
+                                                        {t('folder_dialog.rename')}
                                                     </ContextMenuItem>
                                                     <ContextMenuItem onClick={() => setEditingFolder(folder)}>
                                                         <Palette className="mr-2 h-4 w-4" />
-                                                        Kleur wijzigen
+                                                        {t('folder_dialog.change_color')}
                                                     </ContextMenuItem>
                                                 </ContextMenuContent>
                                             </ContextMenu>
@@ -424,22 +428,22 @@ export function AppNav({ isCollapsed, folders: propFolders, currentFolder }: App
                                                         <ContextMenuContent className="w-48">
                                                             <ContextMenuItem onClick={() => setEditingFolder(folder)}>
                                                                 <Pencil className="mr-2 h-4 w-4" />
-                                                                Hernoemen
+                                                                {t('folder_dialog.rename')}
                                                             </ContextMenuItem>
                                                             <ContextMenuItem onClick={() => setEditingFolder(folder)}>
                                                                 <Palette className="mr-2 h-4 w-4" />
-                                                                Kleur wijzigen
+                                                                {t('folder_dialog.change_color')}
                                                             </ContextMenuItem>
                                                             <ContextMenuSeparator />
                                                             <ContextMenuItem
                                                                 className="text-destructive focus:text-destructive"
                                                                 onClick={() => router.delete(`/folders/${folder.id}`, {
-                                                                    onSuccess: () => toast.success('Map verwijderd'),
-                                                                    onError: () => toast.error('Map verwijderen mislukt'),
+                                                                    onSuccess: () => toast.success(t('folder_dialog.deleted')),
+                                                                    onError: () => toast.error(t('folder_dialog.delete_failed')),
                                                                 })}
                                                             >
                                                                 <Trash2 className="mr-2 h-4 w-4" />
-                                                                Verwijderen
+                                                                {t('actions.delete')}
                                                             </ContextMenuItem>
                                                         </ContextMenuContent>
                                                     </ContextMenu>
@@ -567,7 +571,7 @@ export function AppNav({ isCollapsed, folders: propFolders, currentFolder }: App
                             <DropdownMenuItem asChild>
                                 <Link href="/settings/profile">
                                     <Settings className="mr-2 h-4 w-4" />
-                                    Profielinstellingen
+                                    {t('nav.profile_settings')}
                                 </Link>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
@@ -576,7 +580,7 @@ export function AppNav({ isCollapsed, folders: propFolders, currentFolder }: App
                                 className="text-destructive focus:text-destructive"
                             >
                                 <LogOut className="mr-2 h-4 w-4" />
-                                Uitloggen
+                                {t('nav.logout')}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -591,7 +595,11 @@ export function AppNav({ isCollapsed, folders: propFolders, currentFolder }: App
 }
 
 function CreateOrgDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
-    const { data, setData, post, processing, errors, reset } = useForm({ name: '' });
+    const { t } = useTranslation('common');
+    const { data, setData, post, processing, errors, reset } = useForm({
+        name: '',
+        locale: 'en',
+    });
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -608,19 +616,32 @@ function CreateOrgDialog({ open, onOpenChange }: { open: boolean; onOpenChange: 
             <DialogContent>
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
-                        <DialogTitle>Organisatie aanmaken</DialogTitle>
-                        <DialogDescription>Maak een nieuwe organisatie aan voor een apart team of project.</DialogDescription>
+                        <DialogTitle>{t('organization_dialog.title')}</DialogTitle>
+                        <DialogDescription>{t('organization_dialog.description')}</DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="org-name">Organisatienaam</Label>
-                            <Input id="org-name" value={data.name} onChange={(e) => setData('name', e.target.value)} placeholder="Bedrijf B.V." autoFocus />
+                            <Label htmlFor="org-name">{t('organization_dialog.name_label')}</Label>
+                            <Input id="org-name" value={data.name} onChange={(e) => setData('name', e.target.value)} placeholder={t('organization_dialog.name_placeholder')} autoFocus />
                             <InputError message={errors.name} />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="org-locale">{t('onboarding.email_locale')}</Label>
+                            <LanguageSelect
+                                name="locale"
+                                value={data.locale}
+                                availableLocales={[...SUPPORTED_LOCALES]}
+                                onValueChange={(value) => setData('locale', value)}
+                            />
+                            <InputError message={errors.locale} />
+                            <p className="text-xs text-muted-foreground">
+                                {t('onboarding.email_locale_hint')}
+                            </p>
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Annuleren</Button>
-                        <Button type="submit" disabled={processing || !data.name.trim()}>{processing ? 'Aanmaken...' : 'Aanmaken'}</Button>
+                        <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>{t('actions.cancel')}</Button>
+                        <Button type="submit" disabled={processing || !data.name.trim()}>{processing ? t('organization_dialog.creating') : t('actions.create')}</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
@@ -629,6 +650,7 @@ function CreateOrgDialog({ open, onOpenChange }: { open: boolean; onOpenChange: 
 }
 
 function CreateFolderDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+    const { t } = useTranslation('common');
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         color: '#6b7280',
@@ -638,11 +660,11 @@ function CreateFolderDialog({ open, onOpenChange }: { open: boolean; onOpenChang
         e.preventDefault();
         post('/folders', {
             onSuccess: () => {
-                toast.success('Map aangemaakt');
+                toast.success(t('folder_dialog.created'));
                 reset();
                 onOpenChange(false);
             },
-            onError: () => toast.error('Map aanmaken mislukt'),
+            onError: () => toast.error(t('folder_dialog.create_failed')),
         });
     }
 
@@ -651,33 +673,33 @@ function CreateFolderDialog({ open, onOpenChange }: { open: boolean; onOpenChang
             <DialogContent>
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
-                        <DialogTitle>Map aanmaken</DialogTitle>
-                        <DialogDescription>Maak een nieuwe map om je tickets te organiseren.</DialogDescription>
+                        <DialogTitle>{t('folder_dialog.create_title')}</DialogTitle>
+                        <DialogDescription>{t('folder_dialog.create_description')}</DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="folder-name">Mapnaam</Label>
+                            <Label htmlFor="folder-name">{t('folder_dialog.name_label')}</Label>
                             <Input
                                 id="folder-name"
                                 value={data.name}
                                 onChange={(e) => setData('name', e.target.value)}
-                                placeholder="Mijn map"
+                                placeholder={t('folder_dialog.name_placeholder')}
                                 autoFocus
                             />
                             <InputError message={errors.name} />
                         </div>
                         <div className="grid gap-2">
-                            <Label>Kleur</Label>
+                            <Label>{t('folder_dialog.color_label')}</Label>
                             <ColorPicker value={data.color} onChange={(color) => setData('color', color)} />
                             <InputError message={errors.color} />
                         </div>
                     </div>
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                            Annuleren
+                            {t('actions.cancel')}
                         </Button>
                         <Button type="submit" disabled={processing || !data.name.trim()}>
-                            {processing ? 'Aanmaken...' : 'Aanmaken'}
+                            {processing ? t('folder_dialog.creating') : t('actions.create')}
                         </Button>
                     </DialogFooter>
                 </form>
@@ -687,6 +709,7 @@ function CreateFolderDialog({ open, onOpenChange }: { open: boolean; onOpenChang
 }
 
 function EditFolderDialog({ folder, onOpenChange }: { folder: TicketFolder | null; onOpenChange: (open: boolean) => void }) {
+    const { t } = useTranslation('common');
     const { data, setData, patch, processing, errors, reset } = useForm({
         name: folder?.name || '',
         color: folder?.color || '#6b7280',
@@ -703,11 +726,11 @@ function EditFolderDialog({ folder, onOpenChange }: { folder: TicketFolder | nul
         if (!folder) return;
         patch(`/folders/${folder.id}`, {
             onSuccess: () => {
-                toast.success('Map bijgewerkt');
+                toast.success(t('folder_dialog.updated'));
                 reset();
                 onOpenChange(false);
             },
-            onError: () => toast.error('Map bijwerken mislukt'),
+            onError: () => toast.error(t('folder_dialog.update_failed')),
         });
     }
 
@@ -716,12 +739,12 @@ function EditFolderDialog({ folder, onOpenChange }: { folder: TicketFolder | nul
             <DialogContent>
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
-                        <DialogTitle>Map bewerken</DialogTitle>
-                        <DialogDescription>Wijzig de mapnaam en kleur.</DialogDescription>
+                        <DialogTitle>{t('folder_dialog.edit_title')}</DialogTitle>
+                        <DialogDescription>{t('folder_dialog.edit_description')}</DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="edit-folder-name">Mapnaam</Label>
+                            <Label htmlFor="edit-folder-name">{t('folder_dialog.name_label')}</Label>
                             <Input
                                 id="edit-folder-name"
                                 value={data.name}
@@ -731,17 +754,17 @@ function EditFolderDialog({ folder, onOpenChange }: { folder: TicketFolder | nul
                             <InputError message={errors.name} />
                         </div>
                         <div className="grid gap-2">
-                            <Label>Kleur</Label>
+                            <Label>{t('folder_dialog.color_label')}</Label>
                             <ColorPicker value={data.color} onChange={(color) => setData('color', color)} />
                             <InputError message={errors.color} />
                         </div>
                     </div>
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                            Annuleren
+                            {t('actions.cancel')}
                         </Button>
                         <Button type="submit" disabled={processing || !data.name.trim()}>
-                            {processing ? 'Opslaan...' : 'Opslaan'}
+                            {processing ? t('folder_dialog.saving') : t('actions.save')}
                         </Button>
                     </DialogFooter>
                 </form>

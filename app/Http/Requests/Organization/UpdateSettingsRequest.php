@@ -41,6 +41,7 @@ class UpdateSettingsRequest extends FormRequest
             'use_random_numbers' => ['nullable', 'boolean'],
             'random_number_length' => ['nullable', 'integer', 'min:4', 'max:12'],
             'timezone' => ['nullable', 'string', 'timezone'],
+            'email_locale' => ['nullable', 'string', 'in:en,nl'],
             'business_hours' => ['nullable', 'array'],
             'business_hours.*.day' => ['required_with:business_hours', 'integer', 'between:0,6'],
             'business_hours.*.start' => ['required_with:business_hours', 'date_format:H:i'],

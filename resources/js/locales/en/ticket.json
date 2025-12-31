@@ -1,0 +1,112 @@
+{
+    "title": "Ticket",
+    "details": {
+        "title": "Ticket details",
+        "number": "Ticket number",
+        "subject": "Subject",
+        "status": "Status",
+        "priority": "Priority",
+        "assigned_to": "Assigned to",
+        "department": "Department",
+        "created": "Created",
+        "updated": "Last updated",
+        "contact": "Contact",
+        "company": "Company",
+        "tags": "Tags",
+        "sla": "SLA",
+        "unassigned": "Unassigned",
+        "unknown": "Unknown"
+    },
+    "messages": {
+        "title": "Messages",
+        "reply": "Reply",
+        "internal_note": "Internal note",
+        "add_note": "Add internal note",
+        "placeholder": "Type your message...",
+        "send": "Send",
+        "empty": "No messages yet"
+    },
+    "actions": {
+        "assign": "Assign",
+        "assign_to": "Assign to {{name}}",
+        "unassign": "Unassign",
+        "change_status": "Change status",
+        "change_priority": "Change priority",
+        "add_tag": "Add tag",
+        "remove_tag": "Remove tag",
+        "close": "Close ticket",
+        "reopen": "Reopen ticket",
+        "delete": "Delete ticket",
+        "merge": "Merge tickets"
+    },
+    "notifications": {
+        "assigned": "Ticket assigned",
+        "status_changed": "Status changed",
+        "priority_changed": "Priority changed",
+        "closed": "Ticket closed",
+        "reopened": "Ticket reopened",
+        "deleted": "Ticket deleted",
+        "reply_sent": "Reply sent",
+        "note_added": "Note added"
+    },
+    "sla": {
+        "first_response": "First response",
+        "resolution": "Resolution",
+        "done": "Done"
+    },
+    "timeline": {
+        "title": "Timeline",
+        "created": "Created",
+        "updated": "Updated",
+        "first_response": "First response",
+        "resolved": "Resolved"
+    },
+    "create": {
+        "title": "New ticket",
+        "subject": "Subject",
+        "subject_placeholder": "Subject",
+        "description": "Description",
+        "contact": "Contact",
+        "priority": "Priority",
+        "department": "Department",
+        "send_via": "Send via",
+        "select_department": "Select department",
+        "select_channel": "Select channel",
+        "submit": "Create",
+        "creating": "Creating...",
+        "created": "Ticket created",
+        "error": "An error occurred",
+        "select_contact": "Select contact",
+        "select_contact_hint": "Select a contact",
+        "click_to_choose": "Click to choose",
+        "write_first_message": "Write your first message below",
+        "message_to": "Message to {{name}}...",
+        "write_message": "Write your message...",
+        "drop_files": "Drop files here",
+        "add_attachments": "Add attachments ({{current}}/10)",
+        "max_attachments": "Maximum reached (10)",
+        "preview": "Preview",
+        "edit": "Edit",
+        "preview_empty": "Type something to see the preview...",
+        "validation": {
+            "subject_required": "Enter a subject",
+            "message_required": "Enter a message",
+            "contact_required": "Select or enter a contact"
+        }
+    },
+    "contact_dialog": {
+        "title": "Select contact",
+        "description": "Choose an existing contact or enter a new email address.",
+        "new_contact": "New contact",
+        "email_placeholder": "Email address",
+        "name_placeholder": "Name (optional)",
+        "use_contact": "Use this contact",
+        "or_existing": "or choose existing",
+        "search_placeholder": "Search contacts...",
+        "no_contacts": "No contacts found",
+        "change_title": "Change Contact",
+        "change_description": "Select a different contact for this ticket.",
+        "search_label": "Search contacts",
+        "search_hint": "Search by name or email..."
+    }
+}

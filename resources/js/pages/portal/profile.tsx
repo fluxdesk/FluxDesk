@@ -7,8 +7,10 @@ import { type PortalSharedData } from '@/types/portal';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { CheckCircle2, Loader2, Save } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function PortalProfile() {
+    const { t } = useTranslation('portal');
     const { organization, contact } = usePage<PortalSharedData>().props;
     const primaryColor = organization?.settings?.primary_color ?? '#18181b';
     const orgSlug = organization?.slug ?? '';
@@ -39,20 +41,20 @@ export default function PortalProfile() {
 
     return (
         <PortalLayout>
-            <Head title="Profiel" />
+            <Head title={t('profile.page_title')} />
 
             <Card className="max-w-2xl mx-auto">
                 <CardHeader>
-                    <CardTitle className="text-xl">Mijn profiel</CardTitle>
+                    <CardTitle className="text-xl">{t('profile.title')}</CardTitle>
                     <CardDescription>
-                        Beheer je contactgegevens. Je e-mailadres kan niet worden gewijzigd.
+                        {t('profile.description')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Email (disabled) */}
                         <div className="space-y-2">
-                            <Label htmlFor="email">E-mailadres</Label>
+                            <Label htmlFor="email">{t('profile.email')}</Label>
                             <Input
                                 id="email"
                                 type="email"
@@ -61,17 +63,17 @@ export default function PortalProfile() {
                                 className="bg-muted"
                             />
                             <p className="text-xs text-muted-foreground">
-                                Je e-mailadres kan niet worden gewijzigd.
+                                {t('profile.email_readonly_hint')}
                             </p>
                         </div>
 
                         {/* Name */}
                         <div className="space-y-2">
-                            <Label htmlFor="name">Naam</Label>
+                            <Label htmlFor="name">{t('profile.name')}</Label>
                             <Input
                                 id="name"
                                 type="text"
-                                placeholder="Je naam"
+                                placeholder={t('profile.name_placeholder')}
                                 value={form.data.name}
                                 onChange={(e) => form.setData('name', e.target.value)}
                                 disabled={form.processing}
@@ -83,11 +85,11 @@ export default function PortalProfile() {
 
                         {/* Phone */}
                         <div className="space-y-2">
-                            <Label htmlFor="phone">Telefoonnummer</Label>
+                            <Label htmlFor="phone">{t('profile.phone')}</Label>
                             <Input
                                 id="phone"
                                 type="tel"
-                                placeholder="+31 6 12345678"
+                                placeholder={t('profile.phone_placeholder')}
                                 value={form.data.phone}
                                 onChange={(e) => form.setData('phone', e.target.value)}
                                 disabled={form.processing}
@@ -99,11 +101,11 @@ export default function PortalProfile() {
 
                         {/* Company */}
                         <div className="space-y-2">
-                            <Label htmlFor="company">Bedrijfsnaam</Label>
+                            <Label htmlFor="company">{t('profile.company')}</Label>
                             <Input
                                 id="company"
                                 type="text"
-                                placeholder="Je bedrijf"
+                                placeholder={t('profile.company_placeholder')}
                                 value={form.data.company}
                                 onChange={(e) => form.setData('company', e.target.value)}
                                 disabled={form.processing}
@@ -117,7 +119,7 @@ export default function PortalProfile() {
                             {showSuccess && (
                                 <div className="flex items-center gap-2 text-sm text-green-600">
                                     <CheckCircle2 className="size-4" />
-                                    Profiel bijgewerkt
+                                    {t('profile.saved')}
                                 </div>
                             )}
                             <div className={showSuccess ? '' : 'ml-auto'}>
@@ -130,12 +132,12 @@ export default function PortalProfile() {
                                     {form.processing ? (
                                         <>
                                             <Loader2 className="size-4 mr-2 animate-spin" />
-                                            Opslaan...
+                                            {t('profile.saving')}
                                         </>
                                     ) : (
                                         <>
                                             <Save className="size-4 mr-2" />
-                                            Opslaan
+                                            {t('profile.save')}
                                         </>
                                     )}
                                 </Button>

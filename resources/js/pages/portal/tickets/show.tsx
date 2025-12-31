@@ -9,12 +9,14 @@ import { cn } from '@/lib/utils';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { formatDateTime } from '@/lib/date';
 import { ArrowLeft, Download, Loader2, Paperclip, Send, User } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     ticket: PortalTicket & { messages?: PortalMessage[] };
 }
 
 export default function PortalTicketShow({ ticket }: Props) {
+    const { t } = useTranslation('portal');
     const { organization } = usePage<PortalSharedData>().props;
     const primaryColor = organization?.settings?.primary_color ?? '#18181b';
     const orgSlug = organization?.slug ?? '';
@@ -46,7 +48,7 @@ export default function PortalTicketShow({ ticket }: Props) {
                     className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                     <ArrowLeft className="size-4" />
-                    Terug naar overzicht
+                    {t('create_ticket.back_to_overview')}
                 </Link>
             </div>
 
@@ -89,7 +91,7 @@ export default function PortalTicketShow({ ticket }: Props) {
                 </CardHeader>
                 <CardContent className="pt-0">
                     <p className="text-sm text-muted-foreground">
-                        Aangemaakt op {formatDateTime(ticket.created_at)}
+                        {t('tickets.created_at', { date: formatDateTime(ticket.created_at) })}
                     </p>
                 </CardContent>
             </Card>
@@ -97,12 +99,12 @@ export default function PortalTicketShow({ ticket }: Props) {
             {/* Messages */}
             <Card className="mb-6">
                 <CardHeader>
-                    <CardTitle className="text-lg">Berichten</CardTitle>
+                    <CardTitle className="text-lg">{t('tickets.messages')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {messages.length === 0 ? (
                         <p className="text-sm text-muted-foreground text-center py-8">
-                            Geen berichten gevonden.
+                            {t('tickets.no_messages')}
                         </p>
                     ) : (
                         messages.map((message) => (
@@ -111,6 +113,7 @@ export default function PortalTicketShow({ ticket }: Props) {
                                 message={message}
                                 isOwn={message.is_from_contact}
                                 primaryColor={primaryColor}
+                                t={t}
                             />
                         ))
                     )}
@@ -121,12 +124,12 @@ export default function PortalTicketShow({ ticket }: Props) {
             {!ticket.status?.is_closed && (
                 <Card>
                     <CardHeader>
-                        <CardTitle className="text-lg">Reageren</CardTitle>
+                        <CardTitle className="text-lg">{t('tickets.reply')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <Textarea
-                                placeholder="Typ je bericht..."
+                                placeholder={t('tickets.reply_placeholder')}
                                 value={form.data.body}
                                 onChange={(e) => form.setData('body', e.target.value)}
                                 disabled={form.processing}
@@ -146,12 +149,12 @@ export default function PortalTicketShow({ ticket }: Props) {
                                     {form.processing ? (
                                         <>
                                             <Loader2 className="size-4 mr-2 animate-spin" />
-                                            Versturen...
+                                            {t('tickets.sending')}
                                         </>
                                     ) : (
                                         <>
                                             <Send className="size-4 mr-2" />
-                                            Versturen
+                                            {t('tickets.send')}
                                         </>
                                     )}
                                 </Button>
@@ -165,10 +168,10 @@ export default function PortalTicketShow({ ticket }: Props) {
                 <Card>
                     <CardContent className="py-8 text-center">
                         <p className="text-muted-foreground">
-                            Dit ticket is gesloten. Maak een nieuw ticket aan als je verdere hulp nodig hebt.
+                            {t('tickets.closed_message')}
                         </p>
                         <Link href={`/${orgSlug}/portal/tickets/create`} className="mt-4 inline-block">
-                            <Button variant="outline">Nieuw ticket aanmaken</Button>
+                            <Button variant="outline">{t('tickets.create_new')}</Button>
                         </Link>
                     </CardContent>
                 </Card>
@@ -181,12 +184,13 @@ interface MessageBubbleProps {
     message: PortalMessage;
     isOwn: boolean;
     primaryColor: string;
+    t: (key: string) => string;
 }
 
-function MessageBubble({ message, isOwn, primaryColor }: MessageBubbleProps) {
+function MessageBubble({ message, isOwn, primaryColor, t }: MessageBubbleProps) {
     const senderName = isOwn
-        ? 'Jij'
-        : message.user?.name ?? 'Support';
+        ? t('tickets.you')
+        : message.user?.name ?? t('tickets.support');
 
     return (
         <div className={cn('flex gap-3', isOwn && 'flex-row-reverse')}>

@@ -27,6 +27,7 @@ class User extends Authenticatable
         'password',
         'is_super_admin',
         'avatar_path',
+        'locale',
     ];
 
     /**

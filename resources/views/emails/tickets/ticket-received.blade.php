@@ -1,25 +1,25 @@
 @extends('emails.tickets.layout')
 
-@section('title', 'Ticket ontvangen - #' . $ticket->ticket_number)
+@section('title', __('emails.ticket_received.title', ['ticket_number' => $ticket->ticket_number]))
 
 @section('preheader')
-    Uw ticket #{{ $ticket->ticket_number }} is ontvangen: {{ Str::limit($ticket->subject, 60) }}
+    {{ __('emails.ticket_received.preheader', ['ticket_number' => $ticket->ticket_number, 'subject' => Str::limit($ticket->subject, 60)]) }}
 @endsection
 
 @section('header')
-    Ticket ontvangen
+    {{ __('emails.ticket_received.header') }}
 @endsection
 
 @section('content')
     <p style="margin: 0 0 24px; font-size: 15px; line-height: 1.6; color: #374151;">
-        Beste {{ $ticket->contact?->name ?? 'klant' }},
+        {{ __('emails.dear') }} {{ $ticket->contact?->name ?? __('emails.customer') }},
     </p>
 
     <p style="margin: 0 0 24px; font-size: 15px; line-height: 1.6; color: #374151;">
         @if($createdByAgent ?? false)
-            We hebben voor u een nieuw ticket aangemaakt en zullen zo snel mogelijk reageren.
+            {{ __('emails.ticket_received.body_agent_created') }}
         @else
-            We hebben uw verzoek ontvangen en zullen zo snel mogelijk reageren.
+            {{ __('emails.ticket_received.body_contact_created') }}
         @endif
     </p>
 
@@ -30,13 +30,13 @@
                 <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                     <tr>
                         <td style="padding-bottom: 12px;">
-                            <span style="font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Ticketnummer</span>
+                            <span style="font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">{{ __('emails.ticket_received.ticket_number') }}</span>
                             <p style="margin: 4px 0 0; font-size: 16px; font-weight: 600; color: #111827;">#{{ $ticket->ticket_number }}</p>
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <span style="font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Onderwerp</span>
+                            <span style="font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">{{ __('emails.subject') }}</span>
                             <p style="margin: 4px 0 0; font-size: 15px; color: #374151;">{{ $ticket->subject }}</p>
                         </td>
                     </tr>
@@ -87,7 +87,7 @@
     @else
         {{-- Contact created ticket: show truncated preview --}}
         <p style="margin: 0 0 12px; font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">
-            Uw bericht
+            {{ __('emails.ticket_received.your_message') }}
         </p>
         <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
             <tr>
@@ -105,21 +105,21 @@
         <tr>
             <td style="padding: 16px 20px;">
                 <p style="margin: 0 0 12px; font-size: 12px; font-weight: 600; color: #065f46; text-transform: uppercase; letter-spacing: 0.05em;">
-                    Verwachte reactietijd
+                    {{ __('emails.ticket_received.expected_response_time') }}
                 </p>
                 @if(!empty($averageReplyTime))
                 <p style="margin: 0 0 8px; font-size: 14px; color: #047857;">
-                    Gemiddelde reactietijd: <strong>{{ $averageReplyTime }}</strong>
+                    {{ __('emails.ticket_received.average_response_time') }}: <strong>{{ $averageReplyTime }}</strong>
                 </p>
                 @endif
                 @if(!empty($slaData['first_response_due']))
                 <p style="margin: 0 0 8px; font-size: 14px; color: #047857;">
-                    Eerste reactie uiterlijk: <strong>{{ $slaData['first_response_due']->setTimezone($organization->settings?->timezone ?? 'UTC')->format('d-m-Y H:i') }}</strong>
+                    {{ __('emails.ticket_received.first_response_due') }}: <strong>{{ $slaData['first_response_due']->setTimezone($organization->settings?->timezone ?? 'UTC')->format('d-m-Y H:i') }}</strong>
                 </p>
                 @endif
                 @if(!empty($slaData['resolution_due']))
                 <p style="margin: 0; font-size: 14px; color: #047857;">
-                    Oplossing uiterlijk: <strong>{{ $slaData['resolution_due']->setTimezone($organization->settings?->timezone ?? 'UTC')->format('d-m-Y H:i') }}</strong>
+                    {{ __('emails.ticket_received.resolution_due') }}: <strong>{{ $slaData['resolution_due']->setTimezone($organization->settings?->timezone ?? 'UTC')->format('d-m-Y H:i') }}</strong>
                 </p>
                 @endif
             </td>
@@ -134,7 +134,7 @@
         <tr>
             <td align="center">
                 <a href="{{ $actionUrl }}" style="display: inline-block; background-color: {{ $organization->settings?->primary_color ?? '#000000' }}; color: #ffffff; font-size: 14px; font-weight: 600; text-decoration: none; padding: 12px 32px; border-radius: 8px;">
-                    Bekijk ticket
+                    {{ __('emails.ticket_received.view_ticket') }}
                 </a>
             </td>
         </tr>

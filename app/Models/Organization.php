@@ -24,6 +24,12 @@ class Organization extends Model
         'is_system_default',
     ];
 
+    /**
+     * Temporary property to pass the initial locale to the OrganizationObserver.
+     * This is not persisted to the database.
+     */
+    public ?string $initialLocale = null;
+
     protected static function booted(): void
     {
         static::creating(function (Organization $organization) {

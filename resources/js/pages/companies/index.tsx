@@ -45,6 +45,7 @@ import {
     Users,
 } from 'lucide-react';
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface CompaniesFilters {
     search?: string;
@@ -57,6 +58,7 @@ interface Props {
 }
 
 export default function CompaniesIndex({ companies, filters, slas }: Props) {
+    const { t } = useTranslation('contacts');
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [editingCompany, setEditingCompany] = useState<Company | null>(null);
     const [deletingCompany, setDeletingCompany] = useState<Company | null>(null);
@@ -68,10 +70,10 @@ export default function CompaniesIndex({ companies, filters, slas }: Props) {
         setIsDeleting(true);
         router.delete(`/companies/${deletingCompany.id}`, {
             onSuccess: () => {
-                toast.success('Bedrijf verwijderd');
+                toast.success(t('companies.notifications.deleted'));
                 setDeletingCompany(null);
             },
-            onError: () => toast.error('Bedrijf verwijderen mislukt'),
+            onError: () => toast.error(t('companies.notifications.delete_failed')),
             onFinish: () => setIsDeleting(false),
         });
     };
@@ -86,23 +88,25 @@ export default function CompaniesIndex({ companies, filters, slas }: Props) {
 
     return (
         <AppShell>
-            <Head title="Bedrijven" />
+            <Head title={t('companies.page_title')} />
 
             <div className="flex min-h-full flex-col">
                 {/* Header - Fixed */}
                 <div className="shrink-0 border-b border-border/50 bg-background px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="text-xl font-semibold tracking-tight">Bedrijven</h1>
+                            <h1 className="text-xl font-semibold tracking-tight">{t('companies.title')}</h1>
                             <p className="text-sm text-muted-foreground">
-                                {companies.total} bedrijv{companies.total !== 1 ? 'en' : ''} totaal
+                                {companies.total === 1
+                                    ? t('companies.count', { count: companies.total })
+                                    : t('companies.count_plural', { count: companies.total })} {t('companies.total')}
                             </p>
                         </div>
                         <Sheet open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                             <SheetTrigger asChild>
                                 <Button>
                                     <Building className="mr-2 h-4 w-4" />
-                                    Bedrijf toevoegen
+                                    {t('companies.create.button')}
                                 </Button>
                             </SheetTrigger>
                             <CompanyFormSheet slas={slas} onClose={() => setIsCreateOpen(false)} />
@@ -115,7 +119,7 @@ export default function CompaniesIndex({ companies, filters, slas }: Props) {
                             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
                                 type="search"
-                                placeholder="Zoek bedrijven..."
+                                placeholder={t('companies.search_placeholder')}
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 className="pl-9"
@@ -131,13 +135,13 @@ export default function CompaniesIndex({ companies, filters, slas }: Props) {
                             <div className="mb-4 rounded-full bg-muted p-4">
                                 <Building className="h-8 w-8 text-muted-foreground" />
                             </div>
-                            <h3 className="mb-1 text-lg font-medium">Nog geen bedrijven</h3>
+                            <h3 className="mb-1 text-lg font-medium">{t('companies.empty.title')}</h3>
                             <p className="mb-4 text-sm text-muted-foreground">
-                                Voeg je eerste bedrijf toe om contacten te groeperen
+                                {t('companies.empty.description')}
                             </p>
                             <Button onClick={() => setIsCreateOpen(true)}>
                                 <Plus className="mr-2 h-4 w-4" />
-                                Bedrijf toevoegen
+                                {t('companies.create.button')}
                             </Button>
                         </div>
                     ) : (
@@ -145,11 +149,11 @@ export default function CompaniesIndex({ companies, filters, slas }: Props) {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="w-[250px]">Bedrijf</TableHead>
-                                        <TableHead>Domeinen</TableHead>
-                                        <TableHead className="text-center">Contacten</TableHead>
-                                        <TableHead className="text-center">Tickets</TableHead>
-                                        <TableHead>SLA</TableHead>
+                                        <TableHead className="w-[250px]">{t('companies.table.company')}</TableHead>
+                                        <TableHead>{t('companies.table.domains')}</TableHead>
+                                        <TableHead className="text-center">{t('companies.table.contacts')}</TableHead>
+                                        <TableHead className="text-center">{t('companies.table.tickets')}</TableHead>
+                                        <TableHead>{t('companies.table.sla')}</TableHead>
                                         <TableHead className="w-[100px]"></TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -250,9 +254,9 @@ export default function CompaniesIndex({ companies, filters, slas }: Props) {
             <ConfirmationDialog
                 open={!!deletingCompany}
                 onOpenChange={(open) => !open && setDeletingCompany(null)}
-                title="Bedrijf verwijderen"
-                description={`Weet je zeker dat je ${deletingCompany?.name} wilt verwijderen? Gekoppelde contacten worden ontkoppeld maar niet verwijderd.`}
-                confirmLabel="Verwijderen"
+                title={t('companies.delete.title')}
+                description={t('companies.delete.description', { name: deletingCompany?.name })}
+                confirmLabel={t('companies.delete.confirm')}
                 onConfirm={handleDelete}
                 loading={isDeleting}
             />
@@ -271,6 +275,7 @@ export function CompanyFormSheet({
     onClose: () => void;
     onSuccess?: (company: Company) => void;
 }) {
+    const { t } = useTranslation('contacts');
     const { data, setData, post, patch, processing, errors, reset } = useForm({
         name: company?.name || '',
         email: company?.email || '',
@@ -308,87 +313,87 @@ export function CompanyFormSheet({
             <form onSubmit={handleSubmit} className="flex h-full min-h-0 flex-col">
                 <SheetHeader className="shrink-0">
                     <SheetTitle>
-                        {company ? 'Bedrijf bewerken' : 'Nieuw bedrijf'}
+                        {company ? t('companies.edit.title') : t('companies.create.title')}
                     </SheetTitle>
                     <SheetDescription>
                         {company
-                            ? 'Wijzig de gegevens van dit bedrijf.'
-                            : 'Voeg een nieuw bedrijf toe aan je organisatie.'}
+                            ? t('companies.edit.description')
+                            : t('companies.create.description')}
                     </SheetDescription>
                 </SheetHeader>
 
                 <div className="flex-1 overflow-y-auto space-y-4 px-4 py-4">
                     <div className="grid gap-2">
                         <Label htmlFor="name">
-                            Bedrijfsnaam <span className="text-destructive">*</span>
+                            {t('companies.fields.name_required')} <span className="text-destructive">*</span>
                         </Label>
                         <Input
                             id="name"
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
-                            placeholder="Acme B.V."
+                            placeholder={t('companies.fields.name_placeholder')}
                             autoFocus
                         />
                         <InputError message={errors.name} />
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="email">E-mail</Label>
+                        <Label htmlFor="email">{t('companies.fields.email')}</Label>
                         <Input
                             id="email"
                             type="email"
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
-                            placeholder="info@acme.nl"
+                            placeholder={t('companies.fields.email_placeholder')}
                         />
                         <InputError message={errors.email} />
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="phone">Telefoon</Label>
+                        <Label htmlFor="phone">{t('companies.fields.phone')}</Label>
                         <Input
                             id="phone"
                             type="tel"
                             value={data.phone}
                             onChange={(e) => setData('phone', e.target.value)}
-                            placeholder="+31 20 1234567"
+                            placeholder={t('companies.fields.phone_placeholder')}
                         />
                         <InputError message={errors.phone} />
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="website">Website</Label>
+                        <Label htmlFor="website">{t('companies.fields.website')}</Label>
                         <Input
                             id="website"
                             type="url"
                             value={data.website}
                             onChange={(e) => setData('website', e.target.value)}
-                            placeholder="https://acme.nl"
+                            placeholder={t('companies.fields.website_placeholder')}
                         />
                         <InputError message={errors.website} />
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="domains">E-maildomeinen</Label>
+                        <Label htmlFor="domains">{t('companies.fields.domains')}</Label>
                         <TagInput
                             id="domains"
                             value={data.domains}
                             onChange={(domains) => setData('domains', domains)}
-                            placeholder="acme.nl, acme.com..."
+                            placeholder={t('companies.fields.domains_placeholder')}
                         />
                         <p className="text-xs text-muted-foreground">
-                            Contacten met deze e-maildomeinen worden automatisch gekoppeld.
+                            {t('companies.fields.domains_hint')}
                         </p>
                         <InputError message={errors.domains} />
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="address">Adres</Label>
+                        <Label htmlFor="address">{t('companies.fields.address')}</Label>
                         <Textarea
                             id="address"
                             value={data.address}
                             onChange={(e) => setData('address', e.target.value)}
-                            placeholder="Straatnaam 123&#10;1234 AB Amsterdam"
+                            placeholder={t('companies.fields.address_placeholder')}
                             rows={2}
                             className="resize-none"
                         />
@@ -396,12 +401,12 @@ export function CompanyFormSheet({
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="notes">Notities</Label>
+                        <Label htmlFor="notes">{t('companies.fields.notes')}</Label>
                         <Textarea
                             id="notes"
                             value={data.notes}
                             onChange={(e) => setData('notes', e.target.value)}
-                            placeholder="Interne notities..."
+                            placeholder={t('companies.fields.notes_placeholder')}
                             rows={2}
                             className="resize-none"
                         />
@@ -409,19 +414,19 @@ export function CompanyFormSheet({
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="sla">SLA</Label>
+                        <Label htmlFor="sla">{t('companies.fields.sla')}</Label>
                         <Select
                             value={data.sla_id || undefined}
                             onValueChange={(value) => setData('sla_id', value === '__default__' ? '' : value)}
                         >
                             <SelectTrigger id="sla">
-                                <SelectValue placeholder="Standaard organisatie SLA" />
+                                <SelectValue placeholder={t('companies.fields.sla_default')} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="__default__">Standaard organisatie SLA</SelectItem>
+                                <SelectItem value="__default__">{t('companies.fields.sla_default')}</SelectItem>
                                 {slas.map((sla) => (
                                     <SelectItem key={sla.id} value={sla.id.toString()}>
-                                        {sla.name}{sla.is_default ? ' (standaard)' : ''}
+                                        {sla.name}{sla.is_default ? ` ${t('companies.fields.sla_default_label')}` : ''}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -432,10 +437,10 @@ export function CompanyFormSheet({
 
                 <SheetFooter className="shrink-0 border-t px-4 py-4">
                     <Button type="button" variant="outline" onClick={onClose}>
-                        Annuleren
+                        {t('actions.cancel')}
                     </Button>
                     <Button type="submit" disabled={processing}>
-                        {company ? 'Opslaan' : 'Aanmaken'}
+                        {company ? t('actions.update') : t('actions.create')}
                     </Button>
                 </SheetFooter>
             </form>

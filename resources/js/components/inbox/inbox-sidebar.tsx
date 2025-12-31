@@ -23,7 +23,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import InputError from '@/components/input-error';
+import { LanguageSelect } from '@/components/common/language-select';
 import { useInitials } from '@/hooks/use-initials';
+import { SUPPORTED_LOCALES } from '@/i18n/config';
 import type { SharedData } from '@/types';
 import { index as inboxIndex } from '@/routes/inbox';
 import { index as contactsIndex } from '@/routes/contacts';
@@ -32,6 +34,7 @@ import { index as settingsIndex } from '@/routes/organization/settings';
 import { edit as profileEdit } from '@/routes/profile';
 import { router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface NavItemProps {
     href: string;
@@ -71,20 +74,21 @@ function NavItem({ href, icon: Icon, label, isActive, badge }: NavItemProps) {
 }
 
 export function InboxSidebar() {
+    const { t } = useTranslation('common');
     const { auth, organization, organizations } = usePage<SharedData>().props;
     const currentPath = usePage().url;
     const getInitials = useInitials();
     const [isCreateOrgOpen, setIsCreateOrgOpen] = useState(false);
 
     const mainNav = [
-        { href: inboxIndex().url, icon: Inbox, label: 'Postvak' },
-        { href: contactsIndex().url, icon: Users, label: 'Contacten' },
-        { href: dashboard().url, icon: LayoutDashboard, label: 'Statistieken' },
+        { href: inboxIndex().url, icon: Inbox, label: t('nav.inbox') },
+        { href: contactsIndex().url, icon: Users, label: t('nav.contacts') },
+        { href: dashboard().url, icon: LayoutDashboard, label: t('nav.dashboard') },
     ];
 
     const bottomNav = [
-        { href: settingsIndex().url, icon: Building2, label: 'Organisatie' },
-        { href: profileEdit().url, icon: Settings, label: 'Instellingen' },
+        { href: settingsIndex().url, icon: Building2, label: t('nav.organization') },
+        { href: profileEdit().url, icon: Settings, label: t('nav.settings') },
     ];
 
     const isActive = (href: string) => {
@@ -127,12 +131,12 @@ export function InboxSidebar() {
                             </DropdownMenuTrigger>
                         </TooltipTrigger>
                         <TooltipContent side="right" sideOffset={8}>
-                            {organization?.name || 'Organisatie'}
+                            {organization?.name || t('nav.organization')}
                         </TooltipContent>
                     </Tooltip>
                     <DropdownMenuContent align="start" side="right" sideOffset={8} className="w-64">
                         <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-                            Wissel van organisatie
+                            {t('nav.switch_organization')}
                         </DropdownMenuLabel>
                         {organizations.map((org) => (
                             <DropdownMenuItem
@@ -166,7 +170,7 @@ export function InboxSidebar() {
                             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded border border-dashed">
                                 <Plus className="h-3.5 w-3.5" />
                             </div>
-                            <span>Organisatie aanmaken</span>
+                            <span>{t('nav.create_organization')}</span>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -229,8 +233,10 @@ function CreateOrganizationDialog({
     open: boolean;
     onOpenChange: (open: boolean) => void;
 }) {
+    const { t } = useTranslation('common');
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
+        locale: 'en',
     });
 
     function handleSubmit(e: React.FormEvent) {
@@ -248,23 +254,36 @@ function CreateOrganizationDialog({
             <DialogContent>
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
-                        <DialogTitle>Organisatie aanmaken</DialogTitle>
+                        <DialogTitle>{t('organization_dialog.title')}</DialogTitle>
                         <DialogDescription>
-                            Maak een nieuwe organisatie aan voor een apart team of project.
+                            {t('organization_dialog.description')}
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="grid gap-4 py-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="org-name">Organisatienaam</Label>
+                            <Label htmlFor="org-name">{t('organization_dialog.name_label')}</Label>
                             <Input
                                 id="org-name"
                                 value={data.name}
                                 onChange={(e) => setData('name', e.target.value)}
-                                placeholder="Bedrijf B.V."
+                                placeholder={t('organization_dialog.name_placeholder')}
                                 autoFocus
                             />
                             <InputError message={errors.name} />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="org-locale">{t('onboarding.email_locale')}</Label>
+                            <LanguageSelect
+                                name="locale"
+                                value={data.locale}
+                                availableLocales={[...SUPPORTED_LOCALES]}
+                                onValueChange={(value) => setData('locale', value)}
+                            />
+                            <InputError message={errors.locale} />
+                            <p className="text-xs text-muted-foreground">
+                                {t('onboarding.email_locale_hint')}
+                            </p>
                         </div>
                     </div>
 
@@ -274,10 +293,10 @@ function CreateOrganizationDialog({
                             variant="outline"
                             onClick={() => onOpenChange(false)}
                         >
-                            Annuleren
+                            {t('actions.cancel')}
                         </Button>
                         <Button type="submit" disabled={processing || !data.name.trim()}>
-                            {processing ? 'Aanmaken...' : 'Aanmaken'}
+                            {processing ? t('organization_dialog.creating') : t('actions.create')}
                         </Button>
                     </DialogFooter>
                 </form>

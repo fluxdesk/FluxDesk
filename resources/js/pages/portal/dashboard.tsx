@@ -7,28 +7,30 @@ import { type PortalSharedData, type PortalTicket } from '@/types/portal';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { formatRelative } from '@/lib/date';
 import { Clock, MessageSquare, Plus, Ticket } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     tickets: PaginatedData<PortalTicket>;
 }
 
 export default function PortalDashboard({ tickets }: Props) {
+    const { t } = useTranslation('portal');
     const { contact, organization } = usePage<PortalSharedData>().props;
     const primaryColor = organization?.settings?.primary_color ?? '#18181b';
     const orgSlug = organization?.slug ?? '';
 
     return (
         <PortalLayout>
-            <Head title="Dashboard" />
+            <Head title={t('dashboard.page_title')} />
 
             {/* Welcome Card */}
             <Card className="mb-6">
                 <CardHeader className="pb-3">
                     <CardTitle className="text-xl">
-                        Welkom terug, {contact?.display_name ?? 'klant'}!
+                        {t('dashboard.welcome', { name: contact?.display_name ?? t('dashboard.default_customer') })}
                     </CardTitle>
                     <CardDescription>
-                        Bekijk en beheer al je support tickets op één plek.
+                        {t('dashboard.description')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-0">
@@ -38,7 +40,7 @@ export default function PortalDashboard({ tickets }: Props) {
                             style={{ backgroundColor: primaryColor }}
                         >
                             <Plus className="size-4 mr-2" />
-                            Nieuw ticket aanmaken
+                            {t('dashboard.create_ticket')}
                         </Button>
                     </Link>
                 </CardContent>
@@ -47,9 +49,9 @@ export default function PortalDashboard({ tickets }: Props) {
             {/* Tickets List */}
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold">Mijn tickets</h2>
+                    <h2 className="text-lg font-semibold">{t('dashboard.title')}</h2>
                     <span className="text-sm text-muted-foreground">
-                        {tickets.total} {tickets.total === 1 ? 'ticket' : 'tickets'}
+                        {t('dashboard.ticket_count', { count: tickets.total })}
                     </span>
                 </div>
 
@@ -62,9 +64,9 @@ export default function PortalDashboard({ tickets }: Props) {
                             >
                                 <Ticket className="size-8" style={{ color: primaryColor }} />
                             </div>
-                            <h3 className="text-lg font-medium mb-1">Geen tickets gevonden</h3>
+                            <h3 className="text-lg font-medium mb-1">{t('dashboard.empty.title')}</h3>
                             <p className="text-sm text-muted-foreground text-center max-w-sm mb-4">
-                                Je hebt nog geen support tickets. Maak een nieuw ticket aan als je hulp nodig hebt.
+                                {t('dashboard.empty.description')}
                             </p>
                             <Link href={`/${orgSlug}/portal/tickets/create`}>
                                 <Button
@@ -73,7 +75,7 @@ export default function PortalDashboard({ tickets }: Props) {
                                     style={{ borderColor: primaryColor, color: primaryColor }}
                                 >
                                     <Plus className="size-4 mr-2" />
-                                    Nieuw ticket
+                                    {t('nav.new_ticket')}
                                 </Button>
                             </Link>
                         </CardContent>
@@ -113,6 +115,8 @@ export default function PortalDashboard({ tickets }: Props) {
 }
 
 function TicketCard({ ticket, orgSlug }: { ticket: PortalTicket; orgSlug: string }) {
+    const { t } = useTranslation('portal');
+
     return (
         <Link href={`/${orgSlug}/portal/tickets/${ticket.id}`}>
             <Card className="hover:shadow-md transition-shadow cursor-pointer">
@@ -148,7 +152,7 @@ function TicketCard({ ticket, orgSlug }: { ticket: PortalTicket; orgSlug: string
                                 {ticket.messages_count !== undefined && (
                                     <span className="flex items-center gap-1">
                                         <MessageSquare className="size-3" />
-                                        {ticket.messages_count} {ticket.messages_count === 1 ? 'bericht' : 'berichten'}
+                                        {t('dashboard.message_count', { count: ticket.messages_count })}
                                     </span>
                                 )}
                             </div>

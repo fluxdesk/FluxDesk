@@ -1,0 +1,27 @@
+{
+    "required": "Dit veld is verplicht",
+    "email": "Voer een geldig e-mailadres in",
+    "min": "Moet minimaal {{min}} tekens bevatten",
+    "max": "Mag niet meer dan {{max}} tekens bevatten",
+    "confirmed": "De bevestiging komt niet overeen",
+    "unique": "Deze waarde is al in gebruik",
+    "url": "Voer een geldige URL in",
+    "numeric": "Moet een getal zijn",
+    "integer": "Moet een geheel getal zijn",
+    "alpha": "Mag alleen letters bevatten",
+    "alpha_num": "Mag alleen letters en cijfers bevatten",
+    "date": "Voer een geldige datum in",
+    "before": "Moet een datum zijn voor {{date}}",
+    "after": "Moet een datum zijn na {{date}}",
+    "file": "Selecteer een geldig bestand",
+    "image": "Selecteer een geldige afbeelding",
+    "mimes": "Bestand moet van het type zijn: {{types}}",
+    "max_file_size": "Bestandsgrootte mag niet groter zijn dan {{size}}",
+    "password": {
+        "min": "Wachtwoord moet minimaal {{min}} tekens bevatten",
+        "mixed": "Wachtwoord moet minimaal één hoofdletter en één kleine letter bevatten",
+        "numbers": "Wachtwoord moet minimaal één cijfer bevatten",
+        "symbols": "Wachtwoord moet minimaal één speciaal teken bevatten",
+        "uncompromised": "Dit wachtwoord is gevonden in een datalek. Kies een ander wachtwoord"
+    }
+}

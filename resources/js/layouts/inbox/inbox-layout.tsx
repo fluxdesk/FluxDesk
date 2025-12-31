@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface InboxLayoutProps {
     sidebar: ReactNode;
@@ -35,6 +36,8 @@ export function InboxLayout({ sidebar, list, detail, className }: InboxLayoutPro
 }
 
 function EmptyDetail() {
+    const { t } = useTranslation('inbox');
+
     return (
         <div className="flex h-full flex-col items-center justify-center p-8 text-center">
             <div className="mb-4 rounded-2xl bg-muted/50 p-6">
@@ -52,9 +55,9 @@ function EmptyDetail() {
                     />
                 </svg>
             </div>
-            <h3 className="mb-1 text-lg font-medium text-foreground/80">Geen ticket geselecteerd</h3>
+            <h3 className="mb-1 text-lg font-medium text-foreground/80">{t('detail.no_ticket_selected')}</h3>
             <p className="max-w-[200px] text-sm text-muted-foreground">
-                Selecteer een ticket uit de lijst om details te bekijken
+                {t('detail.select_ticket_hint')}
             </p>
         </div>
     );

@@ -61,9 +61,10 @@ import {
     XCircle,
 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
-import { nl } from 'date-fns/locale';
+import { nl, enUS } from 'date-fns/locale';
 
 interface Props {
     webhooks: Webhook[];
@@ -72,6 +73,7 @@ interface Props {
 }
 
 export default function Webhooks({ webhooks, availableEvents, availableFormats }: Props) {
+    const { t } = useTranslation('organization');
     const [creatingWebhook, setCreatingWebhook] = useState(false);
     const [editingWebhook, setEditingWebhook] = useState<Webhook | null>(null);
     const [deletingWebhook, setDeletingWebhook] = useState<Webhook | null>(null);
@@ -86,17 +88,17 @@ export default function Webhooks({ webhooks, availableEvents, availableFormats }
         router.delete(destroy(deletingWebhook.id).url, {
             preserveScroll: true,
             onSuccess: () => {
-                toast.success('Webhook verwijderd');
+                toast.success(t('webhooks.deleted'));
                 setDeletingWebhook(null);
             },
-            onError: () => toast.error('Webhook verwijderen mislukt'),
+            onError: () => toast.error(t('webhooks.delete_failed')),
             onFinish: () => setIsDeleting(false),
         });
     };
 
     return (
         <AppLayout>
-            <Head title="Webhooks" />
+            <Head title={t('webhooks.page_title')} />
 
             <OrganizationLayout>
                 <div className="mx-auto max-w-4xl space-y-6">
@@ -108,15 +110,15 @@ export default function Webhooks({ webhooks, availableEvents, availableFormats }
                                         <WebhookIcon className="h-5 w-5 text-primary" />
                                     </div>
                                     <div>
-                                        <CardTitle className="text-lg">Webhooks</CardTitle>
+                                        <CardTitle className="text-lg">{t('webhooks.title')}</CardTitle>
                                         <CardDescription>
-                                            Ontvang HTTP-notificaties voor ticket- en berichtgebeurtenissen
+                                            {t('webhooks.description')}
                                         </CardDescription>
                                     </div>
                                 </div>
                                 <Button onClick={() => setCreatingWebhook(true)}>
                                     <Plus className="h-4 w-4" />
-                                    Webhook toevoegen
+                                    {t('webhooks.add')}
                                 </Button>
                             </div>
                         </CardHeader>
@@ -124,13 +126,13 @@ export default function Webhooks({ webhooks, availableEvents, availableFormats }
                             {webhooks.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-12 text-center">
                                     <WebhookIcon className="h-12 w-12 text-muted-foreground/50" />
-                                    <h3 className="mt-4 text-lg font-semibold">Geen webhooks</h3>
+                                    <h3 className="mt-4 text-lg font-semibold">{t('webhooks.empty_title')}</h3>
                                     <p className="mt-2 text-sm text-muted-foreground">
-                                        Voeg een webhook toe om notificaties te ontvangen wanneer tickets worden aangemaakt of bijgewerkt.
+                                        {t('webhooks.empty_description')}
                                     </p>
                                     <Button className="mt-4" onClick={() => setCreatingWebhook(true)}>
                                         <Plus className="h-4 w-4" />
-                                        Webhook toevoegen
+                                        {t('webhooks.add')}
                                     </Button>
                                 </div>
                             ) : (
@@ -197,9 +199,9 @@ export default function Webhooks({ webhooks, availableEvents, availableFormats }
                 <ConfirmationDialog
                     open={!!deletingWebhook}
                     onOpenChange={(open) => !open && setDeletingWebhook(null)}
-                    title="Webhook verwijderen"
-                    description={`Weet je zeker dat je de webhook "${deletingWebhook?.name}" wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.`}
-                    confirmLabel="Verwijderen"
+                    title={t('webhooks.delete_title')}
+                    description={t('webhooks.delete_description', { name: deletingWebhook?.name })}
+                    confirmLabel={t('webhooks.delete')}
                     onConfirm={handleDelete}
                     loading={isDeleting}
                 />
@@ -208,18 +210,18 @@ export default function Webhooks({ webhooks, availableEvents, availableFormats }
                 <ConfirmationDialog
                     open={!!regeneratingSecret}
                     onOpenChange={(open) => !open && setRegeneratingSecret(null)}
-                    title="Nieuwe secret genereren"
-                    description="Weet je zeker dat je een nieuwe signing secret wilt genereren? Je moet de nieuwe secret bijwerken in je systeem dat de webhooks ontvangt."
-                    confirmLabel="Genereren"
+                    title={t('webhooks.regenerate_title')}
+                    description={t('webhooks.regenerate_description')}
+                    confirmLabel={t('webhooks.regenerate_confirm')}
                     onConfirm={() => {
                         if (!regeneratingSecret) return;
                         router.post(regenerateSecret(regeneratingSecret.id).url, {}, {
                             preserveScroll: true,
                             onSuccess: () => {
-                                toast.success('Nieuwe signing secret gegenereerd');
+                                toast.success(t('webhooks.regenerate_success'));
                                 setRegeneratingSecret(null);
                             },
-                            onError: () => toast.error('Secret genereren mislukt'),
+                            onError: () => toast.error(t('webhooks.regenerate_failed')),
                         });
                     }}
                 />
@@ -243,8 +245,11 @@ function WebhookItem({
     onViewDeliveries: () => void;
     onRegenerateSecret: () => void;
 }) {
+    const { t, i18n } = useTranslation('organization');
     const [isToggling, setIsToggling] = useState(false);
     const [isTesting, setIsTesting] = useState(false);
+
+    const dateLocale = i18n.language === 'nl' ? nl : enUS;
 
     const handleToggle = () => {
         setIsToggling(true);
@@ -255,11 +260,11 @@ function WebhookItem({
                 preserveScroll: true,
                 onSuccess: () => {
                     const message = webhook.is_active
-                        ? 'Webhook gedeactiveerd'
-                        : 'Webhook geactiveerd';
+                        ? t('webhooks.deactivated')
+                        : t('webhooks.activated');
                     toast.success(message);
                 },
-                onError: () => toast.error('Status wijzigen mislukt'),
+                onError: () => toast.error(t('webhooks.toggle_failed')),
                 onFinish: () => setIsToggling(false),
             },
         );
@@ -280,7 +285,7 @@ function WebhookItem({
                         toast.error(flash.error);
                     }
                 },
-                onError: () => toast.error('Test verzenden mislukt'),
+                onError: () => toast.error(t('webhooks.test_failed')),
                 onFinish: () => setIsTesting(false),
             },
         );
@@ -291,7 +296,7 @@ function WebhookItem({
             return (
                 <Badge variant="outline" className="border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
                     <XCircle className="mr-1 h-3 w-3" />
-                    Uitgeschakeld (fouten)
+                    {t('webhooks.status.disabled_errors')}
                 </Badge>
             );
         }
@@ -300,7 +305,7 @@ function WebhookItem({
             return (
                 <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-400">
                     <CheckCircle2 className="mr-1 h-3 w-3" />
-                    Actief
+                    {t('webhooks.status.active')}
                 </Badge>
             );
         }
@@ -308,7 +313,7 @@ function WebhookItem({
         return (
             <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-400">
                 <AlertCircle className="mr-1 h-3 w-3" />
-                Inactief
+                {t('webhooks.status.inactive')}
             </Badge>
         );
     };
@@ -329,7 +334,9 @@ function WebhookItem({
                         <span className="font-medium truncate">{webhook.name}</span>
                         {getStatusBadge()}
                         <Badge variant="secondary" className="text-xs">
-                            {webhook.events.length} {webhook.events.length === 1 ? 'event' : 'events'}
+                            {webhook.events.length === 1
+                                ? t('webhooks.event_count', { count: webhook.events.length })
+                                : t('webhooks.event_count_plural', { count: webhook.events.length })}
                         </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground mt-0.5 truncate" title={webhook.url}>
@@ -339,13 +346,15 @@ function WebhookItem({
                         {webhook.last_triggered_at && (
                             <span className="flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
-                                Laatst: {formatDistanceToNow(new Date(webhook.last_triggered_at), { addSuffix: true, locale: nl })}
+                                {t('webhooks.last_triggered')} {formatDistanceToNow(new Date(webhook.last_triggered_at), { addSuffix: true, locale: dateLocale })}
                             </span>
                         )}
                         {webhook.failure_count > 0 && !webhook.was_auto_disabled && (
                             <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
                                 <AlertCircle className="h-3 w-3" />
-                                {webhook.failure_count} mislukte pogingen
+                                {webhook.failure_count === 1
+                                    ? t('webhooks.failed_attempts', { count: webhook.failure_count })
+                                    : t('webhooks.failed_attempts_plural', { count: webhook.failure_count })}
                             </span>
                         )}
                     </div>
@@ -358,7 +367,7 @@ function WebhookItem({
                         htmlFor={`toggle-${webhook.id}`}
                         className="text-sm text-muted-foreground cursor-pointer"
                     >
-                        {webhook.is_active ? 'Aan' : 'Uit'}
+                        {webhook.is_active ? t('webhooks.toggle_on') : t('webhooks.toggle_off')}
                     </Label>
                     <Switch
                         id={`toggle-${webhook.id}`}
@@ -372,13 +381,13 @@ function WebhookItem({
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" size="icon" className="h-8 w-8">
                             <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Acties</span>
+                            <span className="sr-only">{t('webhooks.actions')}</span>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={onEdit}>
                             <Pencil className="h-4 w-4" />
-                            Bewerken
+                            {t('webhooks.edit')}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={handleTest} disabled={isTesting}>
                             {isTesting ? (
@@ -386,25 +395,25 @@ function WebhookItem({
                             ) : (
                                 <Send className="h-4 w-4" />
                             )}
-                            Test verzenden
+                            {t('webhooks.send_test')}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={onViewDeliveries}>
                             <History className="h-4 w-4" />
-                            Leveringsgeschiedenis
+                            {t('webhooks.delivery_history')}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={onViewSecret}>
                             <Key className="h-4 w-4" />
-                            Signing secret
+                            {t('webhooks.signing_secret')}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={onRegenerateSecret}>
                             <RefreshCw className="h-4 w-4" />
-                            Secret vernieuwen
+                            {t('webhooks.regenerate_secret')}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem variant="destructive" onClick={onDelete}>
                             <Trash2 className="h-4 w-4" />
-                            Verwijderen
+                            {t('webhooks.delete')}
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -426,6 +435,7 @@ function WebhookFormDialog({
     availableEvents: WebhookEventOption[];
     availableFormats: WebhookFormatOption[];
 }) {
+    const { t } = useTranslation('organization');
     const isEditing = !!webhook;
     const [eventsOpen, setEventsOpen] = useState(false);
     const [isTesting, setIsTesting] = useState(false);
@@ -445,21 +455,21 @@ function WebhookFormDialog({
             patch(update(webhook.id).url, {
                 preserveScroll: true,
                 onSuccess: () => {
-                    toast.success('Webhook bijgewerkt');
+                    toast.success(t('webhooks.form.updated'));
                     reset();
                     onClose();
                 },
-                onError: () => toast.error('Bijwerken mislukt'),
+                onError: () => toast.error(t('webhooks.form.update_failed')),
             });
         } else {
             post(store().url, {
                 preserveScroll: true,
                 onSuccess: () => {
-                    toast.success('Webhook aangemaakt');
+                    toast.success(t('webhooks.form.created'));
                     reset();
                     onClose();
                 },
-                onError: () => toast.error('Aanmaken mislukt'),
+                onError: () => toast.error(t('webhooks.form.create_failed')),
             });
         }
     };
@@ -480,7 +490,7 @@ function WebhookFormDialog({
                         toast.error(flash.error);
                     }
                 },
-                onError: () => toast.error('Test verzenden mislukt'),
+                onError: () => toast.error(t('webhooks.test_failed')),
                 onFinish: () => setIsTesting(false),
             },
         );
@@ -495,13 +505,13 @@ function WebhookFormDialog({
     };
 
     const getSelectedEventsLabel = () => {
-        if (data.events.length === 0) return 'Selecteer events...';
+        if (data.events.length === 0) return t('webhooks.form.events_placeholder');
         if (data.events.length === 1) {
             const event = availableEvents.find(e => e.value === data.events[0]);
-            return event?.label || '1 event';
+            return event?.label || t('webhooks.form.events_selected', { count: 1 });
         }
-        if (data.events.length === availableEvents.length) return 'Alle events';
-        return `${data.events.length} events geselecteerd`;
+        if (data.events.length === availableEvents.length) return t('webhooks.form.events_all');
+        return t('webhooks.form.events_selected_plural', { count: data.events.length });
     };
 
     return (
@@ -510,42 +520,42 @@ function WebhookFormDialog({
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <WebhookIcon className="h-5 w-5" />
-                        {isEditing ? 'Webhook bewerken' : 'Webhook toevoegen'}
+                        {isEditing ? t('webhooks.form.edit_title') : t('webhooks.form.create_title')}
                     </DialogTitle>
                     <DialogDescription>
                         {isEditing
-                            ? 'Wijzig de webhook instellingen.'
-                            : 'Voeg een nieuwe webhook toe om notificaties te ontvangen.'}
+                            ? t('webhooks.form.edit_description')
+                            : t('webhooks.form.create_description')}
                     </DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit}>
                     <div className="grid gap-4 py-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="name">Naam</Label>
+                            <Label htmlFor="name">{t('webhooks.form.name')}</Label>
                             <Input
                                 id="name"
                                 value={data.name}
                                 onChange={(e) => setData('name', e.target.value)}
-                                placeholder="Mijn webhook"
+                                placeholder={t('webhooks.form.name_placeholder')}
                             />
                             <InputError message={errors.name} />
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="url">URL</Label>
+                            <Label htmlFor="url">{t('webhooks.form.url')}</Label>
                             <Input
                                 id="url"
                                 type="url"
                                 value={data.url}
                                 onChange={(e) => setData('url', e.target.value)}
-                                placeholder="https://example.com/webhook"
+                                placeholder={t('webhooks.form.url_placeholder')}
                             />
                             <InputError message={errors.url} />
                         </div>
 
                         <div className="grid gap-2">
-                            <Label>Events</Label>
+                            <Label>{t('webhooks.form.events')}</Label>
                             <Popover open={eventsOpen} onOpenChange={setEventsOpen} modal={false}>
                                 <PopoverTrigger asChild>
                                     <Button
@@ -593,13 +603,13 @@ function WebhookFormDialog({
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="format">Formaat</Label>
+                            <Label htmlFor="format">{t('webhooks.form.format')}</Label>
                             <Select
                                 value={data.format}
                                 onValueChange={(value) => setData('format', value as WebhookFormatType)}
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Selecteer formaat..." />
+                                    <SelectValue placeholder={t('webhooks.form.format_placeholder')} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {availableFormats.map((format) => (
@@ -616,12 +626,12 @@ function WebhookFormDialog({
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="description">Beschrijving (optioneel)</Label>
+                            <Label htmlFor="description">{t('webhooks.form.description')}</Label>
                             <Textarea
                                 id="description"
                                 value={data.description}
                                 onChange={(e) => setData('description', e.target.value)}
-                                placeholder="Een korte beschrijving van deze webhook..."
+                                placeholder={t('webhooks.form.description_placeholder')}
                                 rows={2}
                             />
                             <InputError message={errors.description} />
@@ -642,15 +652,15 @@ function WebhookFormDialog({
                                 ) : (
                                     <Send className="h-4 w-4" />
                                 )}
-                                Test verzenden
+                                {t('webhooks.send_test')}
                             </Button>
                         )}
                         <Button type="button" variant="outline" onClick={onClose}>
-                            Annuleren
+                            {t('webhooks.form.cancel')}
                         </Button>
                         <Button type="submit" disabled={processing || data.events.length === 0}>
                             {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                            {isEditing ? 'Opslaan' : 'Toevoegen'}
+                            {isEditing ? t('webhooks.form.save') : t('webhooks.form.add')}
                         </Button>
                     </DialogFooter>
                 </form>
@@ -670,6 +680,7 @@ function SecretDialog({
     onClose: () => void;
     onRegenerate: () => void;
 }) {
+    const { t } = useTranslation('organization');
     const [secret, setSecret] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [revealed, setRevealed] = useState(false);
@@ -683,7 +694,7 @@ function SecretDialog({
             setSecret(data.secret);
             setRevealed(true);
         } catch {
-            toast.error('Secret ophalen mislukt');
+            toast.error(t('webhooks.secret.fetch_failed'));
         } finally {
             setLoading(false);
         }
@@ -694,7 +705,7 @@ function SecretDialog({
             navigator.clipboard.writeText(secret);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
-            toast.success('Secret gekopieerd');
+            toast.success(t('webhooks.secret.copied'));
         }
     };
 
@@ -710,17 +721,17 @@ function SecretDialog({
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <Key className="h-5 w-5" />
-                        Signing Secret
+                        {t('webhooks.secret.title')}
                     </DialogTitle>
                     <DialogDescription>
-                        Gebruik deze secret om webhook payloads te verifiëren. De signature wordt meegestuurd in de <code className="text-xs bg-muted px-1 rounded">X-Webhook-Signature</code> header.
+                        <span dangerouslySetInnerHTML={{ __html: t('webhooks.secret.description') }} />
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="py-4">
                     <div className="flex items-center gap-2">
                         <div className="flex-1 rounded-lg border bg-muted/50 p-3 font-mono text-sm break-all">
-                            {revealed && secret ? secret : '••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••'}
+                            {revealed && secret ? secret : t('webhooks.secret.hidden')}
                         </div>
                         {revealed && secret ? (
                             <Button variant="outline" size="icon" onClick={copyToClipboard}>
@@ -740,18 +751,18 @@ function SecretDialog({
                             onClick={() => { setRevealed(false); setSecret(null); }}
                         >
                             <EyeOff className="h-4 w-4" />
-                            Verbergen
+                            {t('webhooks.secret.hide')}
                         </Button>
                     )}
                 </div>
 
                 <DialogFooter className="flex-col gap-2 sm:flex-row">
                     <Button type="button" variant="outline" onClick={handleClose}>
-                        Sluiten
+                        {t('webhooks.secret.close')}
                     </Button>
                     <Button type="button" variant="destructive" onClick={onRegenerate}>
                         <RefreshCw className="h-4 w-4" />
-                        Nieuwe secret genereren
+                        {t('webhooks.secret.regenerate')}
                     </Button>
                 </DialogFooter>
             </DialogContent>
@@ -768,9 +779,12 @@ function DeliveriesDialog({
     open: boolean;
     onClose: () => void;
 }) {
+    const { t, i18n } = useTranslation('organization');
     const [deliveries, setDeliveries] = useState<WebhookDelivery[]>(webhook.recent_deliveries || []);
     const [loading, setLoading] = useState(false);
     const [expandedId, setExpandedId] = useState<number | null>(null);
+
+    const dateLocale = i18n.language === 'nl' ? nl : enUS;
 
     const fetchDeliveries = async () => {
         setLoading(true);
@@ -779,24 +793,17 @@ function DeliveriesDialog({
             const data = await response.json();
             setDeliveries(data.deliveries);
         } catch {
-            toast.error('Leveringen ophalen mislukt');
+            toast.error(t('webhooks.deliveries.fetch_failed'));
         } finally {
             setLoading(false);
         }
     };
 
     const getEventLabel = (eventType: string) => {
-        const labels: Record<string, string> = {
-            'ticket.created': 'Nieuw ticket',
-            'ticket.status_changed': 'Status gewijzigd',
-            'ticket.priority_changed': 'Prioriteit gewijzigd',
-            'ticket.assigned': 'Toegewezen',
-            'ticket.sla_changed': 'SLA gewijzigd',
-            'message.created': 'Nieuw bericht',
-            'message.reply_received': 'Klantreactie',
-            'test': 'Test',
-        };
-        return labels[eventType] || eventType;
+        const eventKey = eventType.replace('.', '_');
+        const translationKey = `webhooks.events.${eventKey}`;
+        const translation = t(translationKey);
+        return translation !== translationKey ? translation : eventType;
     };
 
     const toggleExpanded = (id: number) => {
@@ -809,10 +816,10 @@ function DeliveriesDialog({
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <History className="h-5 w-5" />
-                        Leveringsgeschiedenis
+                        {t('webhooks.deliveries.title')}
                     </DialogTitle>
                     <DialogDescription>
-                        De laatste 50 webhook leveringen voor "{webhook.name}".
+                        {t('webhooks.deliveries.description', { name: webhook.name })}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -820,23 +827,23 @@ function DeliveriesDialog({
                     <div className="flex justify-end mb-4">
                         <Button variant="outline" size="sm" onClick={fetchDeliveries} disabled={loading}>
                             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                            Verversen
+                            {t('webhooks.deliveries.refresh')}
                         </Button>
                     </div>
 
                     {deliveries.length === 0 ? (
                         <div className="text-center py-8 text-muted-foreground">
-                            Nog geen leveringen
+                            {t('webhooks.deliveries.empty')}
                         </div>
                     ) : (
                         <div className="max-h-96 overflow-auto rounded-lg border">
                             <table className="w-full text-sm">
                                 <thead className="bg-muted/50 sticky top-0">
                                     <tr>
-                                        <th className="px-3 py-2 text-left font-medium">Event</th>
-                                        <th className="px-3 py-2 text-left font-medium">Status</th>
-                                        <th className="px-3 py-2 text-left font-medium">Duur</th>
-                                        <th className="px-3 py-2 text-left font-medium">Tijd</th>
+                                        <th className="px-3 py-2 text-left font-medium">{t('webhooks.deliveries.table.event')}</th>
+                                        <th className="px-3 py-2 text-left font-medium">{t('webhooks.deliveries.table.status')}</th>
+                                        <th className="px-3 py-2 text-left font-medium">{t('webhooks.deliveries.table.duration')}</th>
+                                        <th className="px-3 py-2 text-left font-medium">{t('webhooks.deliveries.table.time')}</th>
                                         <th className="px-3 py-2 w-10"></th>
                                     </tr>
                                 </thead>
@@ -860,7 +867,7 @@ function DeliveriesDialog({
                                                     ) : (
                                                         <span className="inline-flex items-center gap-1 text-red-600 dark:text-red-400">
                                                             <XCircle className="h-3.5 w-3.5" />
-                                                            {delivery.response_status || 'Fout'}
+                                                            {delivery.response_status || t('webhooks.deliveries.table.error')}
                                                         </span>
                                                     )}
                                                 </td>
@@ -868,7 +875,7 @@ function DeliveriesDialog({
                                                     {delivery.duration_ms ? `${delivery.duration_ms}ms` : '-'}
                                                 </td>
                                                 <td className="px-3 py-2 text-muted-foreground">
-                                                    {formatDistanceToNow(new Date(delivery.created_at), { addSuffix: true, locale: nl })}
+                                                    {formatDistanceToNow(new Date(delivery.created_at), { addSuffix: true, locale: dateLocale })}
                                                 </td>
                                                 <td className="px-3 py-2">
                                                     <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${expandedId === delivery.id ? 'rotate-180' : ''}`} />
@@ -880,7 +887,7 @@ function DeliveriesDialog({
                                                         <div className="space-y-2">
                                                             {delivery.error && (
                                                                 <div>
-                                                                    <span className="text-xs font-medium text-muted-foreground">Fout:</span>
+                                                                    <span className="text-xs font-medium text-muted-foreground">{t('webhooks.deliveries.error_label')}</span>
                                                                     <pre className="mt-1 text-xs bg-red-50 dark:bg-red-950/50 text-red-700 dark:text-red-300 p-2 rounded overflow-auto max-h-24">
                                                                         {delivery.error}
                                                                     </pre>
@@ -888,14 +895,14 @@ function DeliveriesDialog({
                                                             )}
                                                             {delivery.response_body && (
                                                                 <div>
-                                                                    <span className="text-xs font-medium text-muted-foreground">Response:</span>
+                                                                    <span className="text-xs font-medium text-muted-foreground">{t('webhooks.deliveries.response_label')}</span>
                                                                     <pre className="mt-1 text-xs bg-muted p-2 rounded overflow-auto max-h-40 whitespace-pre-wrap break-all">
                                                                         {delivery.response_body}
                                                                     </pre>
                                                                 </div>
                                                             )}
                                                             {!delivery.error && !delivery.response_body && (
-                                                                <span className="text-xs text-muted-foreground">Geen response details beschikbaar</span>
+                                                                <span className="text-xs text-muted-foreground">{t('webhooks.deliveries.no_details')}</span>
                                                             )}
                                                         </div>
                                                     </td>
@@ -911,7 +918,7 @@ function DeliveriesDialog({
 
                 <DialogFooter>
                     <Button type="button" variant="outline" onClick={onClose}>
-                        Sluiten
+                        {t('webhooks.deliveries.close')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

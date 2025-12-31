@@ -1,0 +1,131 @@
+{
+    "title": "Settings",
+    "nav": {
+        "sidebar_description": "Manage your account",
+        "profile": "Profile",
+        "password": "Password",
+        "two_factor": "Two-factor authentication",
+        "notifications": "Notifications",
+        "appearance": "Appearance"
+    },
+    "profile": {
+        "page_title": "Profile settings",
+        "title": "Profile information",
+        "description": "Update your name and email address",
+        "name": "Name",
+        "name_placeholder": "Full name",
+        "email": "Email address",
+        "email_placeholder": "Email address",
+        "email_not_verified": "Your email address is not verified.",
+        "resend_verification": "Resend verification email",
+        "verification_sent": "A new verification link has been sent.",
+        "save": "Save changes",
+        "saved": "Profile updated",
+        "error": "Failed to update profile",
+        "language": {
+            "title": "Language",
+            "description": "Choose your preferred language for the interface",
+            "label": "Display language"
+        },
+        "danger_zone": {
+            "title": "Danger zone",
+            "description": "Permanently delete your account and all your data"
+        }
+    },
+    "password": {
+        "page_title": "Password settings",
+        "title": "Change password",
+        "description": "Use a long, random password for extra security",
+        "current": "Current password",
+        "current_placeholder": "Enter current password",
+        "new": "New password",
+        "new_placeholder": "Enter new password",
+        "confirm": "Confirm password",
+        "confirm_placeholder": "Confirm new password",
+        "submit": "Change password",
+        "saved": "Password updated",
+        "error": "Failed to update password"
+    },
+    "appearance": {
+        "page_title": "Appearance settings",
+        "title": "Theme",
+        "description": "Choose how the application looks",
+        "light": "Light",
+        "light_description": "Light background with dark text",
+        "dark": "Dark",
+        "dark_description": "Dark background with light text",
+        "system": "System",
+        "system_description": "Follows your system preference",
+        "changed": "Theme changed to {{theme}}"
+    },
+    "notifications": {
+        "page_title": "Notification settings",
+        "title": "Email notifications",
+        "description": "Choose which notifications you want to receive for {{organization}}",
+        "new_ticket": "New tickets",
+        "new_ticket_description": "Receive a notification when a new ticket is created",
+        "contact_reply": "Customer replies",
+        "contact_reply_description": "Receive a notification when a customer replies to a ticket",
+        "internal_note": "Internal notes",
+        "internal_note_description": "Receive a notification when a colleague adds an internal note",
+        "ticket_assigned": "Ticket assignment",
+        "ticket_assigned_description": "Receive a notification when a ticket is assigned to you",
+        "mention": "Mentions",
+        "mention_description": "Receive a notification when someone @mentions you in a message",
+        "sla_warning": "SLA warnings",
+        "sla_warning_description": "Receive a notification when an SLA deadline is approaching",
+        "save": "Save settings",
+        "saving": "Saving...",
+        "saved": "Notification settings saved",
+        "error": "Something went wrong while saving"
+    },
+    "two_factor": {
+        "page_title": "Two-factor authentication",
+        "title": "Two-factor authentication",
+        "description": "Add an extra layer of security to your account",
+        "status_enabled": "Enabled",
+        "status_disabled": "Disabled",
+        "enabled_description": "Two-factor authentication is enabled. When logging in, you will be asked for a secure PIN that you can retrieve from your authenticator app.",
+        "disabled_description": "Enable two-factor authentication for an extra layer of security. You will need a TOTP-compatible authenticator app like Google Authenticator or Authy.",
+        "enable": "Enable 2FA",
+        "disable": "Disable 2FA",
+        "continue_setup": "Continue setup",
+        "enabled_success": "Two-factor authentication enabled",
+        "disabled_success": "Two-factor authentication disabled",
+        "disable_error": "Failed to disable two-factor authentication",
+        "recovery": {
+            "title": "2FA Recovery codes",
+            "description": "Recovery codes allow you to access your account if you lose your 2FA device. Keep them in a secure password manager.",
+            "show": "View recovery codes",
+            "hide": "Hide recovery codes",
+            "regenerate": "Regenerate codes",
+            "info": "Each recovery code can be used once to access your account and is then deleted. Need more? Click on Regenerate codes above."
+        },
+        "setup": {
+            "title": "Enable two-factor authentication",
+            "title_verify": "Verify authentication code",
+            "title_enabled": "Two-factor authentication enabled",
+            "description": "Scan the QR code or enter the key in your authenticator app to complete two-factor authentication setup",
+            "description_verify": "Enter the 6-digit code from your authenticator app",
+            "description_enabled": "Two-factor authentication is now enabled. Scan the QR code or enter the key in your authenticator app.",
+            "manual_entry": "or enter the code manually",
+            "continue": "Continue",
+            "close": "Close",
+            "back": "Back",
+            "confirm": "Confirm"
+        }
+    },
+    "delete_account": {
+        "title": "Delete account",
+        "description": "Delete your account and all your data",
+        "warning": "Warning",
+        "warning_text": "Please note, this cannot be undone.",
+        "button": "Delete account",
+        "dialog_title": "Are you sure you want to delete your account?",
+        "dialog_description": "Once your account is deleted, all your data will be permanently deleted. Enter your password to confirm that you want to permanently delete your account.",
+        "password": "Password",
+        "password_placeholder": "Password",
+        "cancel": "Cancel",
+        "confirm": "Delete account"
+    }
+}

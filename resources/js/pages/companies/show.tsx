@@ -49,6 +49,7 @@ import {
     Users,
 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Sheet, SheetTrigger } from '@/components/ui/sheet';
 import { CompanyFormSheet } from './index';
 
@@ -69,6 +70,7 @@ export default function CompanyShow({
     slas,
     availableContacts,
 }: Props) {
+    const { t } = useTranslation('contacts');
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -81,9 +83,9 @@ export default function CompanyShow({
         setIsDeleting(true);
         router.delete(`/companies/${company.id}`, {
             onSuccess: () => {
-                toast.success('Bedrijf verwijderd');
+                toast.success(t('companies.notifications.deleted'));
             },
-            onError: () => toast.error('Bedrijf verwijderen mislukt'),
+            onError: () => toast.error(t('companies.notifications.delete_failed')),
             onFinish: () => setIsDeleting(false),
         });
     };
@@ -95,11 +97,11 @@ export default function CompanyShow({
             {},
             {
                 onSuccess: () => {
-                    toast.success('Contact gekoppeld aan bedrijf');
+                    toast.success(t('companies.contacts.linked'));
                     setIsLinkingContact(false);
                     setSelectedContactId('');
                 },
-                onError: () => toast.error('Contact koppelen mislukt'),
+                onError: () => toast.error(t('companies.contacts.link_failed')),
             },
         );
     };
@@ -108,10 +110,10 @@ export default function CompanyShow({
         if (!unlinkingContact) return;
         router.delete(`/companies/${company.id}/contacts/${unlinkingContact.id}`, {
             onSuccess: () => {
-                toast.success('Contact ontkoppeld van bedrijf');
+                toast.success(t('companies.contacts.unlinked'));
                 setUnlinkingContact(null);
             },
-            onError: () => toast.error('Contact ontkoppelen mislukt'),
+            onError: () => toast.error(t('companies.contacts.unlink_failed')),
         });
     };
 
@@ -150,7 +152,7 @@ export default function CompanyShow({
                                 <SheetTrigger asChild>
                                     <Button variant="outline">
                                         <Pencil className="mr-2 h-4 w-4" />
-                                        Bewerken
+                                        {t('companies.edit.button')}
                                     </Button>
                                 </SheetTrigger>
                                 <CompanyFormSheet
@@ -161,7 +163,7 @@ export default function CompanyShow({
                             </Sheet>
                             <Button variant="outline" onClick={() => setIsDeleteOpen(true)}>
                                 <Trash2 className="mr-2 h-4 w-4" />
-                                Verwijderen
+                                {t('companies.delete.button')}
                             </Button>
                         </div>
                     </div>
@@ -171,16 +173,16 @@ export default function CompanyShow({
                         <div className="flex items-center gap-2">
                             <Users className="h-4 w-4 text-muted-foreground" />
                             <span className="text-sm font-medium">{company.contacts_count}</span>
-                            <span className="text-sm text-muted-foreground">contacten</span>
+                            <span className="text-sm text-muted-foreground">{t('companies.detail.contacts')}</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <TicketIcon className="h-4 w-4 text-muted-foreground" />
                             <span className="text-sm font-medium">{company.tickets_count}</span>
-                            <span className="text-sm text-muted-foreground">tickets totaal</span>
+                            <span className="text-sm text-muted-foreground">{t('companies.detail.tickets_total')}</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <Badge variant={openTicketsCount > 0 ? 'default' : 'secondary'}>
-                                {openTicketsCount} open
+                                {openTicketsCount} {t('companies.detail.open')}
                             </Badge>
                         </div>
                     </div>
@@ -193,14 +195,14 @@ export default function CompanyShow({
                         <div className="space-y-6">
                             <Card>
                                 <CardHeader>
-                                    <CardTitle className="text-base">Bedrijfsgegevens</CardTitle>
+                                    <CardTitle className="text-base">{t('companies.detail.company_info')}</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     {company.email && (
                                         <div className="flex items-start gap-3">
                                             <Mail className="mt-0.5 h-4 w-4 text-muted-foreground" />
                                             <div>
-                                                <p className="text-sm font-medium">E-mail</p>
+                                                <p className="text-sm font-medium">{t('companies.detail.email')}</p>
                                                 <a
                                                     href={`mailto:${company.email}`}
                                                     className="text-sm text-muted-foreground hover:text-primary"
@@ -214,7 +216,7 @@ export default function CompanyShow({
                                         <div className="flex items-start gap-3">
                                             <Phone className="mt-0.5 h-4 w-4 text-muted-foreground" />
                                             <div>
-                                                <p className="text-sm font-medium">Telefoon</p>
+                                                <p className="text-sm font-medium">{t('companies.detail.phone')}</p>
                                                 <a
                                                     href={`tel:${company.phone}`}
                                                     className="text-sm text-muted-foreground hover:text-primary"
@@ -228,7 +230,7 @@ export default function CompanyShow({
                                         <div className="flex items-start gap-3">
                                             <Globe className="mt-0.5 h-4 w-4 text-muted-foreground" />
                                             <div>
-                                                <p className="text-sm font-medium">Website</p>
+                                                <p className="text-sm font-medium">{t('companies.detail.website')}</p>
                                                 <a
                                                     href={company.website}
                                                     target="_blank"
@@ -244,7 +246,7 @@ export default function CompanyShow({
                                         <div className="flex items-start gap-3">
                                             <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" />
                                             <div>
-                                                <p className="text-sm font-medium">Adres</p>
+                                                <p className="text-sm font-medium">{t('companies.detail.address')}</p>
                                                 <p className="whitespace-pre-line text-sm text-muted-foreground">
                                                     {company.address}
                                                 </p>
@@ -255,7 +257,7 @@ export default function CompanyShow({
                                         <div className="flex items-start gap-3">
                                             <TicketIcon className="mt-0.5 h-4 w-4 text-muted-foreground" />
                                             <div>
-                                                <p className="text-sm font-medium">SLA</p>
+                                                <p className="text-sm font-medium">{t('companies.detail.sla')}</p>
                                                 <p className="text-sm text-muted-foreground">{company.sla.name}</p>
                                             </div>
                                         </div>
@@ -266,7 +268,7 @@ export default function CompanyShow({
                                         !company.address &&
                                         !company.sla && (
                                             <p className="text-sm text-muted-foreground">
-                                                Geen gegevens ingevuld
+                                                {t('companies.detail.no_info')}
                                             </p>
                                         )}
                                 </CardContent>
@@ -277,7 +279,7 @@ export default function CompanyShow({
                                     <CardHeader>
                                         <CardTitle className="flex items-center gap-2 text-base">
                                             <StickyNote className="h-4 w-4" />
-                                            Notities
+                                            {t('companies.detail.notes')}
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent>
@@ -294,10 +296,10 @@ export default function CompanyShow({
                             <Tabs defaultValue="contacts" className="w-full">
                                 <TabsList>
                                     <TabsTrigger value="contacts">
-                                        Contacten ({company.contacts_count})
+                                        {t('companies.contacts.title')} ({company.contacts_count})
                                     </TabsTrigger>
                                     <TabsTrigger value="tickets">
-                                        Recente tickets ({recentTickets.length})
+                                        {t('companies.tickets.title')} ({recentTickets.length})
                                     </TabsTrigger>
                                 </TabsList>
 
@@ -305,9 +307,9 @@ export default function CompanyShow({
                                     <Card>
                                         <CardHeader className="flex flex-row items-center justify-between">
                                             <div>
-                                                <CardTitle className="text-base">Contacten</CardTitle>
+                                                <CardTitle className="text-base">{t('companies.contacts.title')}</CardTitle>
                                                 <CardDescription>
-                                                    Alle contacten die aan dit bedrijf gekoppeld zijn
+                                                    {t('companies.contacts.description')}
                                                 </CardDescription>
                                             </div>
                                             {availableContacts.length > 0 && (
@@ -318,15 +320,14 @@ export default function CompanyShow({
                                                     <DialogTrigger asChild>
                                                         <Button size="sm">
                                                             <UserPlus className="mr-2 h-4 w-4" />
-                                                            Contact koppelen
+                                                            {t('companies.contacts.link_button')}
                                                         </Button>
                                                     </DialogTrigger>
                                                     <DialogContent>
                                                         <DialogHeader>
-                                                            <DialogTitle>Contact koppelen</DialogTitle>
+                                                            <DialogTitle>{t('companies.contacts.link_title')}</DialogTitle>
                                                             <DialogDescription>
-                                                                Selecteer een contact om aan dit bedrijf te
-                                                                koppelen.
+                                                                {t('companies.contacts.link_description')}
                                                             </DialogDescription>
                                                         </DialogHeader>
                                                         <div className="py-4">
@@ -335,7 +336,7 @@ export default function CompanyShow({
                                                                 onValueChange={setSelectedContactId}
                                                             >
                                                                 <SelectTrigger>
-                                                                    <SelectValue placeholder="Selecteer een contact" />
+                                                                    <SelectValue placeholder={t('companies.contacts.select_placeholder')} />
                                                                 </SelectTrigger>
                                                                 <SelectContent>
                                                                     {availableContacts.map((contact) => (
@@ -354,13 +355,13 @@ export default function CompanyShow({
                                                                 variant="outline"
                                                                 onClick={() => setIsLinkingContact(false)}
                                                             >
-                                                                Annuleren
+                                                                {t('actions.cancel')}
                                                             </Button>
                                                             <Button
                                                                 onClick={handleLinkContact}
                                                                 disabled={!selectedContactId}
                                                             >
-                                                                Koppelen
+                                                                {t('companies.contacts.link')}
                                                             </Button>
                                                         </DialogFooter>
                                                     </DialogContent>
@@ -372,17 +373,17 @@ export default function CompanyShow({
                                                 <div className="flex flex-col items-center justify-center py-8 text-center">
                                                     <Users className="mb-2 h-8 w-8 text-muted-foreground" />
                                                     <p className="text-sm text-muted-foreground">
-                                                        Nog geen contacten gekoppeld
+                                                        {t('companies.contacts.empty')}
                                                     </p>
                                                 </div>
                                             ) : (
                                                 <Table>
                                                     <TableHeader>
                                                         <TableRow>
-                                                            <TableHead>Contact</TableHead>
-                                                            <TableHead>E-mail</TableHead>
+                                                            <TableHead>{t('companies.tickets.table.contact')}</TableHead>
+                                                            <TableHead>{t('companies.detail.email')}</TableHead>
                                                             <TableHead className="text-center">
-                                                                Tickets
+                                                                {t('companies.table.tickets')}
                                                             </TableHead>
                                                             <TableHead className="w-[50px]"></TableHead>
                                                         </TableRow>
@@ -431,9 +432,9 @@ export default function CompanyShow({
                                 <TabsContent value="tickets" className="mt-4">
                                     <Card>
                                         <CardHeader>
-                                            <CardTitle className="text-base">Recente tickets</CardTitle>
+                                            <CardTitle className="text-base">{t('companies.tickets.title')}</CardTitle>
                                             <CardDescription>
-                                                De meest recente tickets van dit bedrijf
+                                                {t('companies.tickets.description')}
                                             </CardDescription>
                                         </CardHeader>
                                         <CardContent>
@@ -441,17 +442,17 @@ export default function CompanyShow({
                                                 <div className="flex flex-col items-center justify-center py-8 text-center">
                                                     <TicketIcon className="mb-2 h-8 w-8 text-muted-foreground" />
                                                     <p className="text-sm text-muted-foreground">
-                                                        Nog geen tickets
+                                                        {t('companies.tickets.empty')}
                                                     </p>
                                                 </div>
                                             ) : (
                                                 <Table>
                                                     <TableHeader>
                                                         <TableRow>
-                                                            <TableHead>Ticket</TableHead>
-                                                            <TableHead>Contact</TableHead>
-                                                            <TableHead>Status</TableHead>
-                                                            <TableHead>Prioriteit</TableHead>
+                                                            <TableHead>{t('companies.tickets.table.ticket')}</TableHead>
+                                                            <TableHead>{t('companies.tickets.table.contact')}</TableHead>
+                                                            <TableHead>{t('companies.tickets.table.status')}</TableHead>
+                                                            <TableHead>{t('companies.tickets.table.priority')}</TableHead>
                                                         </TableRow>
                                                     </TableHeader>
                                                     <TableBody>
@@ -508,7 +509,7 @@ export default function CompanyShow({
                                                         href={`/companies/${company.id}/tickets`}
                                                         className="text-sm text-primary hover:underline"
                                                     >
-                                                        Bekijk alle {company.tickets_count} tickets
+                                                        {t('companies.tickets.view_all', { count: company.tickets_count })}
                                                     </Link>
                                                 </div>
                                             )}
@@ -524,9 +525,9 @@ export default function CompanyShow({
             <ConfirmationDialog
                 open={isDeleteOpen}
                 onOpenChange={setIsDeleteOpen}
-                title="Bedrijf verwijderen"
-                description={`Weet je zeker dat je ${company.name} wilt verwijderen? Gekoppelde contacten worden ontkoppeld maar niet verwijderd.`}
-                confirmLabel="Verwijderen"
+                title={t('companies.delete.title')}
+                description={t('companies.delete.description', { name: company.name })}
+                confirmLabel={t('companies.delete.confirm')}
                 onConfirm={handleDelete}
                 loading={isDeleting}
             />
@@ -534,9 +535,9 @@ export default function CompanyShow({
             <ConfirmationDialog
                 open={!!unlinkingContact}
                 onOpenChange={(open) => !open && setUnlinkingContact(null)}
-                title="Contact ontkoppelen"
-                description={`Weet je zeker dat je ${unlinkingContact?.name || unlinkingContact?.email} wilt ontkoppelen van dit bedrijf?`}
-                confirmLabel="Ontkoppelen"
+                title={t('companies.contacts.unlink_title')}
+                description={t('companies.contacts.unlink_description', { name: unlinkingContact?.name || unlinkingContact?.email })}
+                confirmLabel={t('companies.contacts.unlink_confirm')}
                 onConfirm={handleUnlinkContact}
             />
         </AppShell>

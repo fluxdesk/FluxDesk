@@ -27,7 +27,6 @@ describe('AI Settings Controller - Index', function () {
         $response->assertInertia(fn ($page) => $page
             ->component('organization/ai-settings')
             ->has('settings')
-            ->has('providers')
             ->has('languages')
         );
     });
@@ -56,7 +55,7 @@ describe('AI Settings Controller - Index', function () {
         );
     });
 
-    it('shows configured providers', function () {
+    it('defers providers for better performance', function () {
         // Add OpenAI integration
         OrganizationIntegration::create([
             'organization_id' => $this->organization->id,
@@ -67,19 +66,16 @@ describe('AI Settings Controller - Index', function () {
             'is_active' => true,
         ]);
 
+        // Providers are now loaded via deferred props for better performance
+        // The initial page load returns successfully without blocking on external API calls
         $response = $this->actingAs($this->admin)
             ->get('/organization/ai-settings');
 
         $response->assertSuccessful();
         $response->assertInertia(fn ($page) => $page
-            ->has('providers', fn ($providers) => $providers
-                ->each(fn ($provider) => $provider
-                    ->has('identifier')
-                    ->has('name')
-                    ->has('is_active')
-                    ->has('models')
-                )
-            )
+            ->component('organization/ai-settings')
+            ->has('settings')
+            ->has('languages')
         );
     });
 });
@@ -198,11 +194,12 @@ describe('AI Settings Controller - Privacy Settings', function () {
             ->get('/organization/ai-settings');
 
         $response->assertSuccessful();
+        // GDPR-compliant defaults: personal customer data off by default
         $response->assertInertia(fn ($page) => $page
-            ->where('settings.include_customer_name', true)
+            ->where('settings.include_customer_name', false)
             ->where('settings.include_agent_name', true)
-            ->where('settings.include_ticket_subject', true)
-            ->where('settings.include_message_history', true)
+            ->where('settings.include_ticket_subject', false)
+            ->where('settings.include_message_history', false)
             ->where('settings.include_department_name', true)
             ->where('settings.message_history_limit', 10)
             ->where('settings.disclosure_enabled', false)

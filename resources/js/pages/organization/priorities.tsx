@@ -29,19 +29,20 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     priorities: Priority[];
 }
 
 export default function Priorities({ priorities: initialPriorities }: Props) {
+    const { t } = useTranslation('organization');
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [editingPriority, setEditingPriority] = useState<Priority | null>(null);
     const [priorities, setPriorities] = useState(initialPriorities);
     const [deletingPriority, setDeletingPriority] = useState<Priority | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    // Sync local state when Inertia refreshes page data
     useEffect(() => {
         setPriorities(initialPriorities);
     }, [initialPriorities]);
@@ -51,11 +52,11 @@ export default function Priorities({ priorities: initialPriorities }: Props) {
         setIsDeleting(true);
         router.delete(destroy(deletingPriority.id).url, {
             onSuccess: () => {
-                toast.success('Prioriteit verwijderd');
+                toast.success(t('priorities.deleted'));
                 setPriorities((prev) => prev.filter((p) => p.id !== deletingPriority.id));
                 setDeletingPriority(null);
             },
-            onError: () => toast.error('Prioriteit verwijderen mislukt'),
+            onError: () => toast.error(t('priorities.delete_failed')),
             onFinish: () => setIsDeleting(false),
         });
     };
@@ -68,14 +69,14 @@ export default function Priorities({ priorities: initialPriorities }: Props) {
             {
                 preserveScroll: true,
                 preserveState: true,
-                onSuccess: () => toast.success('Prioriteitsvolgorde bijgewerkt'),
+                onSuccess: () => toast.success(t('priorities.reordered')),
             },
         );
     };
 
     return (
         <AppLayout>
-            <Head title="Prioriteiten" />
+            <Head title={t('priorities.page_title')} />
 
             <OrganizationLayout>
                 <div className="mx-auto max-w-4xl space-y-6">
@@ -87,9 +88,9 @@ export default function Priorities({ priorities: initialPriorities }: Props) {
                                         <Flag className="h-5 w-5 text-primary" />
                                     </div>
                                     <div>
-                                        <CardTitle className="text-lg">Prioriteiten</CardTitle>
+                                        <CardTitle className="text-lg">{t('priorities.title')}</CardTitle>
                                         <CardDescription>
-                                            Sleep om te herschikken
+                                            {t('common.drag_to_reorder')}
                                         </CardDescription>
                                     </div>
                                 </div>
@@ -97,10 +98,10 @@ export default function Priorities({ priorities: initialPriorities }: Props) {
                                     <DialogTrigger asChild>
                                         <Button size="sm">
                                             <Plus className="mr-2 h-4 w-4" />
-                                            Toevoegen
+                                            {t('priorities.add')}
                                         </Button>
                                     </DialogTrigger>
-                                    <PriorityFormDialog onClose={() => setIsCreateOpen(false)} />
+                                    <PriorityFormDialog t={t} onClose={() => setIsCreateOpen(false)} />
                                 </Dialog>
                             </div>
                         </CardHeader>
@@ -108,9 +109,9 @@ export default function Priorities({ priorities: initialPriorities }: Props) {
                             {priorities.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-12 text-center">
                                     <Flag className="h-12 w-12 text-muted-foreground/50" />
-                                    <h3 className="mt-4 text-lg font-semibold">Geen prioriteiten</h3>
+                                    <h3 className="mt-4 text-lg font-semibold">{t('priorities.empty_title')}</h3>
                                     <p className="mt-2 text-sm text-muted-foreground">
-                                        Voeg een prioriteit toe om tickets te classificeren.
+                                        {t('priorities.empty_description')}
                                     </p>
                                 </div>
                             ) : (
@@ -119,6 +120,7 @@ export default function Priorities({ priorities: initialPriorities }: Props) {
                                     onReorder={handleReorder}
                                     renderItem={(priority) => (
                                         <PriorityItem
+                                            t={t}
                                             priority={priority}
                                             isEditing={editingPriority?.id === priority.id}
                                             onEdit={() => setEditingPriority(priority)}
@@ -135,9 +137,9 @@ export default function Priorities({ priorities: initialPriorities }: Props) {
                 <ConfirmationDialog
                     open={!!deletingPriority}
                     onOpenChange={(open) => !open && setDeletingPriority(null)}
-                    title="Prioriteit verwijderen"
-                    description={`Weet je zeker dat je de prioriteit "${deletingPriority?.name}" wilt verwijderen? Tickets met deze prioriteit worden teruggezet naar de standaardprioriteit.`}
-                    confirmLabel="Verwijderen"
+                    title={t('priorities.delete_title')}
+                    description={t('priorities.delete_description', { name: deletingPriority?.name })}
+                    confirmLabel={t('common.delete')}
                     onConfirm={handleDelete}
                     loading={isDeleting}
                 />
@@ -147,12 +149,14 @@ export default function Priorities({ priorities: initialPriorities }: Props) {
 }
 
 function PriorityItem({
+    t,
     priority,
     isEditing,
     onEdit,
     onEditClose,
     onDelete,
 }: {
+    t: (key: string, options?: Record<string, unknown>) => string;
     priority: Priority;
     isEditing: boolean;
     onEdit: () => void;
@@ -170,7 +174,7 @@ function PriorityItem({
                     <span className="font-medium truncate">{priority.name}</span>
                     {priority.is_default && (
                         <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                            Standaard
+                            {t('common.default')}
                         </span>
                     )}
                 </div>
@@ -182,7 +186,7 @@ function PriorityItem({
                             <Pencil className="h-4 w-4" />
                         </Button>
                     </DialogTrigger>
-                    <PriorityFormDialog priority={priority} onClose={onEditClose} />
+                    <PriorityFormDialog t={t} priority={priority} onClose={onEditClose} />
                 </Dialog>
                 <Tooltip>
                     <TooltipTrigger asChild>
@@ -200,7 +204,7 @@ function PriorityItem({
                     </TooltipTrigger>
                     {priority.is_default && (
                         <TooltipContent>
-                            Standaardprioriteit kan niet verwijderd worden
+                            {t('priorities.cannot_delete_default')}
                         </TooltipContent>
                     )}
                 </Tooltip>
@@ -210,9 +214,11 @@ function PriorityItem({
 }
 
 function PriorityFormDialog({
+    t,
     priority,
     onClose,
 }: {
+    t: (key: string, options?: Record<string, unknown>) => string;
     priority?: Priority;
     onClose: () => void;
 }) {
@@ -227,20 +233,20 @@ function PriorityFormDialog({
         if (priority) {
             patch(update(priority.id).url, {
                 onSuccess: () => {
-                    toast.success('Prioriteit bijgewerkt');
+                    toast.success(t('priorities.updated'));
                     reset();
                     onClose();
                 },
-                onError: () => toast.error('Prioriteit bijwerken mislukt'),
+                onError: () => toast.error(t('priorities.update_failed')),
             });
         } else {
             post(store().url, {
                 onSuccess: () => {
-                    toast.success('Prioriteit aangemaakt');
+                    toast.success(t('priorities.created'));
                     reset();
                     onClose();
                 },
-                onError: () => toast.error('Prioriteit aanmaken mislukt'),
+                onError: () => toast.error(t('priorities.create_failed')),
             });
         }
     }
@@ -249,27 +255,27 @@ function PriorityFormDialog({
         <DialogContent className="sm:max-w-md">
             <form onSubmit={handleSubmit}>
                 <DialogHeader>
-                    <DialogTitle>{priority ? 'Prioriteit bewerken' : 'Prioriteit toevoegen'}</DialogTitle>
+                    <DialogTitle>{priority ? t('priorities.edit_title') : t('priorities.create_title')}</DialogTitle>
                     <DialogDescription>
-                        {priority ? 'Werk de prioriteitsdetails bij.' : 'Voeg een nieuw prioriteitsniveau toe voor tickets.'}
+                        {priority ? t('priorities.edit_description') : t('priorities.create_description')}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="name">Naam</Label>
+                        <Label htmlFor="name">{t('common.name')}</Label>
                         <Input
                             id="name"
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
-                            placeholder="bijv. Laag, Normaal, Hoog, Urgent"
+                            placeholder={t('priorities.name_placeholder')}
                             autoFocus
                         />
                         <InputError message={errors.name} />
                     </div>
 
                     <div className="grid gap-2">
-                        <Label>Kleur</Label>
+                        <Label>{t('common.color')}</Label>
                         <ColorPicker value={data.color} onChange={(color) => setData('color', color)} />
                         <InputError message={errors.color} />
                     </div>
@@ -285,9 +291,9 @@ function PriorityFormDialog({
                             className="mt-0.5"
                         />
                         <div className="space-y-1">
-                            <span className="font-medium">Standaardprioriteit</span>
+                            <span className="font-medium">{t('priorities.is_default')}</span>
                             <p className="text-xs text-muted-foreground">
-                                Nieuwe tickets krijgen automatisch deze prioriteit
+                                {t('priorities.is_default_description')}
                             </p>
                         </div>
                     </label>
@@ -295,10 +301,10 @@ function PriorityFormDialog({
 
                 <DialogFooter>
                     <Button type="button" variant="outline" onClick={onClose}>
-                        Annuleren
+                        {t('common.cancel')}
                     </Button>
                     <Button type="submit" disabled={processing || !data.name.trim()}>
-                        {priority ? 'Opslaan' : 'Toevoegen'}
+                        {priority ? t('common.save') : t('common.add')}
                     </Button>
                 </DialogFooter>
             </form>

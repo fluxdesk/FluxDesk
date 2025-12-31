@@ -1,22 +1,22 @@
 @extends('emails.tickets.layout')
 
-@section('title', 'Nieuwe reactie - #' . $ticket->ticket_number)
+@section('title', __('emails.agent_reply.title', ['ticket_number' => $ticket->ticket_number]))
 
 @section('preheader')
-    Nieuwe reactie op ticket #{{ $ticket->ticket_number }}: {{ Str::limit($ticket->subject, 50) }}
+    {{ __('emails.agent_reply.preheader', ['ticket_number' => $ticket->ticket_number, 'subject' => Str::limit($ticket->subject, 50)]) }}
 @endsection
 
 @section('header')
-    Nieuwe reactie op ticket #{{ $ticket->ticket_number }}
+    {{ __('emails.agent_reply.header', ['ticket_number' => $ticket->ticket_number]) }}
 @endsection
 
 @section('content')
     <p style="margin: 0 0 24px; font-size: 15px; line-height: 1.6; color: #374151;">
-        Beste {{ $ticket->contact?->name ?? 'klant' }},
+        {{ __('emails.dear') }} {{ $ticket->contact?->name ?? __('emails.customer') }},
     </p>
 
     <p style="margin: 0 0 24px; font-size: 15px; line-height: 1.6; color: #374151;">
-        Er is een nieuwe reactie op uw ticket.
+        {{ __('emails.agent_reply.body') }}
     </p>
 
     <!-- Agent message bubble -->
@@ -74,7 +74,7 @@
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
         <tr>
             <td style="padding-bottom: 8px;">
-                <span style="font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Bijlagen ({{ $message->fileAttachments->count() }})</span>
+                <span style="font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">{{ __('emails.attachments') }} ({{ $message->fileAttachments->count() }})</span>
             </td>
         </tr>
         <tr>
@@ -101,7 +101,7 @@
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9fafb; border-radius: 8px; margin-bottom: 24px;">
         <tr>
             <td style="padding: 16px 20px;">
-                <span style="font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Onderwerp</span>
+                <span style="font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">{{ __('emails.subject') }}</span>
                 <p style="margin: 4px 0 0; font-size: 15px; font-weight: 500; color: #111827;">{{ $ticket->subject }}</p>
             </td>
         </tr>
@@ -114,7 +114,7 @@
         <tr>
             <td align="center">
                 <a href="{{ $actionUrl }}" style="display: inline-block; background-color: {{ $organization->settings?->primary_color ?? '#000000' }}; color: #ffffff; font-size: 14px; font-weight: 600; text-decoration: none; padding: 12px 32px; border-radius: 8px;">
-                    Reageren
+                    {{ __('emails.agent_reply.reply_button') }}
                 </a>
             </td>
         </tr>
