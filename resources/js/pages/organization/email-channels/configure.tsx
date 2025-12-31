@@ -17,6 +17,7 @@ import { type EmailChannel, type MailFolder, type PostImportActionOption, type D
 import { Head, useForm } from '@inertiajs/react';
 import { update } from '@/routes/organization/email-channels/configure';
 import { ArrowLeft, Building2, Calendar, FolderInput, Loader2, Mail, Settings } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Link } from '@inertiajs/react';
 import { index } from '@/routes/organization/email-channels';
 
@@ -29,6 +30,7 @@ interface Props {
 }
 
 export default function Configure({ channel, mailFolders, postImportActions, departments, defaultImportSince }: Props) {
+    const { t } = useTranslation('organization');
     const { data, setData, patch, processing, errors } = useForm({
         department_id: channel.department_id?.toString() || departments.find((d) => d.is_default)?.id.toString() || '',
         fetch_folder: channel.fetch_folder || '',
@@ -46,7 +48,7 @@ export default function Configure({ channel, mailFolders, postImportActions, dep
 
     return (
         <AppLayout>
-            <Head title={`${channel.name} configureren`} />
+            <Head title={t('email_channels.configure.page_title', { name: channel.name })} />
 
             <OrganizationLayout>
                 <div className="mx-auto max-w-4xl space-y-6">
@@ -59,10 +61,10 @@ export default function Configure({ channel, mailFolders, postImportActions, dep
                         </Link>
                         <div>
                             <h1 className="text-lg font-semibold">
-                                {channel.name} configureren
+                                {t('email_channels.configure.title', { name: channel.name })}
                             </h1>
                             <p className="text-sm text-muted-foreground">
-                                Verbonden als {channel.email_address}
+                                {t('email_channels.configure.connected_as', { email: channel.email_address })}
                             </p>
                         </div>
                     </div>
@@ -72,21 +74,21 @@ export default function Configure({ channel, mailFolders, postImportActions, dep
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-base">
                                     <Building2 className="h-5 w-5" />
-                                    Afdeling koppelen
+                                    {t('email_channels.configure.department_card.title')}
                                 </CardTitle>
                                 <CardDescription>
-                                    Tickets van dit e-mailkanaal worden automatisch aan deze afdeling toegewezen.
+                                    {t('email_channels.configure.department_card.description')}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="department_id">Afdeling</Label>
+                                    <Label htmlFor="department_id">{t('email_channels.configure.department_label')}</Label>
                                     <Select
                                         value={data.department_id}
                                         onValueChange={(value) => setData('department_id', value)}
                                     >
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Selecteer een afdeling" />
+                                            <SelectValue placeholder={t('email_channels.configure.department_placeholder')} />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {departments.map((department) => (
@@ -111,22 +113,22 @@ export default function Configure({ channel, mailFolders, postImportActions, dep
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-base">
                                     <FolderInput className="h-5 w-5" />
-                                    E-mailmap selecteren
+                                    {t('email_channels.configure.folder_card.title')}
                                 </CardTitle>
                                 <CardDescription>
-                                    Selecteer de map waaruit e-mails worden opgehaald en omgezet naar tickets.
+                                    {t('email_channels.configure.folder_card.description')}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="fetch_folder">Map om e-mails uit op te halen</Label>
+                                    <Label htmlFor="fetch_folder">{t('email_channels.configure.folder_label')}</Label>
                                     {mailFolders.length > 0 ? (
                                         <Select
                                             value={data.fetch_folder}
                                             onValueChange={(value) => setData('fetch_folder', value)}
                                         >
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Selecteer een map" />
+                                                <SelectValue placeholder={t('email_channels.configure.folder_placeholder')} />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {mailFolders.map((folder) => (
@@ -139,7 +141,7 @@ export default function Configure({ channel, mailFolders, postImportActions, dep
                                     ) : (
                                         <div className="flex items-center gap-2 rounded-md border p-3 text-sm text-muted-foreground">
                                             <Loader2 className="h-4 w-4 animate-spin" />
-                                            Mappen laden...
+                                            {t('email_channels.configure.folders_loading')}
                                         </div>
                                     )}
                                     <InputError message={errors.fetch_folder} />
@@ -151,10 +153,10 @@ export default function Configure({ channel, mailFolders, postImportActions, dep
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-base">
                                     <Calendar className="h-5 w-5" />
-                                    Historische e-mails importeren
+                                    {t('email_channels.configure.history_card.title')}
                                 </CardTitle>
                                 <CardDescription>
-                                    Wil je oude e-mails importeren als tickets, of alleen nieuwe e-mails vanaf nu?
+                                    {t('email_channels.configure.history_card.description')}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
@@ -171,9 +173,9 @@ export default function Configure({ channel, mailFolders, postImportActions, dep
                                     >
                                         <RadioGroupItem value="no" id="import_no" className="mt-0.5" />
                                         <div className="flex-1">
-                                            <span className="font-medium">Alleen nieuwe e-mails</span>
+                                            <span className="font-medium">{t('email_channels.configure.history_new_only')}</span>
                                             <p className="text-sm text-muted-foreground">
-                                                Importeer alleen e-mails die binnenkomen na activatie. Aanbevolen voor migraties.
+                                                {t('email_channels.configure.history_new_only_description')}
                                             </p>
                                         </div>
                                     </label>
@@ -185,9 +187,9 @@ export default function Configure({ channel, mailFolders, postImportActions, dep
                                     >
                                         <RadioGroupItem value="yes" id="import_yes" className="mt-0.5" />
                                         <div className="flex-1">
-                                            <span className="font-medium">Ook oude e-mails importeren</span>
+                                            <span className="font-medium">{t('email_channels.configure.history_import_old')}</span>
                                             <p className="text-sm text-muted-foreground">
-                                                Importeer e-mails vanaf een specifieke datum als tickets.
+                                                {t('email_channels.configure.history_import_old_description')}
                                             </p>
                                         </div>
                                     </label>
@@ -195,7 +197,7 @@ export default function Configure({ channel, mailFolders, postImportActions, dep
 
                                 {data.import_old_emails && (
                                     <div className="grid gap-2 pt-2 pl-7">
-                                        <Label htmlFor="import_emails_since">E-mails importeren vanaf</Label>
+                                        <Label htmlFor="import_emails_since">{t('email_channels.configure.history_since_label')}</Label>
                                         <Input
                                             type="date"
                                             id="import_emails_since"
@@ -205,7 +207,7 @@ export default function Configure({ channel, mailFolders, postImportActions, dep
                                             className="max-w-[200px]"
                                         />
                                         <p className="text-sm text-muted-foreground">
-                                            Alle e-mails vanaf deze datum worden geimporteerd als tickets.
+                                            {t('email_channels.configure.history_since_help')}
                                         </p>
                                         <InputError message={errors.import_emails_since} />
                                     </div>
@@ -217,10 +219,10 @@ export default function Configure({ channel, mailFolders, postImportActions, dep
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-base">
                                     <Mail className="h-5 w-5" />
-                                    Na het importeren
+                                    {t('email_channels.configure.post_import_card.title')}
                                 </CardTitle>
                                 <CardDescription>
-                                    Wat moet er met e-mails gebeuren nadat ze zijn geimporteerd als ticket?
+                                    {t('email_channels.configure.post_import_card.description')}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
@@ -255,14 +257,14 @@ export default function Configure({ channel, mailFolders, postImportActions, dep
 
                                 {data.post_import_action === 'move_to_folder' && (
                                     <div className="grid gap-2 pt-2">
-                                        <Label htmlFor="post_import_folder">Verplaatsen naar map</Label>
+                                        <Label htmlFor="post_import_folder">{t('email_channels.configure.post_import_folder_label')}</Label>
                                         {mailFolders.length > 0 ? (
                                             <Select
                                                 value={data.post_import_folder}
                                                 onValueChange={(value) => setData('post_import_folder', value)}
                                             >
                                                 <SelectTrigger>
-                                                    <SelectValue placeholder="Selecteer een map" />
+                                                    <SelectValue placeholder={t('email_channels.configure.post_import_folder_placeholder')} />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     {mailFolders
@@ -279,7 +281,7 @@ export default function Configure({ channel, mailFolders, postImportActions, dep
                                                 id="post_import_folder"
                                                 value={data.post_import_folder}
                                                 onChange={(e) => setData('post_import_folder', e.target.value)}
-                                                placeholder="Map naam"
+                                                placeholder={t('email_channels.configure.post_import_folder_name_placeholder')}
                                             />
                                         )}
                                         <InputError message={errors.post_import_folder} />
@@ -292,15 +294,15 @@ export default function Configure({ channel, mailFolders, postImportActions, dep
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-base">
                                     <Settings className="h-5 w-5" />
-                                    Synchronisatie-instellingen
+                                    {t('email_channels.configure.sync_card.title')}
                                 </CardTitle>
                                 <CardDescription>
-                                    Hoe vaak moeten nieuwe e-mails worden opgehaald?
+                                    {t('email_channels.configure.sync_card.description')}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="sync_interval_minutes">Synchronisatie-interval (minuten)</Label>
+                                    <Label htmlFor="sync_interval_minutes">{t('email_channels.configure.sync_interval_label')}</Label>
                                     <Input
                                         id="sync_interval_minutes"
                                         type="number"
@@ -311,7 +313,7 @@ export default function Configure({ channel, mailFolders, postImportActions, dep
                                         className="max-w-[200px]"
                                     />
                                     <p className="text-sm text-muted-foreground">
-                                        Nieuwe e-mails worden elke {data.sync_interval_minutes} {data.sync_interval_minutes === 1 ? 'minuut' : 'minuten'} opgehaald.
+                                        {t('email_channels.configure.sync_interval_help', { count: data.sync_interval_minutes })}
                                     </p>
                                     <InputError message={errors.sync_interval_minutes} />
                                 </div>
@@ -320,11 +322,11 @@ export default function Configure({ channel, mailFolders, postImportActions, dep
 
                         <div className="flex justify-end gap-3">
                             <Button type="button" variant="outline" asChild>
-                                <Link href={index().url}>Annuleren</Link>
+                                <Link href={index().url}>{t('common.cancel')}</Link>
                             </Button>
                             <Button type="submit" disabled={processing || !data.fetch_folder || !data.department_id}>
                                 {processing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Activeren
+                                {t('email_channels.configure.activate')}
                             </Button>
                         </div>
                     </form>

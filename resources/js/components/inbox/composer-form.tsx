@@ -12,6 +12,7 @@ import type { Ticket, User } from '@/types';
 import { useForm } from '@inertiajs/react';
 import { suggest } from '@/actions/App/Http/Controllers/AIController';
 import { refactor } from '@/actions/App/Http/Controllers/AIController';
+import { useTranslation } from 'react-i18next';
 
 interface UploadedFile {
     temp_id: string;
@@ -44,6 +45,7 @@ interface ComposerFormProps {
 }
 
 export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
+    const { t } = useTranslation('inbox');
     const [messageType, setMessageType] = React.useState<'reply' | 'note'>('reply');
     const [files, setFiles] = React.useState<UploadedFile[]>([]);
     const [showPreview, setShowPreview] = React.useState(false);
@@ -142,7 +144,7 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
             const placeholderIds = new Set(placeholders.map(p => p.temp_id));
             setFiles(prev => prev.map(f => {
                 if (f.uploading && placeholderIds.has(f.temp_id)) {
-                    return { ...f, uploading: false, error: 'Upload mislukt' };
+                    return { ...f, uploading: false, error: t('composer.upload_failed') };
                 }
                 return f;
             }));
@@ -302,14 +304,14 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
             const data = await response.json();
 
             if (!response.ok) {
-                setAiError(data.error || 'Er ging iets mis');
+                setAiError(data.error || t('composer.ai_something_wrong'));
                 return;
             }
 
             setSuggestions(data.suggestions || []);
             setSuggestionsOpen(true);
         } catch {
-            setAiError('Kon geen verbinding maken met AI service');
+            setAiError(t('composer.ai_error'));
         } finally {
             setAiSuggesting(false);
         }
@@ -337,14 +339,14 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
             const result = await response.json();
 
             if (!response.ok) {
-                setAiError(result.error || 'Er ging iets mis');
+                setAiError(result.error || t('composer.ai_something_wrong'));
                 return;
             }
 
             setData('body', result.text);
             setAiUsed(true);
         } catch {
-            setAiError('Kon geen verbinding maken met AI service');
+            setAiError(t('composer.ai_error'));
         } finally {
             setAiRefactoring(false);
         }
@@ -388,7 +390,7 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
                         <div className="text-center">
                             <Paperclip className="mx-auto h-8 w-8 text-primary" />
                             <p className="mt-2 text-sm font-medium text-primary">
-                                Bestanden hier neerzetten
+                                {t('composer.drop_files')}
                             </p>
                         </div>
                     </div>
@@ -463,7 +465,7 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
                             <MarkdownRenderer content={data.body} className="prose-sm" />
                         ) : (
                             <p className="text-sm text-muted-foreground italic">
-                                Typ iets om de preview te zien...
+                                {t('composer.preview_empty')}
                             </p>
                         )}
                     </div>
@@ -474,8 +476,8 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
                         onKeyDown={handleKeyDown}
                         users={agents}
                         placeholder={isNote
-                            ? 'Voeg een interne notitie toe...'
-                            : `Antwoord aan ${ticket.contact?.name || 'klant'}...`
+                            ? t('composer.note_placeholder')
+                            : t('composer.reply_placeholder', { name: ticket.contact?.name || 'customer' })
                         }
                         disabled={processing}
                         minRows={2}
@@ -498,21 +500,21 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
                                     className="h-7 gap-1 rounded-md px-2 text-xs data-[state=active]:bg-muted data-[state=active]:shadow-none"
                                 >
                                     <Send className="h-3 w-3" />
-                                    Antwoord
+                                    {t('composer.reply')}
                                 </TabsTrigger>
                                 <TabsTrigger
                                     value="note"
                                     className="h-7 gap-1 rounded-md px-2 text-xs data-[state=active]:bg-amber-100 data-[state=active]:text-amber-700 data-[state=active]:shadow-none dark:data-[state=active]:bg-amber-900/50 dark:data-[state=active]:text-amber-400"
                                 >
                                     <StickyNote className="h-3 w-3" />
-                                    Notitie
+                                    {t('composer.note')}
                                 </TabsTrigger>
                             </TabsList>
                         </Tabs>
 
                         {isNote && (
                             <span className="hidden text-xs text-amber-600 dark:text-amber-400 sm:inline">
-                                Intern
+                                {t('composer.internal')}
                             </span>
                         )}
 
@@ -532,8 +534,8 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
                             </TooltipTrigger>
                             <TooltipContent side="top" className="text-xs">
                                 {canUploadMore
-                                    ? `Bijlagen toevoegen (${files.length}/10)`
-                                    : 'Maximum bereikt (10)'
+                                    ? t('composer.add_attachments', { current: files.length, max: 10 })
+                                    : t('composer.max_attachments', { max: 10 })
                                 }
                             </TooltipContent>
                         </Tooltip>
@@ -559,7 +561,7 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent side="top" className="text-xs">
-                                {showPreview ? 'Bewerken' : 'Preview'}
+                                {showPreview ? t('composer.edit') : t('composer.preview')}
                             </TooltipContent>
                         </Tooltip>
 
@@ -586,12 +588,12 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
                                                     ) : (
                                                         <Sparkles className="h-3.5 w-3.5" />
                                                     )}
-                                                    <span className="hidden text-xs sm:inline">Suggestie</span>
+                                                    <span className="hidden text-xs sm:inline">{t('composer.ai_suggestion')}</span>
                                                 </Button>
                                             </PopoverTrigger>
                                         </TooltipTrigger>
                                         <TooltipContent side="top" className="text-xs">
-                                            AI genereert suggesties
+                                            {t('composer.ai_generates_suggestions')}
                                         </TooltipContent>
                                     </Tooltip>
                                     <PopoverContent
@@ -600,16 +602,16 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
                                         onOpenAutoFocus={(e) => e.preventDefault()}
                                     >
                                         <div className="border-b px-3 py-2">
-                                            <p className="text-sm font-medium">AI Suggesties</p>
+                                            <p className="text-sm font-medium">{t('composer.ai_suggestions_title')}</p>
                                             <p className="text-xs text-muted-foreground">
-                                                Kies een suggestie om te gebruiken
+                                                {t('composer.ai_suggestions_description')}
                                             </p>
                                         </div>
                                         <div className="max-h-80 overflow-y-auto">
                                             {suggestions.length === 0 && !aiError && (
                                                 <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
                                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                    Laden...
+                                                    {t('composer.ai_loading')}
                                                 </div>
                                             )}
                                             {aiError && (
@@ -650,11 +652,11 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
                                             ) : (
                                                 <Wand2 className="h-3.5 w-3.5" />
                                             )}
-                                            <span className="hidden text-xs sm:inline">Verbeter</span>
+                                            <span className="hidden text-xs sm:inline">{t('composer.ai_improve')}</span>
                                         </Button>
                                     </TooltipTrigger>
                                     <TooltipContent side="top" className="text-xs">
-                                        AI verbetert je tekst
+                                        {t('composer.ai_improves_text')}
                                     </TooltipContent>
                                 </Tooltip>
                             </>
@@ -672,7 +674,7 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
                             className="h-7 gap-1.5 px-3 text-xs"
                         >
                             <Send className="h-3 w-3" />
-                            {isNote ? 'Toevoegen' : 'Versturen'}
+                            {isNote ? t('composer.add') : t('composer.send')}
                         </Button>
                     </div>
                 </div>

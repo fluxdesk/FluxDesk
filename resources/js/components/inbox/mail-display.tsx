@@ -26,6 +26,7 @@ import {
 import { useInitials } from '@/hooks/use-initials';
 import type { Ticket, Status, Priority, User, Contact } from '@/types';
 import { usePage } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 
 interface MailDisplayProps {
     ticket?: Ticket | null;
@@ -36,6 +37,7 @@ interface MailDisplayProps {
 }
 
 export function MailDisplay({ ticket }: MailDisplayProps) {
+    const { t } = useTranslation('inbox');
     const getInitials = useInitials();
     const { props } = usePage<{ ticket?: Ticket }>();
 
@@ -50,28 +52,28 @@ export function MailDisplay({ ticket }: MailDisplayProps) {
                         <TooltipTrigger asChild>
                             <Button variant="ghost" size="icon" disabled={!displayTicket}>
                                 <Archive className="h-4 w-4" />
-                                <span className="sr-only">Archiveren</span>
+                                <span className="sr-only">{t('display.archive')}</span>
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent>Archiveren</TooltipContent>
+                        <TooltipContent>{t('display.archive')}</TooltipContent>
                     </Tooltip>
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button variant="ghost" size="icon" disabled={!displayTicket}>
                                 <ArchiveX className="h-4 w-4" />
-                                <span className="sr-only">Naar spam</span>
+                                <span className="sr-only">{t('display.to_spam')}</span>
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent>Naar spam</TooltipContent>
+                        <TooltipContent>{t('display.to_spam')}</TooltipContent>
                     </Tooltip>
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button variant="ghost" size="icon" disabled={!displayTicket}>
                                 <Trash2 className="h-4 w-4" />
-                                <span className="sr-only">Naar prullenbak</span>
+                                <span className="sr-only">{t('display.to_trash')}</span>
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent>Naar prullenbak</TooltipContent>
+                        <TooltipContent>{t('display.to_trash')}</TooltipContent>
                     </Tooltip>
                 </div>
                 <div className="ml-auto flex items-center gap-2">
@@ -79,28 +81,28 @@ export function MailDisplay({ ticket }: MailDisplayProps) {
                         <TooltipTrigger asChild>
                             <Button variant="ghost" size="icon" disabled={!displayTicket}>
                                 <Reply className="h-4 w-4" />
-                                <span className="sr-only">Beantwoorden</span>
+                                <span className="sr-only">{t('display.reply')}</span>
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent>Beantwoorden</TooltipContent>
+                        <TooltipContent>{t('display.reply')}</TooltipContent>
                     </Tooltip>
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button variant="ghost" size="icon" disabled={!displayTicket}>
                                 <ReplyAll className="h-4 w-4" />
-                                <span className="sr-only">Allen beantwoorden</span>
+                                <span className="sr-only">{t('display.reply_all')}</span>
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent>Allen beantwoorden</TooltipContent>
+                        <TooltipContent>{t('display.reply_all')}</TooltipContent>
                     </Tooltip>
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button variant="ghost" size="icon" disabled={!displayTicket}>
                                 <Forward className="h-4 w-4" />
-                                <span className="sr-only">Doorsturen</span>
+                                <span className="sr-only">{t('display.forward')}</span>
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent>Doorsturen</TooltipContent>
+                        <TooltipContent>{t('display.forward')}</TooltipContent>
                     </Tooltip>
                 </div>
                 <Separator orientation="vertical" className="mx-2 h-6" />
@@ -108,14 +110,14 @@ export function MailDisplay({ ticket }: MailDisplayProps) {
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" disabled={!displayTicket}>
                             <MoreVertical className="h-4 w-4" />
-                            <span className="sr-only">Meer</span>
+                            <span className="sr-only">{t('display.more')}</span>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem>Markeer als ongelezen</DropdownMenuItem>
-                        <DropdownMenuItem>Label toevoegen</DropdownMenuItem>
-                        <DropdownMenuItem>Status wijzigen</DropdownMenuItem>
-                        <DropdownMenuItem>Toewijzen aan...</DropdownMenuItem>
+                        <DropdownMenuItem>{t('actions.mark_unread')}</DropdownMenuItem>
+                        <DropdownMenuItem>{t('actions.add_label')}</DropdownMenuItem>
+                        <DropdownMenuItem>{t('actions.change_status')}</DropdownMenuItem>
+                        <DropdownMenuItem>{t('actions.assign_to')}</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
@@ -132,11 +134,11 @@ export function MailDisplay({ ticket }: MailDisplayProps) {
                             </Avatar>
                             <div className="grid gap-1">
                                 <div className="font-semibold">
-                                    {displayTicket.contact?.name || 'Onbekend'}
+                                    {displayTicket.contact?.name || t('ticket.unknown')}
                                 </div>
                                 <div className="line-clamp-1 text-xs">{displayTicket.subject}</div>
                                 <div className="line-clamp-1 text-xs">
-                                    <span className="font-medium">Van:</span>{' '}
+                                    <span className="font-medium">{t('ticket.from')}:</span>{' '}
                                     {displayTicket.contact?.email}
                                 </div>
                             </div>
@@ -164,7 +166,7 @@ export function MailDisplay({ ticket }: MailDisplayProps) {
                                 </div>
                                 <div className="pl-8 text-sm">{message.content}</div>
                             </div>
-                        )) || <p className="text-muted-foreground">Geen berichten</p>}
+                        )) || <p className="text-muted-foreground">{t('ticket.no_messages')}</p>}
                     </div>
                     <Separator className="mt-auto" />
                     <div className="p-4">
@@ -172,11 +174,11 @@ export function MailDisplay({ ticket }: MailDisplayProps) {
                             <div className="grid gap-4">
                                 <Textarea
                                     className="p-4"
-                                    placeholder={`Antwoord aan ${displayTicket.contact?.name || 'klant'}...`}
+                                    placeholder={t('composer.reply_placeholder', { name: displayTicket.contact?.name || 'customer' })}
                                 />
                                 <div className="flex items-center">
                                     <Button size="sm" className="ml-auto">
-                                        Versturen
+                                        {t('composer.send')}
                                     </Button>
                                 </div>
                             </div>
@@ -185,7 +187,7 @@ export function MailDisplay({ ticket }: MailDisplayProps) {
                 </div>
             ) : (
                 <div className="flex flex-1 items-center justify-center p-8 text-center text-muted-foreground">
-                    Geen ticket geselecteerd
+                    {t('detail.no_ticket_selected')}
                 </div>
             )}
         </div>

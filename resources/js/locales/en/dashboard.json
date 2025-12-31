@@ -1,0 +1,71 @@
+{
+    "page_title": "Statistics",
+    "title": "Statistics",
+    "description": "Overview of your support tickets",
+    "date_ranges": {
+        "24h": "Last 24 hours",
+        "7d": "Last 7 days",
+        "30d": "Last 30 days",
+        "90d": "Last 3 months"
+    },
+    "metrics": {
+        "open_tickets": "Open tickets",
+        "total_tickets": "{{count}} tickets total",
+        "unassigned": "Unassigned",
+        "awaiting_assignment": "Awaiting assignment",
+        "sla_breached": "SLA breached",
+        "deadline_passed": "Deadline passed",
+        "resolved_this_week": "Resolved this week",
+        "new_this_week": "{{count}} new this week"
+    },
+    "charts": {
+        "created": "Created",
+        "resolved": "Resolved",
+        "assigned": "Assigned"
+    },
+    "activity": {
+        "title": "Ticket activity",
+        "tickets_per_status": "Tickets by status",
+        "current_distribution": "Current distribution"
+    },
+    "response_times": {
+        "title": "Response times",
+        "description": "Average times in this period",
+        "first_response": "First response",
+        "resolution_time": "Resolution time",
+        "average": "average"
+    },
+    "trends": {
+        "title": "Comparison to previous period",
+        "description": "Compared to the same period before",
+        "new_tickets": "New tickets",
+        "resolved_tickets": "Resolved tickets"
+    },
+    "agent_performance": {
+        "title": "Agent performance",
+        "description": "Tickets assigned and resolved",
+        "no_activity": "No ticket activity in this period"
+    },
+    "channels": {
+        "title": "Tickets by channel",
+        "description": "Distribution over input channels",
+        "no_tickets": "No tickets in this period"
+    },
+    "sla": {
+        "title": "SLA warnings",
+        "description": "Tickets at risk or deadline breached",
+        "all_within_sla": "All tickets are within SLA",
+        "overdue": "{{hours}}h {{minutes}}m overdue",
+        "remaining": "{{hours}}h {{minutes}}m remaining"
+    },
+    "recent_tickets": {
+        "title": "Recent tickets",
+        "description": "Latest activity",
+        "empty": "No tickets yet"
+    },
+    "time": {
+        "minutes": "{{count}}m",
+        "hours": "{{count}}h",
+        "days": "{{count}}d"
+    }
+}

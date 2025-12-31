@@ -12,8 +12,10 @@ import { store } from '@/routes/two-factor/login';
 import { Form, Head } from '@inertiajs/react';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function TwoFactorChallenge() {
+    const { t } = useTranslation('auth');
     const [showRecoveryInput, setShowRecoveryInput] = useState<boolean>(false);
     const [code, setCode] = useState<string>('');
 
@@ -24,20 +26,18 @@ export default function TwoFactorChallenge() {
     }>(() => {
         if (showRecoveryInput) {
             return {
-                title: 'Herstelcode',
-                description:
-                    'Vul een van je noodherstelcodes in om toegang te krijgen tot je account.',
-                toggleText: 'inloggen met authenticatiecode',
+                title: t('two_factor.recovery_title'),
+                description: t('two_factor.recovery_description'),
+                toggleText: t('two_factor.toggle_use_code'),
             };
         }
 
         return {
-            title: 'Authenticatiecode',
-            description:
-                'Vul de code in van je authenticator app.',
-            toggleText: 'inloggen met herstelcode',
+            title: t('two_factor.code_title'),
+            description: t('two_factor.code_description'),
+            toggleText: t('two_factor.toggle_use_recovery'),
         };
-    }, [showRecoveryInput]);
+    }, [showRecoveryInput, t]);
 
     const toggleRecoveryMode = (clearErrors: () => void): void => {
         setShowRecoveryInput(!showRecoveryInput);
@@ -50,7 +50,7 @@ export default function TwoFactorChallenge() {
             title={authConfigContent.title}
             description={authConfigContent.description}
         >
-            <Head title="Tweestapsverificatie" />
+            <Head title={t('two_factor.page_title')} />
 
             <div className="space-y-6">
                 <Form
@@ -66,7 +66,7 @@ export default function TwoFactorChallenge() {
                                     <Input
                                         name="recovery_code"
                                         type="text"
-                                        placeholder="Vul herstelcode in"
+                                        placeholder={t('two_factor.recovery_placeholder')}
                                         autoFocus={showRecoveryInput}
                                         required
                                     />
@@ -107,11 +107,11 @@ export default function TwoFactorChallenge() {
                                 className="w-full"
                                 disabled={processing}
                             >
-                                Doorgaan
+                                {t('two_factor.continue')}
                             </Button>
 
                             <div className="text-center text-sm text-muted-foreground">
-                                <span>of je kunt </span>
+                                <span>{t('two_factor.or_you_can')} </span>
                                 <button
                                     type="button"
                                     className="cursor-pointer text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"

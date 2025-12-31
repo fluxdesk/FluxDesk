@@ -29,19 +29,20 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     statuses: Status[];
 }
 
 export default function Statuses({ statuses: initialStatuses }: Props) {
+    const { t } = useTranslation('organization');
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [editingStatus, setEditingStatus] = useState<Status | null>(null);
     const [statuses, setStatuses] = useState(initialStatuses);
     const [deletingStatus, setDeletingStatus] = useState<Status | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    // Sync local state when Inertia refreshes page data
     useEffect(() => {
         setStatuses(initialStatuses);
     }, [initialStatuses]);
@@ -51,11 +52,11 @@ export default function Statuses({ statuses: initialStatuses }: Props) {
         setIsDeleting(true);
         router.delete(destroy(deletingStatus.id).url, {
             onSuccess: () => {
-                toast.success('Status verwijderd');
+                toast.success(t('statuses.deleted'));
                 setStatuses((prev) => prev.filter((s) => s.id !== deletingStatus.id));
                 setDeletingStatus(null);
             },
-            onError: () => toast.error('Status verwijderen mislukt'),
+            onError: () => toast.error(t('statuses.delete_failed')),
             onFinish: () => setIsDeleting(false),
         });
     };
@@ -68,14 +69,14 @@ export default function Statuses({ statuses: initialStatuses }: Props) {
             {
                 preserveScroll: true,
                 preserveState: true,
-                onSuccess: () => toast.success('Statusvolgorde bijgewerkt'),
+                onSuccess: () => toast.success(t('statuses.reordered')),
             },
         );
     };
 
     return (
         <AppLayout>
-            <Head title="Statussen" />
+            <Head title={t('statuses.page_title')} />
 
             <OrganizationLayout>
                 <div className="mx-auto max-w-4xl space-y-6">
@@ -87,9 +88,9 @@ export default function Statuses({ statuses: initialStatuses }: Props) {
                                         <CircleDot className="h-5 w-5 text-primary" />
                                     </div>
                                     <div>
-                                        <CardTitle className="text-lg">Statussen</CardTitle>
+                                        <CardTitle className="text-lg">{t('statuses.title')}</CardTitle>
                                         <CardDescription>
-                                            Sleep om te herschikken
+                                            {t('common.drag_to_reorder')}
                                         </CardDescription>
                                     </div>
                                 </div>
@@ -97,10 +98,10 @@ export default function Statuses({ statuses: initialStatuses }: Props) {
                                     <DialogTrigger asChild>
                                         <Button size="sm">
                                             <Plus className="mr-2 h-4 w-4" />
-                                            Toevoegen
+                                            {t('statuses.add')}
                                         </Button>
                                     </DialogTrigger>
-                                    <StatusFormDialog onClose={() => setIsCreateOpen(false)} />
+                                    <StatusFormDialog t={t} onClose={() => setIsCreateOpen(false)} />
                                 </Dialog>
                             </div>
                         </CardHeader>
@@ -108,9 +109,9 @@ export default function Statuses({ statuses: initialStatuses }: Props) {
                             {statuses.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-12 text-center">
                                     <CircleDot className="h-12 w-12 text-muted-foreground/50" />
-                                    <h3 className="mt-4 text-lg font-semibold">Geen statussen</h3>
+                                    <h3 className="mt-4 text-lg font-semibold">{t('statuses.empty_title')}</h3>
                                     <p className="mt-2 text-sm text-muted-foreground">
-                                        Voeg een status toe om tickets te organiseren.
+                                        {t('statuses.empty_description')}
                                     </p>
                                 </div>
                             ) : (
@@ -119,6 +120,7 @@ export default function Statuses({ statuses: initialStatuses }: Props) {
                                     onReorder={handleReorder}
                                     renderItem={(status) => (
                                         <StatusItem
+                                            t={t}
                                             status={status}
                                             isEditing={editingStatus?.id === status.id}
                                             onEdit={() => setEditingStatus(status)}
@@ -135,9 +137,9 @@ export default function Statuses({ statuses: initialStatuses }: Props) {
                 <ConfirmationDialog
                     open={!!deletingStatus}
                     onOpenChange={(open) => !open && setDeletingStatus(null)}
-                    title="Status verwijderen"
-                    description={`Weet je zeker dat je de status "${deletingStatus?.name}" wilt verwijderen? Tickets met deze status worden teruggezet naar de standaardstatus.`}
-                    confirmLabel="Verwijderen"
+                    title={t('statuses.delete_title')}
+                    description={t('statuses.delete_description', { name: deletingStatus?.name })}
+                    confirmLabel={t('common.delete')}
                     onConfirm={handleDelete}
                     loading={isDeleting}
                 />
@@ -147,12 +149,14 @@ export default function Statuses({ statuses: initialStatuses }: Props) {
 }
 
 function StatusItem({
+    t,
     status,
     isEditing,
     onEdit,
     onEditClose,
     onDelete,
 }: {
+    t: (key: string, options?: Record<string, unknown>) => string;
     status: Status;
     isEditing: boolean;
     onEdit: () => void;
@@ -170,12 +174,12 @@ function StatusItem({
                     <span className="font-medium truncate">{status.name}</span>
                     {status.is_default && (
                         <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                            Standaard
+                            {t('common.default')}
                         </span>
                     )}
                     {status.is_closed && (
                         <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                            Gesloten
+                            {t('statuses.closed_badge')}
                         </span>
                     )}
                 </div>
@@ -187,7 +191,7 @@ function StatusItem({
                             <Pencil className="h-4 w-4" />
                         </Button>
                     </DialogTrigger>
-                    <StatusFormDialog status={status} onClose={onEditClose} />
+                    <StatusFormDialog t={t} status={status} onClose={onEditClose} />
                 </Dialog>
                 <Tooltip>
                     <TooltipTrigger asChild>
@@ -205,7 +209,7 @@ function StatusItem({
                     </TooltipTrigger>
                     {status.is_default && (
                         <TooltipContent>
-                            Standaardstatus kan niet verwijderd worden
+                            {t('statuses.cannot_delete_default')}
                         </TooltipContent>
                     )}
                 </Tooltip>
@@ -215,9 +219,11 @@ function StatusItem({
 }
 
 function StatusFormDialog({
+    t,
     status,
     onClose,
 }: {
+    t: (key: string, options?: Record<string, unknown>) => string;
     status?: Status;
     onClose: () => void;
 }) {
@@ -233,20 +239,20 @@ function StatusFormDialog({
         if (status) {
             patch(update(status.id).url, {
                 onSuccess: () => {
-                    toast.success('Status bijgewerkt');
+                    toast.success(t('statuses.updated'));
                     reset();
                     onClose();
                 },
-                onError: () => toast.error('Status bijwerken mislukt'),
+                onError: () => toast.error(t('statuses.update_failed')),
             });
         } else {
             post(store().url, {
                 onSuccess: () => {
-                    toast.success('Status aangemaakt');
+                    toast.success(t('statuses.created'));
                     reset();
                     onClose();
                 },
-                onError: () => toast.error('Status aanmaken mislukt'),
+                onError: () => toast.error(t('statuses.create_failed')),
             });
         }
     }
@@ -255,27 +261,27 @@ function StatusFormDialog({
         <DialogContent className="sm:max-w-md">
             <form onSubmit={handleSubmit}>
                 <DialogHeader>
-                    <DialogTitle>{status ? 'Status bewerken' : 'Status toevoegen'}</DialogTitle>
+                    <DialogTitle>{status ? t('statuses.edit_title') : t('statuses.create_title')}</DialogTitle>
                     <DialogDescription>
-                        {status ? 'Werk de statusdetails bij.' : 'Voeg een nieuwe statusoptie toe voor tickets.'}
+                        {status ? t('statuses.edit_description') : t('statuses.create_description')}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="name">Naam</Label>
+                        <Label htmlFor="name">{t('common.name')}</Label>
                         <Input
                             id="name"
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
-                            placeholder="bijv. Open, In behandeling, Gesloten"
+                            placeholder={t('statuses.name_placeholder')}
                             autoFocus
                         />
                         <InputError message={errors.name} />
                     </div>
 
                     <div className="grid gap-2">
-                        <Label>Kleur</Label>
+                        <Label>{t('common.color')}</Label>
                         <ColorPicker value={data.color} onChange={(color) => setData('color', color)} />
                         <InputError message={errors.color} />
                     </div>
@@ -291,9 +297,9 @@ function StatusFormDialog({
                             className="mt-0.5"
                         />
                         <div className="space-y-1">
-                            <span className="font-medium">Standaardstatus</span>
+                            <span className="font-medium">{t('statuses.is_default')}</span>
                             <p className="text-xs text-muted-foreground">
-                                Nieuwe tickets krijgen automatisch deze status
+                                {t('statuses.is_default_description')}
                             </p>
                         </div>
                     </label>
@@ -309,9 +315,9 @@ function StatusFormDialog({
                             className="mt-0.5"
                         />
                         <div className="space-y-1">
-                            <span className="font-medium">Gesloten status</span>
+                            <span className="font-medium">{t('statuses.is_closed')}</span>
                             <p className="text-xs text-muted-foreground">
-                                Markeert ticket als afgehandeld
+                                {t('statuses.is_closed_description')}
                             </p>
                         </div>
                     </label>
@@ -319,10 +325,10 @@ function StatusFormDialog({
 
                 <DialogFooter>
                     <Button type="button" variant="outline" onClick={onClose}>
-                        Annuleren
+                        {t('common.cancel')}
                     </Button>
                     <Button type="submit" disabled={processing || !data.name.trim()}>
-                        {status ? 'Opslaan' : 'Toevoegen'}
+                        {status ? t('common.save') : t('common.add')}
                     </Button>
                 </DialogFooter>
             </form>

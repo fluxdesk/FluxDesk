@@ -51,7 +51,23 @@ class AISettingsController extends Controller
             'disclosure_text' => null,
         ]);
 
-        // Get available AI integrations
+        return Inertia::render('organization/ai-settings', [
+            'settings' => $settings->toArray(),
+            'languages' => $this->getLanguages(),
+            // Defer external API calls so page loads instantly
+            'providers' => Inertia::defer(fn () => $this->getProviders($organization)),
+            'usage' => Inertia::defer(fn () => $this->usageTracker->getSummary($organization, 'month'), 'stats'),
+            'usageByAction' => Inertia::defer(fn () => $this->usageTracker->getByAction($organization, 'month'), 'stats'),
+        ]);
+    }
+
+    /**
+     * Get AI providers with models (may make external API calls).
+     *
+     * @return array<array{identifier: string, name: string, is_active: bool, models: array}>
+     */
+    protected function getProviders($organization): array
+    {
         $aiIntegrations = $this->integrationManager->byCategory('ai');
         $providers = [];
 
@@ -80,17 +96,7 @@ class AISettingsController extends Controller
             ];
         }
 
-        // Get usage statistics
-        $usage = $this->usageTracker->getSummary($organization, 'month');
-        $usageByAction = $this->usageTracker->getByAction($organization, 'month');
-
-        return Inertia::render('organization/ai-settings', [
-            'settings' => $settings->toArray(),
-            'providers' => $providers,
-            'usage' => $usage,
-            'usageByAction' => $usageByAction,
-            'languages' => $this->getLanguages(),
-        ]);
+        return $providers;
     }
 
     /**

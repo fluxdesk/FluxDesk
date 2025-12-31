@@ -28,6 +28,7 @@ import { Head, useForm, router } from '@inertiajs/react';
 import { toast } from 'sonner';
 import { Building, Mail, Pencil, Phone, Plus, Search, Ticket, Trash2, UserPlus } from 'lucide-react';
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Select,
     SelectContent,
@@ -50,6 +51,7 @@ interface Props {
 }
 
 export default function ContactsIndex({ contacts, filters, slas, companies }: Props) {
+    const { t } = useTranslation('contacts');
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [editingContact, setEditingContact] = useState<Contact | null>(null);
     const [deletingContact, setDeletingContact] = useState<(Contact & { tickets_count: number }) | null>(null);
@@ -62,10 +64,10 @@ export default function ContactsIndex({ contacts, filters, slas, companies }: Pr
         setIsDeleting(true);
         router.delete(`/contacts/${deletingContact.id}`, {
             onSuccess: () => {
-                toast.success('Contact verwijderd');
+                toast.success(t('notifications.deleted'));
                 setDeletingContact(null);
             },
-            onError: () => toast.error('Contact verwijderen mislukt'),
+            onError: () => toast.error(t('notifications.delete_failed')),
             onFinish: () => setIsDeleting(false),
         });
     };
@@ -80,23 +82,25 @@ export default function ContactsIndex({ contacts, filters, slas, companies }: Pr
 
     return (
         <AppShell>
-            <Head title="Contacten" />
+            <Head title={t('title')} />
 
             <div className="flex min-h-full flex-col">
                 {/* Header - Fixed */}
                 <div className="shrink-0 border-b border-border/50 bg-background px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="text-xl font-semibold tracking-tight">Contacten</h1>
+                            <h1 className="text-xl font-semibold tracking-tight">{t('title')}</h1>
                             <p className="text-sm text-muted-foreground">
-                                {contacts.total} contact{contacts.total !== 1 ? 'en' : ''} totaal
+                                {contacts.total === 1
+                                    ? t('count', { count: contacts.total })
+                                    : t('count_plural', { count: contacts.total })} {t('total')}
                             </p>
                         </div>
                         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                             <DialogTrigger asChild>
                                 <Button>
                                     <UserPlus className="mr-2 h-4 w-4" />
-                                    Contact toevoegen
+                                    {t('actions.add')}
                                 </Button>
                             </DialogTrigger>
                             <ContactFormDialog slas={slas} companies={companies} onClose={() => setIsCreateOpen(false)} />
@@ -109,7 +113,7 @@ export default function ContactsIndex({ contacts, filters, slas, companies }: Pr
                             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
                                 type="search"
-                                placeholder="Zoek contacten..."
+                                placeholder={t('search_placeholder')}
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 className="pl-9"
@@ -125,13 +129,13 @@ export default function ContactsIndex({ contacts, filters, slas, companies }: Pr
                             <div className="mb-4 rounded-full bg-muted p-4">
                                 <UserPlus className="h-8 w-8 text-muted-foreground" />
                             </div>
-                            <h3 className="mb-1 text-lg font-medium">Nog geen contacten</h3>
+                            <h3 className="mb-1 text-lg font-medium">{t('empty.title')}</h3>
                             <p className="mb-4 text-sm text-muted-foreground">
-                                Voeg je eerste contact toe om klantrelaties te beheren
+                                {t('empty.description')}
                             </p>
                             <Button onClick={() => setIsCreateOpen(true)}>
                                 <Plus className="mr-2 h-4 w-4" />
-                                Contact toevoegen
+                                {t('actions.add')}
                             </Button>
                         </div>
                     ) : (
@@ -139,11 +143,11 @@ export default function ContactsIndex({ contacts, filters, slas, companies }: Pr
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="w-[250px]">Contact</TableHead>
-                                    <TableHead>E-mail</TableHead>
-                                    <TableHead>Bedrijf</TableHead>
-                                    <TableHead>Telefoon</TableHead>
-                                    <TableHead className="text-center">Tickets</TableHead>
+                                    <TableHead className="w-[250px]">{t('table.contact')}</TableHead>
+                                    <TableHead>{t('table.email')}</TableHead>
+                                    <TableHead>{t('table.company')}</TableHead>
+                                    <TableHead>{t('table.phone')}</TableHead>
+                                    <TableHead className="text-center">{t('table.tickets')}</TableHead>
                                     <TableHead className="w-[100px]"></TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -222,7 +226,7 @@ export default function ContactsIndex({ contacts, filters, slas, companies }: Pr
                                                     className="h-8 w-8"
                                                     onClick={() => setDeletingContact(contact)}
                                                     disabled={contact.tickets_count > 0}
-                                                    title={contact.tickets_count > 0 ? 'Kan contact met bestaande tickets niet verwijderen' : undefined}
+                                                    title={contact.tickets_count > 0 ? t('delete_disabled_has_tickets') : undefined}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -240,9 +244,9 @@ export default function ContactsIndex({ contacts, filters, slas, companies }: Pr
             <ConfirmationDialog
                 open={!!deletingContact}
                 onOpenChange={(open) => !open && setDeletingContact(null)}
-                title="Contact verwijderen"
-                description={`Weet je zeker dat je ${deletingContact?.name} wilt verwijderen? Dit kan niet ongedaan worden gemaakt.`}
-                confirmLabel="Verwijderen"
+                title={t('delete_dialog.title')}
+                description={t('delete_dialog.description', { name: deletingContact?.name })}
+                confirmLabel={t('actions.delete')}
                 onConfirm={handleDelete}
                 loading={isDeleting}
             />
@@ -261,6 +265,7 @@ function ContactFormDialog({
     companies: Pick<Company, 'id' | 'name'>[];
     onClose: () => void;
 }) {
+    const { t } = useTranslation('contacts');
     const [isCreatingCompany, setIsCreatingCompany] = useState(false);
     const [localCompanies, setLocalCompanies] = useState(companies);
     const { data, setData, post, patch, processing, errors, reset } = useForm({
@@ -301,53 +306,53 @@ function ContactFormDialog({
             <DialogContent>
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
-                        <DialogTitle>{contact ? 'Contact bewerken' : 'Contact toevoegen'}</DialogTitle>
+                        <DialogTitle>{contact ? t('edit.title') : t('create.title')}</DialogTitle>
                         <DialogDescription>
                             {contact
-                                ? 'Werk de contactgegevens bij.'
-                                : 'Voeg een nieuw klantcontact toe aan je organisatie.'}
+                                ? t('edit.description')
+                                : t('create.description')}
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="grid gap-4 py-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="name">Naam</Label>
+                            <Label htmlFor="name">{t('fields.name')}</Label>
                             <Input
                                 id="name"
                                 value={data.name}
                                 onChange={(e) => setData('name', e.target.value)}
-                                placeholder="Jan Jansen"
+                                placeholder={t('fields.name_placeholder')}
                             />
                             <InputError message={errors.name} />
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="email">E-mail</Label>
+                            <Label htmlFor="email">{t('fields.email')}</Label>
                             <Input
                                 id="email"
                                 type="email"
                                 value={data.email}
                                 onChange={(e) => setData('email', e.target.value)}
-                                placeholder="jan@voorbeeld.nl"
+                                placeholder={t('fields.email_placeholder')}
                             />
                             <InputError message={errors.email} />
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="phone">Telefoon (optioneel)</Label>
+                            <Label htmlFor="phone">{t('fields.phone')}</Label>
                             <Input
                                 id="phone"
                                 type="tel"
                                 value={data.phone}
                                 onChange={(e) => setData('phone', e.target.value)}
-                                placeholder="+31 6 12345678"
+                                placeholder={t('fields.phone_placeholder')}
                             />
                             <InputError message={errors.phone} />
                         </div>
 
                         <div className="grid gap-2">
                             <Label htmlFor="company" className="flex items-center justify-between">
-                                <span>Bedrijf</span>
+                                <span>{t('fields.company')}</span>
                                 <Button
                                     type="button"
                                     variant="ghost"
@@ -356,7 +361,7 @@ function ContactFormDialog({
                                     onClick={() => setIsCreatingCompany(true)}
                                 >
                                     <Plus className="mr-1 h-3 w-3" />
-                                    Nieuw bedrijf
+                                    {t('fields.new_company')}
                                 </Button>
                             </Label>
                             <Select
@@ -364,10 +369,10 @@ function ContactFormDialog({
                                 onValueChange={(value) => setData('company_id', value === '__none__' ? '' : value)}
                             >
                                 <SelectTrigger id="company">
-                                    <SelectValue placeholder="Geen bedrijf" />
+                                    <SelectValue placeholder={t('fields.no_company')} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="__none__">Geen bedrijf</SelectItem>
+                                    <SelectItem value="__none__">{t('fields.no_company')}</SelectItem>
                                     {localCompanies.map((company) => (
                                         <SelectItem key={company.id} value={company.id.toString()}>
                                             {company.name}
@@ -379,25 +384,25 @@ function ContactFormDialog({
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="sla">SLA</Label>
+                            <Label htmlFor="sla">{t('fields.sla')}</Label>
                             <Select
                                 value={data.sla_id || undefined}
                                 onValueChange={(value) => setData('sla_id', value === '__default__' ? '' : value)}
                             >
                                 <SelectTrigger id="sla">
-                                    <SelectValue placeholder="Geen specifieke SLA" />
+                                    <SelectValue placeholder={t('fields.no_sla')} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="__default__">Geen specifieke SLA</SelectItem>
+                                    <SelectItem value="__default__">{t('fields.no_sla')}</SelectItem>
                                     {slas.map((sla) => (
                                         <SelectItem key={sla.id} value={sla.id.toString()}>
-                                            {sla.name}{sla.is_default ? ' (organisatie-standaard)' : ''}
+                                            {sla.name}{sla.is_default ? ` ${t('fields.sla_default_label')}` : ''}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                             <p className="text-sm text-muted-foreground">
-                                Kies een specifieke SLA voor dit contact, of gebruik de organisatie-standaard
+                                {t('fields.sla_hint')}
                             </p>
                             <InputError message={errors.sla_id} />
                         </div>
@@ -405,10 +410,10 @@ function ContactFormDialog({
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={onClose}>
-                            Annuleren
+                            {t('actions.cancel')}
                         </Button>
                         <Button type="submit" disabled={processing}>
-                            {contact ? 'Wijzigingen opslaan' : 'Contact toevoegen'}
+                            {contact ? t('actions.update') : t('actions.add')}
                         </Button>
                     </DialogFooter>
                 </form>

@@ -8,6 +8,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -38,6 +39,20 @@ class ProfileController extends Controller
         $request->user()->save();
 
         return to_route('profile.edit');
+    }
+
+    /**
+     * Update the user's locale preference.
+     */
+    public function updateLocale(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'locale' => ['required', 'string', Rule::in(config('app.available_locales'))],
+        ]);
+
+        $request->user()->update(['locale' => $validated['locale']]);
+
+        return back();
     }
 
     /**

@@ -22,12 +22,14 @@ import { ColorPicker } from '@/components/common/color-picker';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     tags: Tag[];
 }
 
 export default function Tags({ tags }: Props) {
+    const { t } = useTranslation('organization');
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [editingTag, setEditingTag] = useState<Tag | null>(null);
     const [deletingTag, setDeletingTag] = useState<Tag | null>(null);
@@ -38,17 +40,17 @@ export default function Tags({ tags }: Props) {
         setIsDeleting(true);
         router.delete(destroy(deletingTag.id).url, {
             onSuccess: () => {
-                toast.success('Tag verwijderd');
+                toast.success(t('tags.deleted'));
                 setDeletingTag(null);
             },
-            onError: () => toast.error('Tag verwijderen mislukt'),
+            onError: () => toast.error(t('tags.delete_failed')),
             onFinish: () => setIsDeleting(false),
         });
     };
 
     return (
         <AppLayout>
-            <Head title="Tags" />
+            <Head title={t('tags.page_title')} />
 
             <OrganizationLayout>
                 <div className="mx-auto max-w-4xl space-y-6">
@@ -56,19 +58,19 @@ export default function Tags({ tags }: Props) {
                         <CardHeader>
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <CardTitle className="text-lg">Tags</CardTitle>
+                                    <CardTitle className="text-lg">{t('tags.title')}</CardTitle>
                                     <CardDescription>
-                                        Maak tags om je tickets te categoriseren
+                                        {t('tags.description')}
                                     </CardDescription>
                                 </div>
                                 <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                                     <DialogTrigger asChild>
                                         <Button size="sm">
                                             <Plus className="mr-2 h-4 w-4" />
-                                            Tag toevoegen
+                                            {t('tags.add')}
                                         </Button>
                                     </DialogTrigger>
-                                    <TagFormDialog onClose={() => setIsCreateOpen(false)} />
+                                    <TagFormDialog t={t} onClose={() => setIsCreateOpen(false)} />
                                 </Dialog>
                             </div>
                         </CardHeader>
@@ -76,7 +78,7 @@ export default function Tags({ tags }: Props) {
                             {tags.length === 0 ? (
                                 <div className="rounded-lg border border-dashed p-8 text-center">
                                     <p className="text-muted-foreground">
-                                        Nog geen tags aangemaakt. Klik op "Tag toevoegen" om je eerste tag te maken.
+                                        {t('tags.empty')}
                                     </p>
                                 </div>
                             ) : (
@@ -101,7 +103,7 @@ export default function Tags({ tags }: Props) {
                                                             <Pencil className="h-3 w-3" />
                                                         </Button>
                                                     </DialogTrigger>
-                                                    <TagFormDialog tag={tag} onClose={() => setEditingTag(null)} />
+                                                    <TagFormDialog t={t} tag={tag} onClose={() => setEditingTag(null)} />
                                                 </Dialog>
                                                 <Button
                                                     variant="ghost"
@@ -123,9 +125,9 @@ export default function Tags({ tags }: Props) {
                 <ConfirmationDialog
                     open={!!deletingTag}
                     onOpenChange={(open) => !open && setDeletingTag(null)}
-                    title="Tag verwijderen"
-                    description={`Weet je zeker dat je de tag "${deletingTag?.name}" wilt verwijderen? De tag wordt van alle tickets verwijderd.`}
-                    confirmLabel="Verwijderen"
+                    title={t('tags.delete_title')}
+                    description={t('tags.delete_description', { name: deletingTag?.name })}
+                    confirmLabel={t('common.delete')}
                     onConfirm={handleDelete}
                     loading={isDeleting}
                 />
@@ -135,9 +137,11 @@ export default function Tags({ tags }: Props) {
 }
 
 function TagFormDialog({
+    t,
     tag,
     onClose,
 }: {
+    t: (key: string, options?: Record<string, unknown>) => string;
     tag?: Tag;
     onClose: () => void;
 }) {
@@ -151,20 +155,20 @@ function TagFormDialog({
         if (tag) {
             patch(update(tag.id).url, {
                 onSuccess: () => {
-                    toast.success('Tag bijgewerkt');
+                    toast.success(t('tags.updated'));
                     reset();
                     onClose();
                 },
-                onError: () => toast.error('Tag bijwerken mislukt'),
+                onError: () => toast.error(t('tags.update_failed')),
             });
         } else {
             post(store().url, {
                 onSuccess: () => {
-                    toast.success('Tag aangemaakt');
+                    toast.success(t('tags.created'));
                     reset();
                     onClose();
                 },
-                onError: () => toast.error('Tag aanmaken mislukt'),
+                onError: () => toast.error(t('tags.create_failed')),
             });
         }
     }
@@ -173,26 +177,26 @@ function TagFormDialog({
         <DialogContent>
             <form onSubmit={handleSubmit}>
                 <DialogHeader>
-                    <DialogTitle>{tag ? 'Tag bewerken' : 'Tag aanmaken'}</DialogTitle>
+                    <DialogTitle>{tag ? t('tags.edit_title') : t('tags.create_title')}</DialogTitle>
                     <DialogDescription>
-                        {tag ? 'Werk de tagdetails bij.' : 'Voeg een nieuwe tag toe om tickets te categoriseren.'}
+                        {tag ? t('tags.edit_description') : t('tags.create_description')}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="name">Naam</Label>
+                        <Label htmlFor="name">{t('common.name')}</Label>
                         <Input
                             id="name"
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
-                            placeholder="bijv. Bug, Feature, Vraag"
+                            placeholder={t('tags.name_placeholder')}
                         />
                         <InputError message={errors.name} />
                     </div>
 
                     <div className="grid gap-2">
-                        <Label>Kleur</Label>
+                        <Label>{t('common.color')}</Label>
                         <ColorPicker value={data.color} onChange={(color) => setData('color', color)} />
                         <InputError message={errors.color} />
                     </div>
@@ -200,10 +204,10 @@ function TagFormDialog({
 
                 <DialogFooter>
                     <Button type="button" variant="outline" onClick={onClose}>
-                        Annuleren
+                        {t('common.cancel')}
                     </Button>
                     <Button type="submit" disabled={processing}>
-                        {tag ? 'Wijzigingen opslaan' : 'Tag aanmaken'}
+                        {tag ? t('common.save_changes') : t('tags.create_title')}
                     </Button>
                 </DialogFooter>
             </form>

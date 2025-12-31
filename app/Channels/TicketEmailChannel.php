@@ -2,12 +2,15 @@
 
 namespace App\Channels;
 
+use App\Models\Contact;
 use App\Models\EmailChannel;
 use App\Models\EmailChannelLog;
+use App\Models\Organization;
 use App\Models\Ticket;
 use App\Services\Email\EmailProviderFactory;
 use App\Services\Email\EmailThreadingService;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
 
@@ -210,14 +213,52 @@ class TicketEmailChannel
     {
         $organization = $ticket->organization;
 
-        $viewData = array_merge($data['data'] ?? [], [
-            'ticket' => $ticket,
-            'organization' => $organization,
-            'notifiable' => $notifiable,
-            'primaryColor' => $organization->settings['primary_color'] ?? '#3b82f6',
-            'emailLogoPath' => $organization->settings['email_logo_path'] ?? null,
-        ]);
+        // Determine the locale to use for this email
+        $emailLocale = $this->determineEmailLocale($notifiable, $organization);
 
-        return View::make($data['view'], $viewData)->render();
+        // Temporarily set locale for email rendering
+        $previousLocale = App::getLocale();
+        App::setLocale($emailLocale);
+
+        try {
+            $viewData = array_merge($data['data'] ?? [], [
+                'ticket' => $ticket,
+                'organization' => $organization,
+                'notifiable' => $notifiable,
+                'primaryColor' => $organization->settings['primary_color'] ?? '#3b82f6',
+                'emailLogoPath' => $organization->settings['email_logo_path'] ?? null,
+                'locale' => $emailLocale,
+            ]);
+
+            return View::make($data['view'], $viewData)->render();
+        } finally {
+            // Restore previous locale
+            App::setLocale($previousLocale);
+        }
+    }
+
+    /**
+     * Determine the locale to use for the email.
+     * Priority: Contact locale > Organization email_locale > config default
+     */
+    private function determineEmailLocale(mixed $notifiable, Organization $organization): string
+    {
+        $availableLocales = ['en', 'nl'];
+
+        // Check contact's locale preference first
+        if ($notifiable instanceof Contact && $notifiable->locale) {
+            if (in_array($notifiable->locale, $availableLocales, true)) {
+                return $notifiable->locale;
+            }
+        }
+
+        // Fall back to organization's email locale
+        $orgLocale = $organization->settings?->email_locale;
+        if ($orgLocale && in_array($orgLocale, $availableLocales, true)) {
+            return $orgLocale;
+        }
+
+        // Final fallback
+        return config('app.locale', 'en');
     }
 }

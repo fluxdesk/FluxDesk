@@ -48,6 +48,7 @@ import {
     Inbox,
 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
     DropdownMenu,
@@ -67,6 +68,7 @@ interface Props {
 }
 
 export default function EmailChannels({ channels, providers, departments, systemEmailChannelId, systemEmailsEnabled: initialSystemEmailsEnabled }: Props) {
+    const { t } = useTranslation('organization');
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [editingChannel, setEditingChannel] = useState<EmailChannel | null>(null);
     const [deletingChannel, setDeletingChannel] = useState<EmailChannel | null>(null);
@@ -82,10 +84,10 @@ export default function EmailChannels({ channels, providers, departments, system
         setIsDeleting(true);
         router.delete(destroy(deletingChannel.id).url, {
             onSuccess: () => {
-                toast.success('E-mailaccount verwijderd');
+                toast.success(t('email_channels.deleted'));
                 setDeletingChannel(null);
             },
-            onError: () => toast.error('E-mailaccount verwijderen mislukt'),
+            onError: () => toast.error(t('email_channels.delete_failed')),
             onFinish: () => setIsDeleting(false),
         });
     };
@@ -97,8 +99,8 @@ export default function EmailChannels({ channels, providers, departments, system
             { system_email_channel_id: selectedSystemChannel },
             {
                 preserveScroll: true,
-                onSuccess: () => toast.success('Systeeme-mail instellingen opgeslagen'),
-                onError: () => toast.error('Opslaan mislukt'),
+                onSuccess: () => toast.success(t('email_channels.system_emails.saved')),
+                onError: () => toast.error(t('email_channels.system_emails.save_failed')),
                 onFinish: () => setIsSavingSystemEmail(false),
             }
         );
@@ -113,11 +115,11 @@ export default function EmailChannels({ channels, providers, departments, system
             {
                 preserveScroll: true,
                 onSuccess: () => toast.success(newValue
-                    ? 'Systeem e-mails ingeschakeld'
-                    : 'Systeem e-mails uitgeschakeld'),
+                    ? t('email_channels.system_emails_toggle.enabled')
+                    : t('email_channels.system_emails_toggle.disabled')),
                 onError: () => {
                     setIsSystemEmailsEnabled(!newValue);
-                    toast.error('Instelling bijwerken mislukt');
+                    toast.error(t('email_channels.system_emails_toggle.update_failed'));
                 },
             }
         );
@@ -130,7 +132,7 @@ export default function EmailChannels({ channels, providers, departments, system
 
     return (
         <AppLayout>
-            <Head title="E-mailaccounts" />
+            <Head title={t('email_channels.page_title')} />
 
             <OrganizationLayout>
                 <div className="mx-auto max-w-4xl space-y-6">
@@ -147,11 +149,11 @@ export default function EmailChannels({ channels, providers, departments, system
                                         )}
                                     </div>
                                     <div>
-                                        <p className="font-medium">Alle uitgaande e-mails</p>
+                                        <p className="font-medium">{t('email_channels.system_emails_toggle.title')}</p>
                                         <p className="text-sm text-muted-foreground">
                                             {!isSystemEmailsEnabled
-                                                ? 'Uitgeschakeld - er worden geen e-mails verzonden'
-                                                : 'Schakel uit tijdens migratie om duplicaten te voorkomen'}
+                                                ? t('email_channels.system_emails_toggle.disabled_description')
+                                                : t('email_channels.system_emails_toggle.enabled_description')}
                                         </p>
                                     </div>
                                 </div>
@@ -172,8 +174,8 @@ export default function EmailChannels({ channels, providers, departments, system
                                         <Send className="h-5 w-5 text-primary" />
                                     </div>
                                     <div>
-                                        <p className="font-medium">Systeem e-mails</p>
-                                        <p className="text-sm text-muted-foreground">Uitnodigingen & notificaties</p>
+                                        <p className="font-medium">{t('email_channels.system_emails.title')}</p>
+                                        <p className="text-sm text-muted-foreground">{t('email_channels.system_emails.description')}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2 flex-1 sm:justify-end">
@@ -182,11 +184,11 @@ export default function EmailChannels({ channels, providers, departments, system
                                         onValueChange={setSelectedSystemChannel}
                                     >
                                         <SelectTrigger className="w-full sm:w-[280px]">
-                                            <SelectValue placeholder="Selecteer verzendaccount" />
+                                            <SelectValue placeholder={t('email_channels.system_emails.select_placeholder')} />
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="default">
-                                                Standaard mailserver (.env)
+                                                {t('email_channels.system_emails.default_option')}
                                             </SelectItem>
                                             {activeOAuthChannels.map((channel) => (
                                                 <SelectItem key={channel.id} value={channel.id.toString()}>
@@ -200,7 +202,7 @@ export default function EmailChannels({ channels, providers, departments, system
                                         onClick={handleSaveSystemEmail}
                                         disabled={isSavingSystemEmail}
                                     >
-                                        Opslaan
+                                        {t('common.save')}
                                     </Button>
                                 </div>
                             </div>
@@ -216,9 +218,9 @@ export default function EmailChannels({ channels, providers, departments, system
                                         <Inbox className="h-5 w-5 text-primary" />
                                     </div>
                                     <div>
-                                        <CardTitle className="text-lg">E-mailaccounts</CardTitle>
+                                        <CardTitle className="text-lg">{t('email_channels.title')}</CardTitle>
                                         <CardDescription>
-                                            E-mails worden automatisch omgezet naar tickets
+                                            {t('email_channels.description')}
                                         </CardDescription>
                                     </div>
                                 </div>
@@ -226,7 +228,7 @@ export default function EmailChannels({ channels, providers, departments, system
                                     <DialogTrigger asChild>
                                         <Button size="sm">
                                             <Plus className="mr-2 h-4 w-4" />
-                                            Toevoegen
+                                            {t('email_channels.add')}
                                         </Button>
                                     </DialogTrigger>
                                     <EmailChannelFormDialog
@@ -241,9 +243,9 @@ export default function EmailChannels({ channels, providers, departments, system
                             {channels.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-12 text-center">
                                     <Mail className="h-12 w-12 text-muted-foreground/50" />
-                                    <h3 className="mt-4 text-lg font-semibold">Geen e-mailaccounts</h3>
+                                    <h3 className="mt-4 text-lg font-semibold">{t('email_channels.empty_title')}</h3>
                                     <p className="mt-2 text-sm text-muted-foreground">
-                                        Voeg een e-mailaccount toe om e-mails automatisch om te zetten in tickets.
+                                        {t('email_channels.empty_description')}
                                     </p>
                                 </div>
                             ) : (
@@ -269,9 +271,9 @@ export default function EmailChannels({ channels, providers, departments, system
                 <ConfirmationDialog
                     open={!!deletingChannel}
                     onOpenChange={(open) => !open && setDeletingChannel(null)}
-                    title="E-mailaccount verwijderen"
-                    description={`Weet je zeker dat je "${deletingChannel?.name}" wilt verwijderen? Bestaande tickets blijven behouden maar nieuwe e-mails worden niet meer verwerkt.`}
-                    confirmLabel="Verwijderen"
+                    title={t('email_channels.delete_title')}
+                    description={t('email_channels.delete_description', { name: deletingChannel?.name })}
+                    confirmLabel={t('common.delete')}
                     onConfirm={handleDelete}
                     loading={isDeleting}
                 />
@@ -297,6 +299,7 @@ function EmailChannelItem({
     onEditClose: () => void;
     onDelete: () => void;
 }) {
+    const { t } = useTranslation('organization');
     const [isSyncing, setIsSyncing] = useState(false);
     const [isTesting, setIsTesting] = useState(false);
 
@@ -307,8 +310,8 @@ function EmailChannelItem({
             {},
             {
                 preserveScroll: true,
-                onSuccess: () => toast.success('Verbinding getest'),
-                onError: () => toast.error('Verbindingstest mislukt'),
+                onSuccess: () => toast.success(t('email_channels.connection_tested')),
+                onError: () => toast.error(t('email_channels.connection_test_failed')),
                 onFinish: () => setIsTesting(false),
             },
         );
@@ -321,8 +324,8 @@ function EmailChannelItem({
             {},
             {
                 preserveScroll: true,
-                onSuccess: () => toast.success('Synchronisatie gestart'),
-                onError: () => toast.error('Synchronisatie starten mislukt'),
+                onSuccess: () => toast.success(t('email_channels.sync_started')),
+                onError: () => toast.error(t('email_channels.sync_failed')),
                 onFinish: () => setIsSyncing(false),
             },
         );
@@ -339,7 +342,7 @@ function EmailChannelItem({
             return (
                 <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-400">
                     <CheckCircle2 className="mr-1 h-3 w-3" />
-                    Actief
+                    {t('email_channels.status.active')}
                 </Badge>
             );
         }
@@ -347,14 +350,14 @@ function EmailChannelItem({
             return (
                 <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-400">
                     <Settings className="mr-1 h-3 w-3" />
-                    Configuratie nodig
+                    {t('email_channels.status.needs_configuration')}
                 </Badge>
             );
         }
         return (
             <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-400">
                 <AlertCircle className="mr-1 h-3 w-3" />
-                Wacht op koppeling
+                {t('email_channels.status.awaiting_connection')}
             </Badge>
         );
     };
@@ -370,20 +373,20 @@ function EmailChannelItem({
                         <span className="font-medium truncate">{channel.name}</span>
                         {channel.is_default && (
                             <Badge variant="secondary" className="shrink-0 text-xs">
-                                Standaard
+                                {t('email_channels.badges.default')}
                             </Badge>
                         )}
                         {getStatusBadge()}
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mt-0.5">
-                        <span className="truncate">{channel.email_address || 'Niet gekoppeld'}</span>
+                        <span className="truncate">{channel.email_address || t('email_channels.not_connected')}</span>
                         <span className="shrink-0">•</span>
                         <span className="shrink-0">{providerLabel}</span>
                         {channel.last_sync_at && (
                             <>
                                 <span className="shrink-0">•</span>
                                 <span className="shrink-0">
-                                    Sync {formatRelative(channel.last_sync_at)}
+                                    {t('email_channels.sync_label', { time: formatRelative(channel.last_sync_at) })}
                                 </span>
                             </>
                         )}
@@ -406,7 +409,7 @@ function EmailChannelItem({
                         disabled={isSyncing}
                     >
                         <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-                        Sync
+                        {t('email_channels.sync_button')}
                     </Button>
                 )}
 
@@ -421,7 +424,7 @@ function EmailChannelItem({
                             <DialogTrigger asChild>
                                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                                     <Pencil className="mr-2 h-4 w-4" />
-                                    Bewerken
+                                    {t('email_channels.actions.edit')}
                                 </DropdownMenuItem>
                             </DialogTrigger>
                             <EmailChannelFormDialog
@@ -436,7 +439,7 @@ function EmailChannelItem({
                             <DropdownMenuItem asChild>
                                 <Link href={configure(channel.id).url}>
                                     <Settings className="mr-2 h-4 w-4" />
-                                    Configureren
+                                    {t('email_channels.actions.configure')}
                                 </Link>
                             </DropdownMenuItem>
                         )}
@@ -444,21 +447,21 @@ function EmailChannelItem({
                         {channel.is_active && (
                             <DropdownMenuItem onClick={handleTestConnection} disabled={isTesting}>
                                 <Check className="mr-2 h-4 w-4" />
-                                Test verbinding
+                                {t('email_channels.actions.test_connection')}
                             </DropdownMenuItem>
                         )}
 
                         <DropdownMenuItem asChild>
                             <Link href={logs(channel.id).url}>
                                 <FileText className="mr-2 h-4 w-4" />
-                                Logs
+                                {t('email_channels.actions.logs')}
                             </Link>
                         </DropdownMenuItem>
 
                         {!channel.is_active && channel.provider !== 'smtp' && !channel.email_address && (
                             <DropdownMenuItem onClick={handleReconnect}>
                                 <ExternalLink className="mr-2 h-4 w-4" />
-                                Opnieuw verbinden
+                                {t('email_channels.actions.reconnect')}
                             </DropdownMenuItem>
                         )}
 
@@ -470,7 +473,7 @@ function EmailChannelItem({
                             disabled={channel.is_default}
                         >
                             <Trash2 className="mr-2 h-4 w-4" />
-                            Verwijderen
+                            {t('email_channels.actions.delete')}
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -490,6 +493,8 @@ function EmailChannelFormDialog({
     departments: Department[];
     onClose: () => void;
 }) {
+    const { t } = useTranslation('organization');
+
     // Default to first available provider, or microsoft365 if editing
     const defaultProvider = channel?.provider
         || providers.find((p) => p.available)?.value
@@ -517,20 +522,20 @@ function EmailChannelFormDialog({
         if (channel) {
             patch(update(channel.id).url, {
                 onSuccess: () => {
-                    toast.success('E-mailaccount bijgewerkt');
+                    toast.success(t('email_channels.form.updated'));
                     reset();
                     onClose();
                 },
-                onError: () => toast.error('E-mailaccount bijwerken mislukt'),
+                onError: () => toast.error(t('email_channels.form.update_failed')),
             });
         } else {
             post(store().url, {
                 onSuccess: () => {
-                    toast.success('E-mailaccount aangemaakt');
+                    toast.success(t('email_channels.form.created'));
                     reset();
                     onClose();
                 },
-                onError: () => toast.error('E-mailaccount aanmaken mislukt'),
+                onError: () => toast.error(t('email_channels.form.create_failed')),
             });
         }
     }
@@ -540,23 +545,23 @@ function EmailChannelFormDialog({
             <form onSubmit={handleSubmit}>
                 <DialogHeader>
                     <DialogTitle>
-                        {channel ? 'E-mailaccount bewerken' : 'E-mailaccount toevoegen'}
+                        {channel ? t('email_channels.form.edit_title') : t('email_channels.form.create_title')}
                     </DialogTitle>
                     <DialogDescription>
                         {channel
-                            ? 'Werk de instellingen van het e-mailaccount bij.'
-                            : 'Voeg een nieuw e-mailaccount toe om e-mails te ontvangen.'}
+                            ? t('email_channels.form.edit_description')
+                            : t('email_channels.form.create_description')}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="name">Naam</Label>
+                        <Label htmlFor="name">{t('email_channels.form.name_label')}</Label>
                         <Input
                             id="name"
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
-                            placeholder="bijv. Support, Sales, Info"
+                            placeholder={t('email_channels.form.name_placeholder')}
                             autoFocus
                         />
                         <InputError message={errors.name} />
@@ -564,13 +569,13 @@ function EmailChannelFormDialog({
 
                     {!channel && (
                         <div className="grid gap-2">
-                            <Label htmlFor="provider">Provider</Label>
+                            <Label htmlFor="provider">{t('email_channels.form.provider_label')}</Label>
                             <Select
                                 value={data.provider}
                                 onValueChange={(value) => setData('provider', value)}
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Selecteer een provider" />
+                                    <SelectValue placeholder={t('email_channels.form.provider_placeholder')} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {providers.map((provider) => (
@@ -596,13 +601,13 @@ function EmailChannelFormDialog({
                     )}
 
                     <div className="grid gap-2">
-                        <Label htmlFor="department">Afdeling</Label>
+                        <Label htmlFor="department">{t('email_channels.form.department_label')}</Label>
                         <Select
                             value={data.department_id}
                             onValueChange={(value) => setData('department_id', value)}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder="Selecteer een afdeling" />
+                                <SelectValue placeholder={t('email_channels.form.department_placeholder')} />
                             </SelectTrigger>
                             <SelectContent>
                                 {departments.map((department) => (
@@ -619,7 +624,7 @@ function EmailChannelFormDialog({
                             </SelectContent>
                         </Select>
                         <p className="text-xs text-muted-foreground">
-                            Tickets uit dit e-mailaccount worden aan deze afdeling toegewezen
+                            {t('email_channels.form.department_help')}
                         </p>
                         <InputError message={errors.department_id} />
                     </div>
@@ -635,9 +640,9 @@ function EmailChannelFormDialog({
                             className="mt-0.5"
                         />
                         <div className="space-y-1">
-                            <span className="font-medium">Standaard e-mailaccount</span>
+                            <span className="font-medium">{t('email_channels.form.is_default')}</span>
                             <p className="text-xs text-muted-foreground">
-                                Wordt gebruikt voor nieuwe tickets zonder specifiek e-mailkanaal
+                                {t('email_channels.form.is_default_description')}
                             </p>
                         </div>
                     </label>
@@ -654,9 +659,9 @@ function EmailChannelFormDialog({
                                 className="mt-0.5"
                             />
                             <div className="space-y-1">
-                                <span className="font-medium">Account is actief</span>
+                                <span className="font-medium">{t('email_channels.form.is_active')}</span>
                                 <p className="text-xs text-muted-foreground">
-                                    Deactiveer om tijdelijk geen e-mails te ontvangen
+                                    {t('email_channels.form.is_active_description')}
                                 </p>
                             </div>
                         </label>
@@ -665,13 +670,13 @@ function EmailChannelFormDialog({
 
                 <DialogFooter className="flex-col gap-3 sm:flex-row sm:justify-end">
                     <Button type="button" variant="outline" onClick={onClose}>
-                        Annuleren
+                        {t('common.cancel')}
                     </Button>
                     <Button
                         type="submit"
                         disabled={processing || !data.name.trim() || (!channel && !selectedProviderAvailable)}
                     >
-                        {channel ? 'Opslaan' : 'Toevoegen'}
+                        {channel ? t('common.save') : t('email_channels.add')}
                     </Button>
                 </DialogFooter>
             </form>

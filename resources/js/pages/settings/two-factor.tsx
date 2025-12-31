@@ -11,6 +11,7 @@ import { Form, Head } from '@inertiajs/react';
 import { ShieldBan, ShieldCheck, Shield } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface TwoFactorProps {
     requiresConfirmation?: boolean;
@@ -21,6 +22,7 @@ export default function TwoFactor({
     requiresConfirmation = false,
     twoFactorEnabled = false,
 }: TwoFactorProps) {
+    const { t } = useTranslation('settings');
     const {
         qrCodeSvg,
         hasSetupData,
@@ -35,7 +37,7 @@ export default function TwoFactor({
 
     return (
         <AppLayout>
-            <Head title="Tweestapsverificatie" />
+            <Head title={t('two_factor.page_title')} />
             <SettingsLayout>
                 <div className="mx-auto max-w-4xl space-y-6">
                     <Card>
@@ -46,14 +48,14 @@ export default function TwoFactor({
                                         <Shield className={`h-5 w-5 ${twoFactorEnabled ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`} />
                                     </div>
                                     <div>
-                                        <CardTitle className="text-lg">Tweestapsverificatie</CardTitle>
+                                        <CardTitle className="text-lg">{t('two_factor.title')}</CardTitle>
                                         <CardDescription>
-                                            Voeg een extra beveiligingslaag toe aan je account
+                                            {t('two_factor.description')}
                                         </CardDescription>
                                     </div>
                                 </div>
                                 <Badge variant={twoFactorEnabled ? 'default' : 'destructive'}>
-                                    {twoFactorEnabled ? 'Ingeschakeld' : 'Uitgeschakeld'}
+                                    {twoFactorEnabled ? t('two_factor.status_enabled') : t('two_factor.status_disabled')}
                                 </Badge>
                             </div>
                         </CardHeader>
@@ -61,8 +63,7 @@ export default function TwoFactor({
                             {twoFactorEnabled ? (
                                 <div className="space-y-4">
                                     <p className="text-sm text-muted-foreground">
-                                        Tweestapsverificatie is ingeschakeld. Bij het inloggen word je gevraagd om een veilige PIN,
-                                        die je kunt ophalen uit je authenticator app.
+                                        {t('two_factor.enabled_description')}
                                     </p>
 
                                     <TwoFactorRecoveryCodes
@@ -75,10 +76,10 @@ export default function TwoFactor({
                                         {...disable.form()}
                                         options={{
                                             onSuccess: () => {
-                                                toast.success('Tweestapsverificatie uitgeschakeld');
+                                                toast.success(t('two_factor.disabled_success'));
                                             },
                                             onError: () => {
-                                                toast.error('Tweestapsverificatie uitschakelen mislukt');
+                                                toast.error(t('two_factor.disable_error'));
                                             },
                                         }}
                                     >
@@ -89,7 +90,7 @@ export default function TwoFactor({
                                                 disabled={processing}
                                             >
                                                 <ShieldBan className="mr-2 h-4 w-4" />
-                                                2FA uitschakelen
+                                                {t('two_factor.disable')}
                                             </Button>
                                         )}
                                     </Form>
@@ -97,15 +98,14 @@ export default function TwoFactor({
                             ) : (
                                 <div className="space-y-4">
                                     <p className="text-sm text-muted-foreground">
-                                        Schakel tweestapsverificatie in voor een extra beveiligingslaag.
-                                        Je hebt een TOTP-compatibele authenticator app nodig zoals Google Authenticator of Authy.
+                                        {t('two_factor.disabled_description')}
                                     </p>
 
                                     <div>
                                         {hasSetupData ? (
                                             <Button onClick={() => setShowSetupModal(true)}>
                                                 <ShieldCheck className="mr-2 h-4 w-4" />
-                                                Doorgaan met instellen
+                                                {t('two_factor.continue_setup')}
                                             </Button>
                                         ) : (
                                             <Form
@@ -115,7 +115,7 @@ export default function TwoFactor({
                                                 {({ processing }) => (
                                                     <Button type="submit" disabled={processing}>
                                                         <ShieldCheck className="mr-2 h-4 w-4" />
-                                                        2FA inschakelen
+                                                        {t('two_factor.enable')}
                                                     </Button>
                                                 )}
                                             </Form>

@@ -1,4 +1,3 @@
-// Components
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
@@ -6,18 +5,21 @@ import AuthLayout from '@/layouts/auth-layout';
 import { logout } from '@/routes';
 import { send } from '@/routes/verification';
 import { Form, Head } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 
 export default function VerifyEmail({ status }: { status?: string }) {
+    const { t } = useTranslation('auth');
+
     return (
         <AuthLayout
-            title="E-mail verifiëren"
-            description="Check je inbox en klik op de verificatielink die we je hebben gestuurd."
+            title={t('verify_email.title')}
+            description={t('verify_email.description')}
         >
-            <Head title="E-mailverificatie" />
+            <Head title={t('verify_email.page_title')} />
 
             {status === 'verification-link-sent' && (
                 <div className="mb-4 text-center text-sm font-medium text-green-600">
-                    Er is een nieuwe verificatielink verstuurd naar je e-mailadres.
+                    {t('verify_email.link_sent')}
                 </div>
             )}
 
@@ -26,14 +28,14 @@ export default function VerifyEmail({ status }: { status?: string }) {
                     <>
                         <Button disabled={processing} variant="secondary">
                             {processing && <Spinner />}
-                            Verstuur opnieuw
+                            {t('verify_email.resend')}
                         </Button>
 
                         <TextLink
                             href={logout()}
                             className="mx-auto block text-sm"
                         >
-                            Uitloggen
+                            {t('verify_email.logout')}
                         </TextLink>
                     </>
                 )}

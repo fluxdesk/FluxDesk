@@ -8,36 +8,38 @@ import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { Bell, KeyRound, Palette, ShieldCheck, User } from 'lucide-react';
 import { type PropsWithChildren } from 'react';
-
-const sidebarNavItems: NavItem[] = [
-    {
-        title: 'Profiel',
-        href: edit(),
-        icon: User,
-    },
-    {
-        title: 'Wachtwoord',
-        href: editPassword(),
-        icon: KeyRound,
-    },
-    {
-        title: 'Tweestapsverificatie',
-        href: show(),
-        icon: ShieldCheck,
-    },
-    {
-        title: 'Notificaties',
-        href: editNotifications(),
-        icon: Bell,
-    },
-    {
-        title: 'Weergave',
-        href: editAppearance(),
-        icon: Palette,
-    },
-];
+import { useTranslation } from 'react-i18next';
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
+    const { t } = useTranslation('settings');
+
+    const sidebarNavItems: NavItem[] = [
+        {
+            title: t('nav.profile'),
+            href: edit(),
+            icon: User,
+        },
+        {
+            title: t('nav.password'),
+            href: editPassword(),
+            icon: KeyRound,
+        },
+        {
+            title: t('nav.two_factor'),
+            href: show(),
+            icon: ShieldCheck,
+        },
+        {
+            title: t('nav.notifications'),
+            href: editNotifications(),
+            icon: Bell,
+        },
+        {
+            title: t('nav.appearance'),
+            href: editAppearance(),
+            icon: Palette,
+        },
+    ];
     const currentPath = usePage().url;
 
     const isActive = (href: string) => {
@@ -51,8 +53,8 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
             <aside className="w-full sm:w-56 shrink-0 border-b sm:border-b-0 sm:border-r border-border/50 bg-sidebar">
                 <div className="flex flex-col">
                     <div className="p-4 pb-2 sm:pb-4">
-                        <h2 className="text-lg font-semibold tracking-tight">Instellingen</h2>
-                        <p className="hidden sm:block text-xs text-muted-foreground">Beheer je account</p>
+                        <h2 className="text-lg font-semibold tracking-tight">{t('title')}</h2>
+                        <p className="hidden sm:block text-xs text-muted-foreground">{t('nav.sidebar_description')}</p>
                     </div>
                     <nav className="flex sm:flex-col gap-1 overflow-x-auto sm:overflow-x-visible px-3 pb-3 sm:pb-0 sm:space-y-1">
                         {sidebarNavItems.map((item) => {

@@ -8,6 +8,7 @@ import AuthCardLayout from '@/layouts/auth/auth-card-layout';
 import { register } from '@/routes/invitations';
 import { Head, useForm } from '@inertiajs/react';
 import { Building2, CheckCircle2, Mail } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface Invitation {
     token: string;
@@ -27,6 +28,7 @@ interface Props {
 }
 
 export default function RegisterViaInvitation({ invitation }: Props) {
+    const { t } = useTranslation('common');
     const { data, setData, post, processing, errors } = useForm({
         name: '',
         password: '',
@@ -38,14 +40,14 @@ export default function RegisterViaInvitation({ invitation }: Props) {
         post(register(invitation.token).url);
     }
 
-    const roleLabel = invitation.role === 'admin' ? 'Beheerder' : 'Medewerker';
+    const roleLabel = invitation.role === 'admin' ? t('invitation.register.role_admin') : t('invitation.register.role_agent');
 
     return (
         <AuthCardLayout
-            title="Account aanmaken"
-            description="Maak een account aan om de uitnodiging te accepteren"
+            title={t('invitation.register.title')}
+            description={t('invitation.register.description')}
         >
-            <Head title="Account aanmaken" />
+            <Head title={t('invitation.register.title')} />
 
             <Card className="border-0 shadow-none p-0">
                 <CardHeader className="px-0 pt-0">
@@ -56,7 +58,7 @@ export default function RegisterViaInvitation({ invitation }: Props) {
                         <div>
                             <CardTitle className="text-lg">{invitation.organization.name}</CardTitle>
                             <CardDescription>
-                                Uitgenodigd door {invitation.inviter.name}
+                                {t('invitation.register.invited_by', { name: invitation.inviter.name })}
                             </CardDescription>
                         </div>
                     </div>
@@ -65,12 +67,12 @@ export default function RegisterViaInvitation({ invitation }: Props) {
                     <div className="mb-6 space-y-2 text-sm">
                         <div className="flex items-center gap-3">
                             <Mail className="size-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">E-mail:</span>
+                            <span className="text-muted-foreground">{t('invitation.register.email_label')}</span>
                             <span className="font-medium">{invitation.email}</span>
                         </div>
                         <div className="flex items-center gap-3">
                             <CheckCircle2 className="size-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">Rol:</span>
+                            <span className="text-muted-foreground">{t('invitation.register.role_label')}</span>
                             <span className="font-medium">{roleLabel}</span>
                         </div>
                     </div>
@@ -78,7 +80,7 @@ export default function RegisterViaInvitation({ invitation }: Props) {
                     <form onSubmit={handleSubmit}>
                         <FieldGroup>
                             <Field>
-                                <FieldLabel htmlFor="name">Naam</FieldLabel>
+                                <FieldLabel htmlFor="name">{t('invitation.register.name_label')}</FieldLabel>
                                 <Input
                                     id="name"
                                     type="text"
@@ -86,40 +88,40 @@ export default function RegisterViaInvitation({ invitation }: Props) {
                                     onChange={(e) => setData('name', e.target.value)}
                                     required
                                     autoFocus
-                                    placeholder="Je volledige naam"
+                                    placeholder={t('invitation.register.name_placeholder')}
                                 />
                                 <InputError message={errors.name} />
                             </Field>
 
                             <Field>
-                                <FieldLabel htmlFor="password">Wachtwoord</FieldLabel>
+                                <FieldLabel htmlFor="password">{t('invitation.register.password_label')}</FieldLabel>
                                 <Input
                                     id="password"
                                     type="password"
                                     value={data.password}
                                     onChange={(e) => setData('password', e.target.value)}
                                     required
-                                    placeholder="Kies een wachtwoord"
+                                    placeholder={t('invitation.register.password_placeholder')}
                                 />
                                 <InputError message={errors.password} />
                             </Field>
 
                             <Field>
-                                <FieldLabel htmlFor="password_confirmation">Bevestig wachtwoord</FieldLabel>
+                                <FieldLabel htmlFor="password_confirmation">{t('invitation.register.password_confirm_label')}</FieldLabel>
                                 <Input
                                     id="password_confirmation"
                                     type="password"
                                     value={data.password_confirmation}
                                     onChange={(e) => setData('password_confirmation', e.target.value)}
                                     required
-                                    placeholder="Herhaal je wachtwoord"
+                                    placeholder={t('invitation.register.password_confirm_placeholder')}
                                 />
                             </Field>
 
                             <Field>
                                 <Button type="submit" className="w-full" disabled={processing}>
                                     {processing && <Spinner />}
-                                    Account aanmaken
+                                    {t('invitation.register.submit_button')}
                                 </Button>
                             </Field>
                         </FieldGroup>

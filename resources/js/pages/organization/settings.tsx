@@ -1,6 +1,8 @@
 import InputError from '@/components/input-error';
+import { LanguageSelect } from '@/components/common/language-select';
 import { TimezoneSelect } from '@/components/common/timezone-select';
 import { Button } from '@/components/ui/button';
+import { SUPPORTED_LOCALES } from '@/i18n/config';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -11,6 +13,7 @@ import { type Organization, type OrganizationSettings } from '@/types';
 import { Transition } from '@headlessui/react';
 import { Head, useForm } from '@inertiajs/react';
 import { Settings } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     organization: Organization;
@@ -19,8 +22,10 @@ interface Props {
 }
 
 export default function SettingsPage({ organization, settings, canSetSystemDefault }: Props) {
+    const { t } = useTranslation('organization');
     const { data, setData, patch, processing, errors, recentlySuccessful } = useForm({
         timezone: settings.timezone || 'UTC',
+        email_locale: settings.email_locale || 'en',
         is_system_default: organization.is_system_default || false,
     });
 
@@ -31,7 +36,7 @@ export default function SettingsPage({ organization, settings, canSetSystemDefau
 
     return (
         <AppLayout>
-            <Head title="Algemeen" />
+            <Head title={t('settings.page_title')} />
 
             <OrganizationLayout>
                 <div className="mx-auto max-w-4xl space-y-6">
@@ -42,9 +47,9 @@ export default function SettingsPage({ organization, settings, canSetSystemDefau
                                     <Settings className="h-5 w-5 text-primary" />
                                 </div>
                                 <div>
-                                    <CardTitle className="text-lg">Algemeen</CardTitle>
+                                    <CardTitle className="text-lg">{t('settings.title')}</CardTitle>
                                     <CardDescription>
-                                        Algemene instellingen voor je organisatie
+                                        {t('settings.description')}
                                     </CardDescription>
                                 </div>
                             </div>
@@ -52,16 +57,31 @@ export default function SettingsPage({ organization, settings, canSetSystemDefau
                         <CardContent>
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="timezone">Tijdzone</Label>
+                                    <Label htmlFor="timezone">{t('settings.timezone.label')}</Label>
                                     <TimezoneSelect
                                         value={data.timezone}
                                         onChange={(value) => setData('timezone', value)}
                                         className="max-w-xs"
                                     />
                                     <p className="text-xs text-muted-foreground">
-                                        Wordt gebruikt voor datumvariabelen in ticketnummers
+                                        {t('settings.timezone.description')}
                                     </p>
                                     <InputError message={errors.timezone} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="email_locale">{t('settings.email_locale.label')}</Label>
+                                    <LanguageSelect
+                                        name="email_locale"
+                                        value={data.email_locale}
+                                        availableLocales={[...SUPPORTED_LOCALES]}
+                                        onValueChange={(value) => setData('email_locale', value)}
+                                        className="max-w-xs"
+                                    />
+                                    <p className="text-xs text-muted-foreground">
+                                        {t('settings.email_locale.description')}
+                                    </p>
+                                    <InputError message={errors.email_locale} />
                                 </div>
 
                                 {canSetSystemDefault && (
@@ -76,9 +96,9 @@ export default function SettingsPage({ organization, settings, canSetSystemDefau
                                             className="mt-0.5"
                                         />
                                         <div className="space-y-1">
-                                            <span className="font-medium">Standaard organisatie</span>
+                                            <span className="font-medium">{t('settings.system_default.label')}</span>
                                             <p className="text-xs text-muted-foreground">
-                                                Stel in als systeemstandaard voor nieuwe gebruikers zonder organisatie
+                                                {t('settings.system_default.description')}
                                             </p>
                                         </div>
                                     </label>
@@ -86,7 +106,7 @@ export default function SettingsPage({ organization, settings, canSetSystemDefau
 
                                 <div className="flex items-center gap-4 pt-2">
                                     <Button type="submit" disabled={processing}>
-                                        Opslaan
+                                        {t('common.save')}
                                     </Button>
                                     <Transition
                                         show={recentlySuccessful}
@@ -95,7 +115,7 @@ export default function SettingsPage({ organization, settings, canSetSystemDefau
                                         leave="transition ease-in-out"
                                         leaveTo="opacity-0"
                                     >
-                                        <p className="text-sm text-muted-foreground">Opgeslagen</p>
+                                        <p className="text-sm text-muted-foreground">{t('settings.saved')}</p>
                                     </Transition>
                                 </div>
                             </form>

@@ -9,6 +9,7 @@ import AuthLayout from '@/layouts/auth-layout';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 import { Form, Head } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 
 interface LoginProps {
     status?: string;
@@ -16,12 +17,14 @@ interface LoginProps {
 }
 
 export default function Login({ status, canResetPassword }: LoginProps) {
+    const { t } = useTranslation('auth');
+
     return (
         <AuthLayout
-            title="Welkom terug"
-            description="Vul je e-mail en wachtwoord in om in te loggen"
+            title={t('login.title')}
+            description={t('login.description')}
         >
-            <Head title="Inloggen" />
+            <Head title={t('login.page_title')} />
 
             <Form
                 {...store.form()}
@@ -31,7 +34,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                 {({ processing, errors }) => (
                     <FieldGroup>
                         <Field>
-                            <FieldLabel htmlFor="email">E-mailadres</FieldLabel>
+                            <FieldLabel htmlFor="email">{t('login.email')}</FieldLabel>
                             <Input
                                 id="email"
                                 type="email"
@@ -47,14 +50,14 @@ export default function Login({ status, canResetPassword }: LoginProps) {
 
                         <Field>
                             <div className="flex items-center justify-between">
-                                <FieldLabel htmlFor="password">Wachtwoord</FieldLabel>
+                                <FieldLabel htmlFor="password">{t('login.password')}</FieldLabel>
                                 {canResetPassword && (
                                     <TextLink
                                         href={request()}
                                         className="text-sm"
                                         tabIndex={5}
                                     >
-                                        Wachtwoord vergeten?
+                                        {t('login.forgot_password')}
                                     </TextLink>
                                 )}
                             </div>
@@ -65,7 +68,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                 required
                                 tabIndex={2}
                                 autoComplete="current-password"
-                                placeholder="Wachtwoord"
+                                placeholder={t('login.password_placeholder')}
                             />
                             <InputError message={errors.password} />
                         </Field>
@@ -77,7 +80,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                 tabIndex={3}
                             />
                             <FieldLabel htmlFor="remember" className="font-normal">
-                                Onthoud mij
+                                {t('login.remember_me')}
                             </FieldLabel>
                         </Field>
 
@@ -90,7 +93,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                 data-test="login-button"
                             >
                                 {processing && <Spinner />}
-                                Inloggen
+                                {t('login.submit')}
                             </Button>
                         </Field>
                     </FieldGroup>

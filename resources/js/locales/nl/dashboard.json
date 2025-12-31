@@ -1,0 +1,71 @@
+{
+    "page_title": "Statistieken",
+    "title": "Statistieken",
+    "description": "Overzicht van je supporttickets",
+    "date_ranges": {
+        "24h": "Afgelopen 24 uur",
+        "7d": "Afgelopen 7 dagen",
+        "30d": "Afgelopen 30 dagen",
+        "90d": "Afgelopen 3 maanden"
+    },
+    "metrics": {
+        "open_tickets": "Open tickets",
+        "total_tickets": "{{count}} tickets totaal",
+        "unassigned": "Niet toegewezen",
+        "awaiting_assignment": "Wacht op toewijzing",
+        "sla_breached": "SLA overschreden",
+        "deadline_passed": "Deadline verstreken",
+        "resolved_this_week": "Opgelost deze week",
+        "new_this_week": "{{count}} nieuw deze week"
+    },
+    "charts": {
+        "created": "Aangemaakt",
+        "resolved": "Opgelost",
+        "assigned": "Toegewezen"
+    },
+    "activity": {
+        "title": "Ticketactiviteit",
+        "tickets_per_status": "Tickets per status",
+        "current_distribution": "Huidige verdeling"
+    },
+    "response_times": {
+        "title": "Responstijden",
+        "description": "Gemiddelde tijden in deze periode",
+        "first_response": "Eerste reactie",
+        "resolution_time": "Oplostijd",
+        "average": "gemiddeld"
+    },
+    "trends": {
+        "title": "Vergelijking vorige periode",
+        "description": "Ten opzichte van dezelfde periode ervoor",
+        "new_tickets": "Nieuwe tickets",
+        "resolved_tickets": "Opgeloste tickets"
+    },
+    "agent_performance": {
+        "title": "Prestaties per medewerker",
+        "description": "Tickets toegewezen en opgelost",
+        "no_activity": "Geen ticketactiviteit in deze periode"
+    },
+    "channels": {
+        "title": "Tickets per kanaal",
+        "description": "Verdeling over invoerkanalen",
+        "no_tickets": "Geen tickets in deze periode"
+    },
+    "sla": {
+        "title": "SLA-waarschuwingen",
+        "description": "Tickets met risico of deadline overschreden",
+        "all_within_sla": "Alle tickets zijn binnen SLA",
+        "overdue": "{{hours}}u {{minutes}}m te laat",
+        "remaining": "{{hours}}u {{minutes}}m over"
+    },
+    "recent_tickets": {
+        "title": "Recente tickets",
+        "description": "Laatste activiteit",
+        "empty": "Nog geen tickets"
+    },
+    "time": {
+        "minutes": "{{count}}m",
+        "hours": "{{count}}u",
+        "days": "{{count}}d"
+    }
+}

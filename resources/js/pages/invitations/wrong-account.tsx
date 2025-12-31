@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import AuthCardLayout from '@/layouts/auth/auth-card-layout';
 import { Head, router } from '@inertiajs/react';
 import { AlertTriangle, Building2, LogOut } from 'lucide-react';
+import { Trans, useTranslation } from 'react-i18next';
 
 interface Invitation {
     token: string;
@@ -23,12 +24,14 @@ interface Props {
 }
 
 export default function WrongAccount({ invitation, currentUserEmail }: Props) {
+    const { t } = useTranslation('common');
+
     return (
         <AuthCardLayout
-            title="Verkeerd account"
-            description="Je bent ingelogd met een ander account"
+            title={t('invitation.wrong_account.title')}
+            description={t('invitation.wrong_account.description')}
         >
-            <Head title="Verkeerd account" />
+            <Head title={t('invitation.wrong_account.title')} />
 
             <Card className="border-0 shadow-none p-0">
                 <CardHeader className="px-0 pt-0">
@@ -39,7 +42,7 @@ export default function WrongAccount({ invitation, currentUserEmail }: Props) {
                         <div>
                             <CardTitle className="text-lg">{invitation.organization.name}</CardTitle>
                             <CardDescription>
-                                Uitgenodigd door {invitation.inviter.name}
+                                {t('invitation.wrong_account.invited_by', { name: invitation.inviter.name })}
                             </CardDescription>
                         </div>
                     </div>
@@ -50,10 +53,15 @@ export default function WrongAccount({ invitation, currentUserEmail }: Props) {
                             <AlertTriangle className="size-5 text-red-600 dark:text-red-400 shrink-0" />
                             <div className="space-y-1">
                                 <p className="text-sm font-medium text-red-800 dark:text-red-200">
-                                    Verkeerd account
+                                    {t('invitation.wrong_account.wrong_account_title')}
                                 </p>
                                 <p className="text-sm text-red-700 dark:text-red-300">
-                                    Deze uitnodiging is voor <strong>{invitation.email}</strong>, maar je bent ingelogd als <strong>{currentUserEmail}</strong>.
+                                    <Trans
+                                        i18nKey="invitation.wrong_account.wrong_account_message"
+                                        ns="common"
+                                        values={{ invitedEmail: invitation.email, currentEmail: currentUserEmail }}
+                                        components={{ strong: <strong /> }}
+                                    />
                                 </p>
                             </div>
                         </div>
@@ -61,7 +69,7 @@ export default function WrongAccount({ invitation, currentUserEmail }: Props) {
 
                     <div className="space-y-3">
                         <p className="text-sm text-muted-foreground">
-                            Log uit en log opnieuw in met het juiste account om deze uitnodiging te accepteren.
+                            {t('invitation.wrong_account.logout_instruction')}
                         </p>
 
                         <Button
@@ -70,7 +78,7 @@ export default function WrongAccount({ invitation, currentUserEmail }: Props) {
                             onClick={() => router.post('/logout')}
                         >
                             <LogOut className="mr-2 size-4" />
-                            Uitloggen
+                            {t('invitation.wrong_account.logout_button')}
                         </Button>
                     </div>
                 </CardContent>

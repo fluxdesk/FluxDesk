@@ -33,6 +33,7 @@ import { useState } from 'react';
 import { useInitials } from '@/hooks/use-initials';
 import { toast } from 'sonner';
 import { formatRelative } from '@/lib/date';
+import { useTranslation } from 'react-i18next';
 
 interface PendingInvitation {
     id: number;
@@ -51,6 +52,7 @@ interface Props {
 }
 
 export default function Members({ members, pendingInvitations, roles }: Props) {
+    const { t } = useTranslation('organization');
     const [isInviteOpen, setIsInviteOpen] = useState(false);
     const [editingMember, setEditingMember] = useState<OrganizationMember | null>(null);
     const [deletingMember, setDeletingMember] = useState<OrganizationMember | null>(null);
@@ -61,17 +63,17 @@ export default function Members({ members, pendingInvitations, roles }: Props) {
         setIsDeleting(true);
         router.delete(destroy(deletingMember.id).url, {
             onSuccess: () => {
-                toast.success('Lid verwijderd');
+                toast.success(t('members.removed'));
                 setDeletingMember(null);
             },
-            onError: () => toast.error('Lid verwijderen mislukt'),
+            onError: () => toast.error(t('members.remove_failed')),
             onFinish: () => setIsDeleting(false),
         });
     };
 
     return (
         <AppLayout>
-            <Head title="Teamleden" />
+            <Head title={t('members.page_title')} />
 
             <OrganizationLayout>
                 <div className="mx-auto max-w-4xl space-y-6">
@@ -79,15 +81,15 @@ export default function Members({ members, pendingInvitations, roles }: Props) {
                     {pendingInvitations.length > 0 && (
                         <Card>
                             <CardHeader>
-                                <CardTitle className="text-lg">Openstaande uitnodigingen</CardTitle>
+                                <CardTitle className="text-lg">{t('members.pending_title')}</CardTitle>
                                 <CardDescription>
-                                    Uitnodigingen die nog niet zijn geaccepteerd
+                                    {t('members.pending_description')}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-2">
                                     {pendingInvitations.map((invitation) => (
-                                        <InvitationRow key={invitation.id} invitation={invitation} />
+                                        <InvitationRow key={invitation.id} invitation={invitation} t={t} />
                                     ))}
                                 </div>
                             </CardContent>
@@ -99,19 +101,19 @@ export default function Members({ members, pendingInvitations, roles }: Props) {
                         <CardHeader>
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <CardTitle className="text-lg">Teamleden</CardTitle>
+                                    <CardTitle className="text-lg">{t('members.title')}</CardTitle>
                                     <CardDescription>
-                                        Beheer wie toegang heeft tot deze organisatie
+                                        {t('members.description')}
                                     </CardDescription>
                                 </div>
                                 <Dialog open={isInviteOpen} onOpenChange={setIsInviteOpen}>
                                     <DialogTrigger asChild>
                                         <Button size="sm">
                                             <UserPlus className="mr-2 h-4 w-4" />
-                                            Uitnodigen
+                                            {t('members.invite')}
                                         </Button>
                                     </DialogTrigger>
-                                    <InviteMemberDialog roles={roles} onClose={() => setIsInviteOpen(false)} />
+                                    <InviteMemberDialog t={t} roles={roles} onClose={() => setIsInviteOpen(false)} />
                                 </Dialog>
                             </div>
                         </CardHeader>
@@ -120,6 +122,7 @@ export default function Members({ members, pendingInvitations, roles }: Props) {
                                 {members.map((member) => (
                                     <MemberRow
                                         key={member.id}
+                                        t={t}
                                         member={member}
                                         roles={roles}
                                         isEditing={editingMember?.id === member.id}
@@ -136,9 +139,9 @@ export default function Members({ members, pendingInvitations, roles }: Props) {
                 <ConfirmationDialog
                     open={!!deletingMember}
                     onOpenChange={(open) => !open && setDeletingMember(null)}
-                    title="Teamlid verwijderen"
-                    description={`Weet je zeker dat je ${deletingMember?.name} uit deze organisatie wilt verwijderen?`}
-                    confirmLabel="Verwijderen"
+                    title={t('members.remove_title')}
+                    description={t('members.remove_description', { name: deletingMember?.name })}
+                    confirmLabel={t('common.delete')}
                     onConfirm={handleDelete}
                     loading={isDeleting}
                 />
@@ -147,15 +150,15 @@ export default function Members({ members, pendingInvitations, roles }: Props) {
     );
 }
 
-function InvitationRow({ invitation }: { invitation: PendingInvitation }) {
+function InvitationRow({ invitation, t }: { invitation: PendingInvitation; t: (key: string, options?: Record<string, unknown>) => string }) {
     const [isRevoking, setIsRevoking] = useState(false);
     const [isResending, setIsResending] = useState(false);
 
     const handleRevoke = () => {
         setIsRevoking(true);
         router.delete(destroyInvitation(invitation.id).url, {
-            onSuccess: () => toast.success('Uitnodiging ingetrokken'),
-            onError: () => toast.error('Uitnodiging intrekken mislukt'),
+            onSuccess: () => toast.success(t('members.invite_revoked')),
+            onError: () => toast.error(t('members.invite_revoke_failed')),
             onFinish: () => setIsRevoking(false),
         });
     };
@@ -163,8 +166,8 @@ function InvitationRow({ invitation }: { invitation: PendingInvitation }) {
     const handleResend = () => {
         setIsResending(true);
         router.post(resendInvitation(invitation.id).url, {}, {
-            onSuccess: () => toast.success('Uitnodiging opnieuw verzonden'),
-            onError: () => toast.error('Uitnodiging opnieuw verzenden mislukt'),
+            onSuccess: () => toast.success(t('members.invite_resent')),
+            onError: () => toast.error(t('members.invite_resend_failed')),
             onFinish: () => setIsResending(false),
         });
     };
@@ -180,12 +183,12 @@ function InvitationRow({ invitation }: { invitation: PendingInvitation }) {
                 <div className="font-medium">{invitation.email}</div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Clock className="size-3" />
-                    Verloopt {expiresIn}
+                    {t('members.expires', { time: expiresIn })}
                 </div>
             </div>
             <div className="flex items-center gap-4">
                 <Badge variant="outline" className="bg-background">
-                    {invitation.role === 'admin' ? 'Beheerder' : 'Medewerker'}
+                    {invitation.role === 'admin' ? t('members.role_admin') : t('members.role_agent')}
                 </Badge>
                 <div className="flex items-center gap-1">
                     <Button
@@ -194,7 +197,7 @@ function InvitationRow({ invitation }: { invitation: PendingInvitation }) {
                         className="h-8 w-8"
                         onClick={handleResend}
                         disabled={isResending}
-                        title="Opnieuw verzenden"
+                        title={t('common.resend')}
                     >
                         <RefreshCw className={`h-4 w-4 ${isResending ? 'animate-spin' : ''}`} />
                     </Button>
@@ -204,7 +207,7 @@ function InvitationRow({ invitation }: { invitation: PendingInvitation }) {
                         className="h-8 w-8 text-destructive hover:text-destructive"
                         onClick={handleRevoke}
                         disabled={isRevoking}
-                        title="Intrekken"
+                        title={t('common.revoke')}
                     >
                         <X className="h-4 w-4" />
                     </Button>
@@ -215,6 +218,7 @@ function InvitationRow({ invitation }: { invitation: PendingInvitation }) {
 }
 
 function MemberRow({
+    t,
     member,
     roles,
     isEditing,
@@ -222,6 +226,7 @@ function MemberRow({
     onClose,
     onDelete,
 }: {
+    t: (key: string, options?: Record<string, unknown>) => string;
     member: OrganizationMember;
     roles: RoleOption[];
     isEditing: boolean;
@@ -249,7 +254,7 @@ function MemberRow({
                             : 'bg-muted text-muted-foreground'
                     }`}
                 >
-                    {member.pivot.role === 'admin' ? 'Beheerder' : 'Medewerker'}
+                    {member.pivot.role === 'admin' ? t('members.role_admin') : t('members.role_agent')}
                 </span>
                 <div className="flex items-center gap-1">
                     <Dialog open={isEditing} onOpenChange={(open) => (open ? onEdit() : onClose())}>
@@ -258,7 +263,7 @@ function MemberRow({
                                 <Pencil className="h-4 w-4" />
                             </Button>
                         </DialogTrigger>
-                        <EditMemberDialog member={member} roles={roles} onClose={onClose} />
+                        <EditMemberDialog t={t} member={member} roles={roles} onClose={onClose} />
                     </Dialog>
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onDelete}>
                         <Trash2 className="h-4 w-4" />
@@ -270,9 +275,11 @@ function MemberRow({
 }
 
 function InviteMemberDialog({
+    t,
     roles,
     onClose,
 }: {
+    t: (key: string, options?: Record<string, unknown>) => string;
     roles: RoleOption[];
     onClose: () => void;
 }) {
@@ -285,11 +292,11 @@ function InviteMemberDialog({
         e.preventDefault();
         post(storeInvitation().url, {
             onSuccess: () => {
-                toast.success('Uitnodiging verzonden');
+                toast.success(t('members.invite_sent'));
                 reset();
                 onClose();
             },
-            onError: () => toast.error('Uitnodiging verzenden mislukt'),
+            onError: () => toast.error(t('members.invite_failed')),
         });
     }
 
@@ -297,52 +304,52 @@ function InviteMemberDialog({
         <DialogContent>
             <form onSubmit={handleSubmit}>
                 <DialogHeader>
-                    <DialogTitle>Teamlid uitnodigen</DialogTitle>
+                    <DialogTitle>{t('members.invite_title')}</DialogTitle>
                     <DialogDescription>
-                        Stuur een uitnodiging naar een nieuw teamlid. Ze ontvangen een e-mail om lid te worden.
+                        {t('members.invite_description')}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="email">E-mailadres</Label>
+                        <Label htmlFor="email">{t('auth:login.email')}</Label>
                         <Input
                             id="email"
                             type="email"
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
-                            placeholder="collega@voorbeeld.nl"
+                            placeholder={t('members.invite_email_placeholder')}
                         />
                         <InputError message={errors.email} />
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="role">Rol</Label>
+                        <Label htmlFor="role">{t('members.role')}</Label>
                         <Select value={data.role} onValueChange={(value) => setData('role', value)}>
                             <SelectTrigger>
-                                <SelectValue placeholder="Selecteer een rol" />
+                                <SelectValue placeholder={t('members.role_select')} />
                             </SelectTrigger>
                             <SelectContent>
                                 {roles.map((role) => (
                                     <SelectItem key={role.value} value={role.value}>
-                                        {role.value === 'admin' ? 'Beheerder' : 'Medewerker'}
+                                        {role.value === 'admin' ? t('members.role_admin') : t('members.role_agent')}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
                         <InputError message={errors.role} />
                         <p className="text-xs text-muted-foreground">
-                            Beheerders kunnen organisatie-instellingen en leden beheren. Medewerkers kunnen alleen tickets afhandelen.
+                            {t('members.role_description')}
                         </p>
                     </div>
                 </div>
 
                 <DialogFooter>
                     <Button type="button" variant="outline" onClick={onClose}>
-                        Annuleren
+                        {t('common.cancel')}
                     </Button>
                     <Button type="submit" disabled={processing}>
-                        Uitnodiging verzenden
+                        {t('members.invite_send')}
                     </Button>
                 </DialogFooter>
             </form>
@@ -351,10 +358,12 @@ function InviteMemberDialog({
 }
 
 function EditMemberDialog({
+    t,
     member,
     roles,
     onClose,
 }: {
+    t: (key: string, options?: Record<string, unknown>) => string;
     member: OrganizationMember;
     roles: RoleOption[];
     onClose: () => void;
@@ -367,10 +376,10 @@ function EditMemberDialog({
         e.preventDefault();
         patch(update(member.id).url, {
             onSuccess: () => {
-                toast.success('Rol bijgewerkt');
+                toast.success(t('members.role_updated'));
                 onClose();
             },
-            onError: () => toast.error('Rol bijwerken mislukt'),
+            onError: () => toast.error(t('members.role_update_failed')),
         });
     }
 
@@ -378,21 +387,21 @@ function EditMemberDialog({
         <DialogContent>
             <form onSubmit={handleSubmit}>
                 <DialogHeader>
-                    <DialogTitle>Rol bewerken</DialogTitle>
-                    <DialogDescription>Wijzig de rol voor {member.name}.</DialogDescription>
+                    <DialogTitle>{t('members.edit_title')}</DialogTitle>
+                    <DialogDescription>{t('members.edit_description', { name: member.name })}</DialogDescription>
                 </DialogHeader>
 
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="role">Rol</Label>
+                        <Label htmlFor="role">{t('members.role')}</Label>
                         <Select value={data.role} onValueChange={(value) => setData('role', value)}>
                             <SelectTrigger>
-                                <SelectValue placeholder="Selecteer een rol" />
+                                <SelectValue placeholder={t('members.role_select')} />
                             </SelectTrigger>
                             <SelectContent>
                                 {roles.map((role) => (
                                     <SelectItem key={role.value} value={role.value}>
-                                        {role.value === 'admin' ? 'Beheerder' : 'Medewerker'}
+                                        {role.value === 'admin' ? t('members.role_admin') : t('members.role_agent')}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -403,10 +412,10 @@ function EditMemberDialog({
 
                 <DialogFooter>
                     <Button type="button" variant="outline" onClick={onClose}>
-                        Annuleren
+                        {t('common.cancel')}
                     </Button>
                     <Button type="submit" disabled={processing}>
-                        Wijzigingen opslaan
+                        {t('common.save_changes')}
                     </Button>
                 </DialogFooter>
             </form>

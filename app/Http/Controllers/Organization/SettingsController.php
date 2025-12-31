@@ -47,6 +47,11 @@ class SettingsController extends Controller
             $settings->update(['timezone' => $data['timezone']]);
         }
 
+        // Handle email locale update
+        if (isset($data['email_locale'])) {
+            $settings->update(['email_locale' => $data['email_locale']]);
+        }
+
         // Handle system default toggle (super admin only)
         if (isset($data['is_system_default']) && $user && $user->isSuperAdmin()) {
             if ($data['is_system_default']) {

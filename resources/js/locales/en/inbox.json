@@ -1,0 +1,150 @@
+{
+    "title": "Inbox",
+    "detail": {
+        "no_ticket_selected": "No ticket selected",
+        "select_ticket_hint": "Select a ticket from the list to view details"
+    },
+    "empty": {
+        "title": "No tickets",
+        "description": "Your inbox is empty",
+        "no_tickets_found": "No tickets found"
+    },
+    "filters": {
+        "all": "All tickets",
+        "unread": "Unread",
+        "assigned_to_me": "Assigned to me",
+        "unassigned": "Unassigned",
+        "open": "Open",
+        "closed": "Closed"
+    },
+    "tabs": {
+        "all": "All",
+        "unread": "Unread"
+    },
+    "view": {
+        "tooltip": "View",
+        "compact": "Compact",
+        "normal": "Normal",
+        "spacious": "Spacious"
+    },
+    "sort": {
+        "newest": "Newest first",
+        "oldest": "Oldest first",
+        "recently_updated": "Recently updated",
+        "priority": "Priority"
+    },
+    "actions": {
+        "mark_read": "Mark as read",
+        "mark_unread": "Mark as unread",
+        "marked_read": "Marked as read",
+        "marked_unread": "Marked as unread",
+        "assign": "Assign",
+        "assign_to": "Assign to...",
+        "close": "Close ticket",
+        "reopen": "Reopen ticket",
+        "delete": "Delete",
+        "delete_permanent": "Permanently delete",
+        "deleted": "Ticket deleted",
+        "deleted_permanent": "Ticket permanently deleted",
+        "merge": "Merge",
+        "move_to_folder": "Move to folder",
+        "moved": "Ticket moved",
+        "archive": "Archive",
+        "mark_spam": "Mark as spam",
+        "add_label": "Add label",
+        "change_status": "Change status",
+        "tags_updated": "Tags updated"
+    },
+    "bulk": {
+        "selected": "{{count}} selected",
+        "select_all": "Select all",
+        "deselect": "Deselect",
+        "tickets_marked_read": "{{count}} tickets marked as read",
+        "tickets_resolved": "{{count}} tickets resolved",
+        "tickets_deleted": "{{count}} tickets deleted",
+        "tickets_deleted_permanent": "{{count}} tickets permanently deleted"
+    },
+    "ticket": {
+        "number": "Ticket #{{number}}",
+        "from": "From",
+        "subject": "Subject",
+        "status": "Status",
+        "priority": "Priority",
+        "assigned_to": "Assigned to",
+        "created": "Created",
+        "updated": "Updated",
+        "unassigned": "Unassigned",
+        "unknown": "Unknown",
+        "messages": "{{count}} message",
+        "messages_plural": "{{count}} messages",
+        "no_messages": "No messages",
+        "move_ticket": "Move ticket",
+        "personal": "personal"
+    },
+    "folders": {
+        "inbox": "Inbox"
+    },
+    "tags": {
+        "title": "Tags",
+        "create_personal": "Create personal tag",
+        "dialog_title": "Create personal tag",
+        "dialog_description": "Create a personal tag that only you can see and use.",
+        "name_label": "Tag name",
+        "name_placeholder": "My tag",
+        "creating": "Creating...",
+        "create": "Create"
+    },
+    "delete_dialog": {
+        "title": "Delete ticket?",
+        "title_permanent": "Permanently delete?",
+        "description_single": "This ticket will be moved to the trash.",
+        "description_single_permanent": "This ticket will be permanently deleted and cannot be restored. Are you sure?",
+        "description_bulk": "{{count}} tickets will be moved to the trash.",
+        "description_bulk_permanent": "{{count}} tickets will be permanently deleted and cannot be restored. Are you sure?",
+        "cancel": "Cancel",
+        "confirm": "Delete",
+        "confirm_permanent": "Permanently delete"
+    },
+    "tooltips": {
+        "mark_read": "Mark read",
+        "mark_resolved": "Mark resolved",
+        "delete": "Delete",
+        "delete_permanent": "Permanently delete",
+        "deselect": "Deselect"
+    },
+    "display": {
+        "archive": "Archive",
+        "to_spam": "Move to spam",
+        "to_trash": "Move to trash",
+        "reply": "Reply",
+        "reply_all": "Reply all",
+        "forward": "Forward",
+        "more": "More"
+    },
+    "composer": {
+        "reply": "Reply",
+        "note": "Note",
+        "internal": "Internal",
+        "reply_placeholder": "Reply to {{name}}...",
+        "note_placeholder": "Add an internal note...",
+        "send": "Send",
+        "add": "Add",
+        "preview": "Preview",
+        "edit": "Edit",
+        "preview_empty": "Type something to see the preview...",
+        "drop_files": "Drop files here",
+        "add_attachments": "Add attachments ({{current}}/{{max}})",
+        "max_attachments": "Maximum reached ({{max}})",
+        "upload_failed": "Upload failed",
+        "ai_suggestion": "Suggestion",
+        "ai_improve": "Improve",
+        "ai_suggestions_title": "AI Suggestions",
+        "ai_suggestions_description": "Choose a suggestion to use",
+        "ai_loading": "Loading...",
+        "ai_error": "Could not connect to AI service",
+        "ai_something_wrong": "Something went wrong",
+        "ai_generates_suggestions": "AI generates suggestions",
+        "ai_improves_text": "AI improves your text"
+    },
+    "color": "Color"
+}

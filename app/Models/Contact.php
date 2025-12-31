@@ -18,6 +18,7 @@ class Contact extends Authenticatable
         'organization_id',
         'company_id',
         'email',
+        'locale',
         'name',
         'phone',
         'company',

@@ -1,23 +1,24 @@
-// Components
-import { login } from '@/routes';
-import { email } from '@/routes/password';
-import { Form, Head } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
-
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
+import { login } from '@/routes';
+import { email } from '@/routes/password';
+import { Form, Head } from '@inertiajs/react';
+import { LoaderCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function ForgotPassword({ status }: { status?: string }) {
+    const { t } = useTranslation('auth');
+
     return (
         <AuthLayout
-            title="Wachtwoord vergeten"
-            description="Vul je e-mail in en we sturen een resetlink"
+            title={t('forgot_password.title')}
+            description={t('forgot_password.description')}
         >
-            <Head title="Wachtwoord vergeten" />
+            <Head title={t('forgot_password.page_title')} />
 
             {status && (
                 <div className="mb-4 text-center text-sm font-medium text-green-600">
@@ -30,7 +31,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
                     {({ processing, errors }) => (
                         <>
                             <div className="grid gap-2">
-                                <Label htmlFor="email">E-mailadres</Label>
+                                <Label htmlFor="email">{t('forgot_password.email')}</Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -52,7 +53,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
                                     {processing && (
                                         <LoaderCircle className="h-4 w-4 animate-spin" />
                                     )}
-                                    Stuur resetlink
+                                    {t('forgot_password.submit')}
                                 </Button>
                             </div>
                         </>
@@ -60,8 +61,8 @@ export default function ForgotPassword({ status }: { status?: string }) {
                 </Form>
 
                 <div className="space-x-1 text-center text-sm text-muted-foreground">
-                    <span>Of ga terug naar</span>
-                    <TextLink href={login()}>inloggen</TextLink>
+                    <span>{t('forgot_password.or_back_to')}</span>
+                    <TextLink href={login()}>{t('forgot_password.login_link')}</TextLink>
                 </div>
             </div>
         </AuthLayout>

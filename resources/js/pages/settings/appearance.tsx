@@ -3,37 +3,43 @@ import { Appearance, useAppearance } from '@/hooks/use-appearance';
 import { cn } from '@/lib/utils';
 import { Monitor, Moon, Sun, type LucideIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 
-const tabs: { value: Appearance; icon: LucideIcon; label: string; description: string }[] = [
-    { value: 'light', icon: Sun, label: 'Licht', description: 'Lichte achtergrond met donkere tekst' },
-    { value: 'dark', icon: Moon, label: 'Donker', description: 'Donkere achtergrond met lichte tekst' },
-    { value: 'system', icon: Monitor, label: 'Systeem', description: 'Volgt je systeemvoorkeur' },
-];
-
 export default function AppearancePage() {
+    const { t } = useTranslation('settings');
     const { appearance, updateAppearance } = useAppearance();
+
+    const tabs: { value: Appearance; icon: LucideIcon; label: string; description: string }[] = [
+        { value: 'light', icon: Sun, label: t('appearance.light'), description: t('appearance.light_description') },
+        { value: 'dark', icon: Moon, label: t('appearance.dark'), description: t('appearance.dark_description') },
+        { value: 'system', icon: Monitor, label: t('appearance.system'), description: t('appearance.system_description') },
+    ];
 
     const handleAppearanceChange = (value: Appearance) => {
         updateAppearance(value);
-        const labels: Record<Appearance, string> = { light: 'licht', dark: 'donker', system: 'systeem' };
-        toast.success(`Thema gewijzigd naar ${labels[value]}`);
+        const labels: Record<Appearance, string> = {
+            light: t('appearance.light').toLowerCase(),
+            dark: t('appearance.dark').toLowerCase(),
+            system: t('appearance.system').toLowerCase()
+        };
+        toast.success(t('appearance.changed', { theme: labels[value] }));
     };
 
     return (
         <AppLayout>
-            <Head title="Weergave-instellingen" />
+            <Head title={t('appearance.page_title')} />
 
             <SettingsLayout>
                 <div className="mx-auto max-w-4xl space-y-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="text-lg">Thema</CardTitle>
+                            <CardTitle className="text-lg">{t('appearance.title')}</CardTitle>
                             <CardDescription>
-                                Kies hoe de applicatie eruitziet
+                                {t('appearance.description')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent>

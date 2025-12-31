@@ -38,6 +38,7 @@ import {
     XCircle,
 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 interface CredentialField {
@@ -69,12 +70,6 @@ interface Integration {
     configured: ConfiguredIntegration | null;
 }
 
-const CATEGORY_LABELS: Record<string, string> = {
-    email: 'E-mail',
-    ai: 'AI',
-    general: 'Overig',
-};
-
 const CATEGORY_ORDER = ['email', 'ai', 'general'];
 
 interface Props {
@@ -82,6 +77,7 @@ interface Props {
 }
 
 export default function Integrations({ integrations }: Props) {
+    const { t } = useTranslation('organization');
     const [configuringIntegration, setConfiguringIntegration] = useState<Integration | null>(null);
     const [deletingIntegration, setDeletingIntegration] = useState<Integration | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -117,17 +113,17 @@ export default function Integrations({ integrations }: Props) {
         router.delete(destroy(deletingIntegration.configured.id).url, {
             preserveScroll: true,
             onSuccess: () => {
-                toast.success('Integratie verwijderd');
+                toast.success(t('integrations.deleted'));
                 setDeletingIntegration(null);
             },
-            onError: () => toast.error('Integratie verwijderen mislukt'),
+            onError: () => toast.error(t('integrations.delete_failed')),
             onFinish: () => setIsDeleting(false),
         });
     };
 
     return (
         <AppLayout>
-            <Head title="Integraties" />
+            <Head title={t('integrations.page_title')} />
 
             <OrganizationLayout>
                 <div className="mx-auto max-w-4xl space-y-6">
@@ -138,9 +134,9 @@ export default function Integrations({ integrations }: Props) {
                                     <Plug className="h-5 w-5 text-primary" />
                                 </div>
                                 <div>
-                                    <CardTitle className="text-lg">Integraties</CardTitle>
+                                    <CardTitle className="text-lg">{t('integrations.title')}</CardTitle>
                                     <CardDescription>
-                                        Verbind externe diensten met je organisatie
+                                        {t('integrations.description')}
                                     </CardDescription>
                                 </div>
                             </div>
@@ -149,9 +145,9 @@ export default function Integrations({ integrations }: Props) {
                             {integrations.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-12 text-center">
                                     <Plug className="h-12 w-12 text-muted-foreground/50" />
-                                    <h3 className="mt-4 text-lg font-semibold">Geen integraties beschikbaar</h3>
+                                    <h3 className="mt-4 text-lg font-semibold">{t('integrations.empty_title')}</h3>
                                     <p className="mt-2 text-sm text-muted-foreground">
-                                        Er zijn nog geen integraties geregistreerd in het systeem.
+                                        {t('integrations.empty_description')}
                                     </p>
                                 </div>
                             ) : (
@@ -159,7 +155,7 @@ export default function Integrations({ integrations }: Props) {
                                     {sortedCategories.map((category) => (
                                         <div key={category}>
                                             <h3 className="text-sm font-semibold text-muted-foreground mb-3">
-                                                {CATEGORY_LABELS[category] || category}
+                                                {t(`integrations.categories.${category}`)}
                                             </h3>
                                             <div className="divide-y rounded-lg border">
                                                 {groupedIntegrations[category].map((integration) => (
@@ -190,9 +186,9 @@ export default function Integrations({ integrations }: Props) {
                 <ConfirmationDialog
                     open={!!deletingIntegration}
                     onOpenChange={(open) => !open && setDeletingIntegration(null)}
-                    title="Integratie verwijderen"
-                    description={`Weet je zeker dat je de ${deletingIntegration?.name} integratie wilt verwijderen? De opgeslagen credentials worden permanent verwijderd.`}
-                    confirmLabel="Verwijderen"
+                    title={t('integrations.delete_title')}
+                    description={t('integrations.delete_description', { name: deletingIntegration?.name })}
+                    confirmLabel={t('common.delete')}
                     onConfirm={handleDelete}
                     loading={isDeleting}
                 />
@@ -210,6 +206,7 @@ function IntegrationItem({
     onConfigure: () => void;
     onDelete: () => void;
 }) {
+    const { t } = useTranslation('organization');
     const [isToggling, setIsToggling] = useState(false);
 
     const handleToggle = () => {
@@ -222,11 +219,11 @@ function IntegrationItem({
                 preserveScroll: true,
                 onSuccess: () => {
                     const message = integration.configured?.is_active
-                        ? 'Integratie gedeactiveerd'
-                        : 'Integratie geactiveerd';
+                        ? t('integrations.deactivated')
+                        : t('integrations.activated');
                     toast.success(message);
                 },
-                onError: () => toast.error('Status wijzigen mislukt'),
+                onError: () => toast.error(t('integrations.toggle_failed')),
                 onFinish: () => setIsToggling(false),
             },
         );
@@ -241,7 +238,7 @@ function IntegrationItem({
             return (
                 <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-400">
                     <CheckCircle2 className="mr-1 h-3 w-3" />
-                    Actief
+                    {t('integrations.status.active')}
                 </Badge>
             );
         }
@@ -250,7 +247,7 @@ function IntegrationItem({
             return (
                 <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-400">
                     <AlertCircle className="mr-1 h-3 w-3" />
-                    Inactief
+                    {t('integrations.status.inactive')}
                 </Badge>
             );
         }
@@ -259,7 +256,7 @@ function IntegrationItem({
             return (
                 <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-400">
                     <AlertCircle className="mr-1 h-3 w-3" />
-                    Test nodig
+                    {t('integrations.status.needs_test')}
                 </Badge>
             );
         }
@@ -267,7 +264,7 @@ function IntegrationItem({
         return (
             <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-400">
                 <AlertCircle className="mr-1 h-3 w-3" />
-                Onvolledig
+                {t('integrations.status.incomplete')}
             </Badge>
         );
     };
@@ -309,7 +306,7 @@ function IntegrationItem({
                             htmlFor={`toggle-${integration.identifier}`}
                             className="text-sm text-muted-foreground cursor-pointer"
                         >
-                            {integration.configured.is_active ? 'Aan' : 'Uit'}
+                            {integration.configured.is_active ? t('integrations.toggle.on') : t('integrations.toggle.off')}
                         </Label>
                         <Switch
                             id={`toggle-${integration.identifier}`}
@@ -324,7 +321,7 @@ function IntegrationItem({
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" size="icon" className="h-8 w-8">
                             <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Acties</span>
+                            <span className="sr-only">{t('integrations.actions')}</span>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -332,18 +329,18 @@ function IntegrationItem({
                             <>
                                 <DropdownMenuItem onClick={onConfigure}>
                                     <Pencil className="h-4 w-4" />
-                                    Bewerken
+                                    {t('common.edit')}
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem variant="destructive" onClick={onDelete}>
                                     <Trash2 className="h-4 w-4" />
-                                    Verwijderen
+                                    {t('common.delete')}
                                 </DropdownMenuItem>
                             </>
                         ) : (
                             <DropdownMenuItem onClick={onConfigure}>
                                 <Settings className="h-4 w-4" />
-                                Configureren
+                                {t('integrations.configure')}
                             </DropdownMenuItem>
                         )}
                     </DropdownMenuContent>
@@ -362,6 +359,7 @@ function IntegrationConfigDialog({
     open: boolean;
     onClose: () => void;
 }) {
+    const { t } = useTranslation('organization');
     const initialData: Record<string, string> = { integration: integration.identifier };
     integration.credential_fields.forEach((field) => {
         initialData[field.name] = field.default || '';
@@ -405,27 +403,27 @@ function IntegrationConfigDialog({
                             preserveScroll: true,
                             onSuccess: () => {
                                 setTestPassed(true);
-                                toast.success('Verbinding succesvol getest! Je kunt nu opslaan.');
+                                toast.success(t('integrations.test_success'));
                             },
                             onError: (errors) => {
                                 setTestError(
                                     typeof errors === 'object' && 'message' in errors
                                         ? String(errors.message)
-                                        : 'Verbindingstest mislukt'
+                                        : t('integrations.test_failed')
                                 );
-                                toast.error('Verbindingstest mislukt');
+                                toast.error(t('integrations.test_failed'));
                             },
                             onFinish: () => setIsTesting(false),
                         },
                     );
                 } else {
                     setIsTesting(false);
-                    setTestError('Kon integratie niet vinden na opslaan');
+                    setTestError(t('integrations.not_found_after_save'));
                 }
             },
             onError: () => {
                 setIsTesting(false);
-                toast.error('Credentials opslaan mislukt');
+                toast.error(t('integrations.credentials_save_failed'));
             },
         });
     };
@@ -434,11 +432,11 @@ function IntegrationConfigDialog({
         post(store().url, {
             preserveScroll: true,
             onSuccess: () => {
-                toast.success('Integratie opgeslagen');
+                toast.success(t('integrations.saved'));
                 reset();
                 onClose();
             },
-            onError: () => toast.error('Opslaan mislukt'),
+            onError: () => toast.error(t('integrations.save_failed')),
         });
     };
 
@@ -450,10 +448,10 @@ function IntegrationConfigDialog({
                         {integration.icon === 'microsoft' && <MicrosoftIcon className="h-5 w-5" />}
                         {integration.icon === 'google' && <GoogleIcon className="h-5 w-5" />}
                         {integration.icon === 'openai' && <OpenAIIcon className="h-5 w-5" />}
-                        {integration.name} {integration.configured ? 'bewerken' : 'configureren'}
+                        {integration.name} {integration.configured ? t('integrations.dialog.edit_suffix') : t('integrations.dialog.configure_suffix')}
                     </DialogTitle>
                     <DialogDescription>
-                        Vul de credentials in en test de verbinding om de integratie te activeren.
+                        {t('integrations.dialog.description')}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -501,14 +499,14 @@ function IntegrationConfigDialog({
                                     <>
                                         <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
                                         <span className="text-green-700 dark:text-green-400">
-                                            Verbinding succesvol! Je kunt nu opslaan.
+                                            {t('integrations.dialog.test_passed')}
                                         </span>
                                     </>
                                 ) : (
                                     <>
                                         <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
                                         <span className="text-red-700 dark:text-red-400">
-                                            {testError || 'Verbindingstest mislukt'}
+                                            {testError || t('integrations.test_failed')}
                                         </span>
                                     </>
                                 )}
@@ -519,14 +517,14 @@ function IntegrationConfigDialog({
                     {/* Info about test requirement for new integrations */}
                     {!integration.configured && !testPassed && !testError && (
                         <p className="text-xs text-muted-foreground">
-                            Test eerst de verbinding voordat je de integratie kunt opslaan.
+                            {t('integrations.dialog.test_first')}
                         </p>
                     )}
                 </div>
 
                 <DialogFooter className="flex-col gap-3 sm:flex-row sm:justify-end">
                     <Button type="button" variant="outline" onClick={onClose}>
-                        Annuleren
+                        {t('common.cancel')}
                     </Button>
                     <Button
                         type="button"
@@ -539,7 +537,7 @@ function IntegrationConfigDialog({
                         ) : (
                             <Check className="mr-2 h-4 w-4" />
                         )}
-                        Test verbinding
+                        {t('integrations.test_connection')}
                     </Button>
                     <Button
                         type="button"
@@ -547,7 +545,7 @@ function IntegrationConfigDialog({
                         disabled={processing || !canSave}
                     >
                         {processing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                        Opslaan
+                        {t('common.save')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

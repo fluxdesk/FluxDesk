@@ -15,21 +15,23 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Form } from '@inertiajs/react';
 import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function DeleteUser() {
+    const { t } = useTranslation('settings');
     const passwordInput = useRef<HTMLInputElement>(null);
 
     return (
         <div className="space-y-6">
             <HeadingSmall
-                title="Account verwijderen"
-                description="Verwijder je account en al je gegevens"
+                title={t('delete_account.title')}
+                description={t('delete_account.description')}
             />
             <div className="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10">
                 <div className="relative space-y-0.5 text-red-600 dark:text-red-100">
-                    <p className="font-medium">Waarschuwing</p>
+                    <p className="font-medium">{t('delete_account.warning')}</p>
                     <p className="text-sm">
-                        Let op, dit kan niet ongedaan worden gemaakt.
+                        {t('delete_account.warning_text')}
                     </p>
                 </div>
 
@@ -39,18 +41,15 @@ export default function DeleteUser() {
                             variant="destructive"
                             data-test="delete-user-button"
                         >
-                            Account verwijderen
+                            {t('delete_account.button')}
                         </Button>
                     </DialogTrigger>
                     <DialogContent>
                         <DialogTitle>
-                            Weet je zeker dat je je account wilt verwijderen?
+                            {t('delete_account.dialog_title')}
                         </DialogTitle>
                         <DialogDescription>
-                            Zodra je account is verwijderd, worden ook alle
-                            gegevens permanent verwijderd. Voer je wachtwoord
-                            in om te bevestigen dat je je account permanent
-                            wilt verwijderen.
+                            {t('delete_account.dialog_description')}
                         </DialogDescription>
 
                         <Form
@@ -69,7 +68,7 @@ export default function DeleteUser() {
                                             htmlFor="password"
                                             className="sr-only"
                                         >
-                                            Wachtwoord
+                                            {t('delete_account.password')}
                                         </Label>
 
                                         <Input
@@ -77,7 +76,7 @@ export default function DeleteUser() {
                                             type="password"
                                             name="password"
                                             ref={passwordInput}
-                                            placeholder="Wachtwoord"
+                                            placeholder={t('delete_account.password_placeholder')}
                                             autoComplete="current-password"
                                         />
 
@@ -92,7 +91,7 @@ export default function DeleteUser() {
                                                     resetAndClearErrors()
                                                 }
                                             >
-                                                Annuleren
+                                                {t('delete_account.cancel')}
                                             </Button>
                                         </DialogClose>
 
@@ -105,7 +104,7 @@ export default function DeleteUser() {
                                                 type="submit"
                                                 data-test="confirm-delete-user-button"
                                             >
-                                                Account verwijderen
+                                                {t('delete_account.confirm')}
                                             </button>
                                         </Button>
                                     </DialogFooter>

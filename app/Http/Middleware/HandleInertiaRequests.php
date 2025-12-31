@@ -8,6 +8,7 @@ use App\Models\TicketFolder;
 use App\Services\OrganizationContext;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -72,6 +73,8 @@ class HandleInertiaRequests extends Middleware
             'tags' => fn () => $user && $this->organizationContext->get()
                 ? Tag::where(fn ($q) => $q->whereNull('user_id')->orWhere('user_id', $user->id))->orderBy('name')->get()
                 : [],
+            'locale' => App::getLocale(),
+            'availableLocales' => config('app.available_locales', ['en']),
         ];
     }
 }

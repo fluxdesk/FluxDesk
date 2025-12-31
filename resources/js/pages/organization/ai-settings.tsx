@@ -7,14 +7,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
 import OrganizationLayout from '@/layouts/organization/layout';
 import { update } from '@/routes/organization/ai-settings';
 import { Transition } from '@headlessui/react';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Deferred, Head, Link, useForm } from '@inertiajs/react';
 import { AlertCircle, Bot, FileText, Info, MessageSquare, Shield, Sparkles, Wand2, Zap } from 'lucide-react';
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface AIProvider {
     identifier: string;
@@ -61,9 +63,9 @@ interface Props {
         disclosure_in_portal: boolean;
         disclosure_text: string | null;
     };
-    providers: AIProvider[];
-    usage: UsageStats;
-    usageByAction: Record<string, { count: number; tokens: number; cost: number }>;
+    providers?: AIProvider[];
+    usage?: UsageStats;
+    usageByAction?: Record<string, { count: number; tokens: number; cost: number }>;
     languages: Language[];
 }
 
@@ -73,6 +75,7 @@ function PrivacyToggle({
     checked,
     onChange,
     sensitive,
+    sensitiveTooltip,
     children,
 }: {
     label: string;
@@ -80,6 +83,7 @@ function PrivacyToggle({
     checked: boolean;
     onChange: (checked: boolean) => void;
     sensitive?: boolean;
+    sensitiveTooltip?: string;
     children?: React.ReactNode;
 }) {
     return (
@@ -93,7 +97,7 @@ function PrivacyToggle({
                                 <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
                             </span>
                         </TooltipTrigger>
-                        <TooltipContent>Persoonsgegeven (AVG/GDPR)</TooltipContent>
+                        <TooltipContent>{sensitiveTooltip}</TooltipContent>
                     </Tooltip>
                 )}
                 {description && (
@@ -155,8 +159,40 @@ function FeatureToggle({
     );
 }
 
+function ProviderConfigSkeleton() {
+    return (
+        <div className="space-y-4 animate-pulse">
+            <Skeleton className="h-5 w-32" />
+            <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+                <div className="grid gap-2">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function UsageStatsSkeleton() {
+    return (
+        <div className="grid gap-4 sm:grid-cols-3">
+            {[...Array(3)].map((_, i) => (
+                <div key={i} className="text-center p-4 rounded-lg bg-muted/50">
+                    <Skeleton className="h-8 w-16 mx-auto mb-2" />
+                    <Skeleton className="h-4 w-20 mx-auto" />
+                </div>
+            ))}
+        </div>
+    );
+}
+
 export default function AISettingsPage({ settings, providers, usage, languages }: Props) {
-    const activeProviders = providers.filter((p) => p.is_active);
+    const { t } = useTranslation('organization');
+    const activeProviders = providers?.filter((p) => p.is_active) ?? [];
     const hasActiveProvider = activeProviders.length > 0;
 
     const { data, setData, patch, processing, errors, recentlySuccessful } = useForm({
@@ -186,7 +222,7 @@ export default function AISettingsPage({ settings, providers, usage, languages }
         disclosure_text: settings.disclosure_text || '',
     });
 
-    const selectedProvider = providers.find((p) => p.identifier === data.default_provider);
+    const selectedProvider = providers?.find((p) => p.identifier === data.default_provider);
     const availableModels = selectedProvider?.models || [];
 
     function handleSubmit(e: React.FormEvent) {
@@ -204,32 +240,34 @@ export default function AISettingsPage({ settings, providers, usage, languages }
 
     return (
         <AppLayout>
-            <Head title="AI Instellingen" />
+            <Head title={t('ai.page_title')} />
 
             <OrganizationLayout>
                 <div className="mx-auto max-w-4xl space-y-6">
-                    {!hasActiveProvider && (
-                        <Card className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
-                            <CardContent className="flex items-start gap-3 pt-6">
-                                <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
-                                <div>
-                                    <p className="font-medium text-amber-900 dark:text-amber-100">
-                                        Geen AI provider geconfigureerd
-                                    </p>
-                                    <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                                        Configureer eerst een AI integratie (zoals OpenAI of Claude) op de{' '}
-                                        <Link
-                                            href="/organization/integrations"
-                                            className="underline hover:no-underline"
-                                        >
-                                            Integraties
-                                        </Link>{' '}
-                                        pagina.
-                                    </p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
+                    <Deferred data="providers" fallback={null}>
+                        {!hasActiveProvider && (
+                            <Card className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
+                                <CardContent className="flex items-start gap-3 pt-6">
+                                    <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
+                                    <div>
+                                        <p className="font-medium text-amber-900 dark:text-amber-100">
+                                            {t('ai.no_provider_title')}
+                                        </p>
+                                        <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                                            {t('ai.no_provider_description_prefix')}{' '}
+                                            <Link
+                                                href="/organization/integrations"
+                                                className="underline hover:no-underline"
+                                            >
+                                                {t('ai.no_provider_integrations_link')}
+                                            </Link>{' '}
+                                            {t('ai.no_provider_description_suffix')}
+                                        </p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </Deferred>
 
                     <Card>
                         <CardHeader>
@@ -238,9 +276,9 @@ export default function AISettingsPage({ settings, providers, usage, languages }
                                     <Bot className="h-5 w-5 text-primary" />
                                 </div>
                                 <div>
-                                    <CardTitle className="text-lg">AI Instellingen</CardTitle>
+                                    <CardTitle className="text-lg">{t('ai.title')}</CardTitle>
                                     <CardDescription>
-                                        Configureer AI-functies voor suggesties en automatische antwoorden
+                                        {t('ai.description')}
                                     </CardDescription>
                                 </div>
                             </div>
@@ -251,15 +289,15 @@ export default function AISettingsPage({ settings, providers, usage, languages }
                                     <TabsList className="mb-6">
                                         <TabsTrigger value="features" className="gap-1.5">
                                             <Sparkles className="h-3.5 w-3.5" />
-                                            Functies
+                                            {t('ai.tabs.features')}
                                         </TabsTrigger>
                                         <TabsTrigger value="instructions" className="gap-1.5">
                                             <FileText className="h-3.5 w-3.5" />
-                                            Instructies
+                                            {t('ai.tabs.instructions')}
                                         </TabsTrigger>
                                         <TabsTrigger value="privacy" className="gap-1.5">
                                             <Shield className="h-3.5 w-3.5" />
-                                            Privacy
+                                            {t('ai.tabs.privacy')}
                                         </TabsTrigger>
                                     </TabsList>
 
@@ -267,62 +305,64 @@ export default function AISettingsPage({ settings, providers, usage, languages }
                                     <TabsContent value="features" className="space-y-6">
                                         {/* Provider Configuration */}
                                         <div className="space-y-4">
-                                            <h3 className="text-sm font-medium">Provider</h3>
-                                            <div className="grid gap-4 sm:grid-cols-2">
-                                                <div className="grid gap-2">
-                                                    <Label htmlFor="default_provider">AI Provider</Label>
-                                                    <Select
-                                                        value={data.default_provider}
-                                                        onValueChange={handleProviderChange}
-                                                        disabled={!hasActiveProvider}
-                                                    >
-                                                        <SelectTrigger id="default_provider">
-                                                            <SelectValue placeholder="Selecteer provider" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {activeProviders.map((provider) => (
-                                                                <SelectItem
-                                                                    key={provider.identifier}
-                                                                    value={provider.identifier}
-                                                                >
-                                                                    {provider.name}
-                                                                </SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                    <InputError message={errors.default_provider} />
-                                                </div>
+                                            <h3 className="text-sm font-medium">{t('ai.provider.title')}</h3>
+                                            <Deferred data="providers" fallback={<ProviderConfigSkeleton />}>
+                                                <div className="grid gap-4 sm:grid-cols-2">
+                                                    <div className="grid gap-2">
+                                                        <Label htmlFor="default_provider">{t('ai.provider.label')}</Label>
+                                                        <Select
+                                                            value={data.default_provider}
+                                                            onValueChange={handleProviderChange}
+                                                            disabled={!hasActiveProvider}
+                                                        >
+                                                            <SelectTrigger id="default_provider">
+                                                                <SelectValue placeholder={t('ai.provider.select_placeholder')} />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {activeProviders.map((provider) => (
+                                                                    <SelectItem
+                                                                        key={provider.identifier}
+                                                                        value={provider.identifier}
+                                                                    >
+                                                                        {provider.name}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <InputError message={errors.default_provider} />
+                                                    </div>
 
-                                                <div className="grid gap-2">
-                                                    <Label htmlFor="default_model">Model</Label>
-                                                    <Select
-                                                        value={data.default_model}
-                                                        onValueChange={(value) => setData('default_model', value)}
-                                                        disabled={!data.default_provider}
-                                                    >
-                                                        <SelectTrigger id="default_model">
-                                                            <SelectValue placeholder="Selecteer model" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {availableModels.map((model) => (
-                                                                <SelectItem key={model.id} value={model.id}>
-                                                                    {model.name}
-                                                                </SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                    <InputError message={errors.default_model} />
+                                                    <div className="grid gap-2">
+                                                        <Label htmlFor="default_model">{t('ai.model.label')}</Label>
+                                                        <Select
+                                                            value={data.default_model}
+                                                            onValueChange={(value) => setData('default_model', value)}
+                                                            disabled={!data.default_provider}
+                                                        >
+                                                            <SelectTrigger id="default_model">
+                                                                <SelectValue placeholder={t('ai.model.select_placeholder')} />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {availableModels.map((model) => (
+                                                                    <SelectItem key={model.id} value={model.id}>
+                                                                        {model.name}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <InputError message={errors.default_model} />
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            </Deferred>
 
                                             <div className="grid gap-2">
-                                                <Label htmlFor="default_language">Standaard taal</Label>
+                                                <Label htmlFor="default_language">{t('ai.language.label')}</Label>
                                                 <Select
                                                     value={data.default_language}
                                                     onValueChange={(value) => setData('default_language', value)}
                                                 >
                                                     <SelectTrigger id="default_language" className="max-w-xs">
-                                                        <SelectValue placeholder="Selecteer taal" />
+                                                        <SelectValue placeholder={t('ai.language.select_placeholder')} />
                                                     </SelectTrigger>
                                                     <SelectContent>
                                                         {languages.map((lang) => (
@@ -341,49 +381,49 @@ export default function AISettingsPage({ settings, providers, usage, languages }
                                                         checked={data.detect_ticket_language}
                                                         onCheckedChange={(checked) => setData('detect_ticket_language', checked)}
                                                     />
-                                                    <span className="text-sm">Detecteer tickettaal</span>
+                                                    <span className="text-sm">{t('ai.language.detect')}</span>
                                                 </label>
                                                 <label className="flex items-center gap-2 cursor-pointer">
                                                     <Switch
                                                         checked={data.match_ticket_language}
                                                         onCheckedChange={(checked) => setData('match_ticket_language', checked)}
                                                     />
-                                                    <span className="text-sm">Match tickettaal</span>
+                                                    <span className="text-sm">{t('ai.language.match')}</span>
                                                 </label>
                                             </div>
                                         </div>
 
                                         {/* AI Features */}
                                         <div className="space-y-3">
-                                            <h3 className="text-sm font-medium">AI Functies</h3>
+                                            <h3 className="text-sm font-medium">{t('ai.features.title')}</h3>
 
                                             <FeatureToggle
                                                 icon={MessageSquare}
-                                                title="Suggesties"
-                                                description="Genereer automatisch antwoordsuggesties"
+                                                title={t('ai.features.suggestions.title')}
+                                                description={t('ai.features.suggestions.description')}
                                                 checked={data.suggested_replies_enabled}
                                                 onChange={(checked) => setData('suggested_replies_enabled', checked)}
                                             />
 
                                             <FeatureToggle
                                                 icon={Wand2}
-                                                title="Tekst verbeteren"
-                                                description="Verbeter en herformuleer geschreven antwoorden"
+                                                title={t('ai.features.improve_text.title')}
+                                                description={t('ai.features.improve_text.description')}
                                                 checked={data.reply_refactor_enabled}
                                                 onChange={(checked) => setData('reply_refactor_enabled', checked)}
                                             />
 
                                             <FeatureToggle
                                                 icon={Zap}
-                                                title="Automatische antwoorden"
-                                                description="Stuur automatisch AI-antwoorden naar nieuwe tickets"
+                                                title={t('ai.features.auto_replies.title')}
+                                                description={t('ai.features.auto_replies.description')}
                                                 checked={data.auto_replies_enabled}
                                                 onChange={(checked) => setData('auto_replies_enabled', checked)}
-                                                badge="Binnenkort"
+                                                badge={t('ai.features.auto_replies.badge')}
                                             >
                                                 <div className="space-y-3">
                                                     <div className="grid gap-2">
-                                                        <Label htmlFor="auto_reply_delay">Wachttijd (minuten)</Label>
+                                                        <Label htmlFor="auto_reply_delay">{t('ai.features.auto_replies.delay_label')}</Label>
                                                         <Input
                                                             id="auto_reply_delay"
                                                             type="number"
@@ -394,7 +434,7 @@ export default function AISettingsPage({ settings, providers, usage, languages }
                                                             className="max-w-[100px]"
                                                         />
                                                         <p className="text-xs text-muted-foreground">
-                                                            Wacht dit aantal minuten voordat een automatisch antwoord wordt verzonden
+                                                            {t('ai.features.auto_replies.delay_description')}
                                                         </p>
                                                     </div>
                                                     <label className="flex items-center gap-2 cursor-pointer">
@@ -402,7 +442,7 @@ export default function AISettingsPage({ settings, providers, usage, languages }
                                                             checked={data.auto_reply_business_hours_only}
                                                             onCheckedChange={(checked) => setData('auto_reply_business_hours_only', checked)}
                                                         />
-                                                        <span className="text-sm">Alleen tijdens kantooruren</span>
+                                                        <span className="text-sm">{t('ai.features.auto_replies.business_hours_only')}</span>
                                                     </label>
                                                 </div>
                                             </FeatureToggle>
@@ -412,31 +452,31 @@ export default function AISettingsPage({ settings, providers, usage, languages }
                                     {/* Instructions Tab */}
                                     <TabsContent value="instructions" className="space-y-6">
                                         <div className="grid gap-2">
-                                            <Label htmlFor="company_context">Bedrijfscontext</Label>
+                                            <Label htmlFor="company_context">{t('ai.instructions.company_context.label')}</Label>
                                             <Textarea
                                                 id="company_context"
                                                 value={data.company_context}
                                                 onChange={(e) => setData('company_context', e.target.value)}
-                                                placeholder="Beschrijf je bedrijf, producten of diensten zodat de AI relevantere antwoorden kan genereren..."
+                                                placeholder={t('ai.instructions.company_context.placeholder')}
                                                 rows={4}
                                             />
                                             <p className="text-xs text-muted-foreground">
-                                                Geef context over je bedrijf voor betere AI-antwoorden
+                                                {t('ai.instructions.company_context.description')}
                                             </p>
                                             <InputError message={errors.company_context} />
                                         </div>
 
                                         <div className="grid gap-2">
-                                            <Label htmlFor="system_instructions">Instructies</Label>
+                                            <Label htmlFor="system_instructions">{t('ai.instructions.system.label')}</Label>
                                             <Textarea
                                                 id="system_instructions"
                                                 value={data.system_instructions}
                                                 onChange={(e) => setData('system_instructions', e.target.value)}
-                                                placeholder="Bijv: Gebruik geen emdashes (—), wees beknopt, vermijd jargon..."
+                                                placeholder={t('ai.instructions.system.placeholder')}
                                                 rows={4}
                                             />
                                             <p className="text-xs text-muted-foreground">
-                                                Specifieke instructies voor de AI bij het genereren van antwoorden
+                                                {t('ai.instructions.system.description')}
                                             </p>
                                             <InputError message={errors.system_instructions} />
                                         </div>
@@ -447,50 +487,52 @@ export default function AISettingsPage({ settings, providers, usage, languages }
                                         {/* Data Sharing */}
                                         <div className="space-y-2">
                                             <div className="flex items-center gap-2">
-                                                <h3 className="text-sm font-medium">Gegevens delen</h3>
+                                                <h3 className="text-sm font-medium">{t('ai.privacy.data_sharing.title')}</h3>
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
                                                         <Info className="h-4 w-4 text-amber-500 cursor-help" />
                                                     </TooltipTrigger>
                                                     <TooltipContent className="max-w-xs">
-                                                        Ingeschakelde gegevens worden naar de externe AI-provider verzonden.
-                                                        Onder de AVG/GDPR is dit een verwerking van persoonsgegevens.
+                                                        {t('ai.privacy.data_sharing.tooltip')}
                                                     </TooltipContent>
                                                 </Tooltip>
                                             </div>
                                             <p className="text-sm text-muted-foreground">
-                                                Bepaal welke gegevens naar de AI-provider worden verzonden
+                                                {t('ai.privacy.data_sharing.description')}
                                             </p>
 
                                             <div className="divide-y rounded-lg border">
                                                 <PrivacyToggle
-                                                    label="Klantnaam"
+                                                    label={t('ai.privacy.fields.customer_name')}
                                                     checked={data.include_customer_name}
                                                     onChange={(checked) => setData('include_customer_name', checked)}
                                                     sensitive
+                                                    sensitiveTooltip={t('ai.privacy.sensitive_tooltip')}
                                                 />
                                                 <PrivacyToggle
-                                                    label="Medewerkersnaam"
+                                                    label={t('ai.privacy.fields.agent_name')}
                                                     checked={data.include_agent_name}
                                                     onChange={(checked) => setData('include_agent_name', checked)}
                                                 />
                                                 <PrivacyToggle
-                                                    label="Ticket onderwerp"
+                                                    label={t('ai.privacy.fields.ticket_subject')}
                                                     checked={data.include_ticket_subject}
                                                     onChange={(checked) => setData('include_ticket_subject', checked)}
                                                     sensitive
+                                                    sensitiveTooltip={t('ai.privacy.sensitive_tooltip')}
                                                 />
                                                 <PrivacyToggle
-                                                    label="Afdelingsnaam"
+                                                    label={t('ai.privacy.fields.department_name')}
                                                     checked={data.include_department_name}
                                                     onChange={(checked) => setData('include_department_name', checked)}
                                                 />
                                                 <PrivacyToggle
-                                                    label="Berichtgeschiedenis"
-                                                    description="eerdere berichten"
+                                                    label={t('ai.privacy.fields.message_history')}
+                                                    description={t('ai.privacy.fields.message_history_description')}
                                                     checked={data.include_message_history}
                                                     onChange={(checked) => setData('include_message_history', checked)}
                                                     sensitive
+                                                    sensitiveTooltip={t('ai.privacy.sensitive_tooltip')}
                                                 >
                                                     {data.include_message_history && (
                                                         <div className="flex items-center gap-2">
@@ -513,14 +555,14 @@ export default function AISettingsPage({ settings, providers, usage, languages }
 
                                         {/* AI Disclosure */}
                                         <div className="space-y-3">
-                                            <h3 className="text-sm font-medium">AI-melding aan klanten</h3>
+                                            <h3 className="text-sm font-medium">{t('ai.privacy.disclosure.title')}</h3>
                                             <p className="text-sm text-muted-foreground">
-                                                Toon klanten wanneer AI is gebruikt bij het opstellen van antwoorden
+                                                {t('ai.privacy.disclosure.description')}
                                             </p>
 
                                             <div className="rounded-lg border p-4 space-y-4">
                                                 <label className="flex items-center justify-between cursor-pointer">
-                                                    <span className="text-sm font-medium">AI-melding inschakelen</span>
+                                                    <span className="text-sm font-medium">{t('ai.privacy.disclosure.enable')}</span>
                                                     <Switch
                                                         checked={data.disclosure_enabled}
                                                         onCheckedChange={(checked) => setData('disclosure_enabled', checked)}
@@ -535,28 +577,28 @@ export default function AISettingsPage({ settings, providers, usage, languages }
                                                                     checked={data.disclosure_in_email}
                                                                     onCheckedChange={(checked) => setData('disclosure_in_email', checked)}
                                                                 />
-                                                                <span className="text-sm">In e-mail</span>
+                                                                <span className="text-sm">{t('ai.privacy.disclosure.in_email')}</span>
                                                             </label>
                                                             <label className="flex items-center gap-2 cursor-pointer">
                                                                 <Switch
                                                                     checked={data.disclosure_in_portal}
                                                                     onCheckedChange={(checked) => setData('disclosure_in_portal', checked)}
                                                                 />
-                                                                <span className="text-sm">In klantenportaal</span>
+                                                                <span className="text-sm">{t('ai.privacy.disclosure.in_portal')}</span>
                                                             </label>
                                                         </div>
 
                                                         <div className="grid gap-2">
-                                                            <Label htmlFor="disclosure_text">Aangepaste tekst</Label>
+                                                            <Label htmlFor="disclosure_text">{t('ai.privacy.disclosure.custom_text_label')}</Label>
                                                             <Textarea
                                                                 id="disclosure_text"
                                                                 value={data.disclosure_text}
                                                                 onChange={(e) => setData('disclosure_text', e.target.value)}
-                                                                placeholder="Dit antwoord is opgesteld met behulp van AI-technologie."
+                                                                placeholder={t('ai.privacy.disclosure.custom_text_placeholder')}
                                                                 rows={2}
                                                             />
                                                             <p className="text-xs text-muted-foreground">
-                                                                Laat leeg voor standaardtekst
+                                                                {t('ai.privacy.disclosure.custom_text_description')}
                                                             </p>
                                                             <InputError message={errors.disclosure_text} />
                                                         </div>
@@ -569,7 +611,7 @@ export default function AISettingsPage({ settings, providers, usage, languages }
 
                                 <div className="flex items-center gap-4 pt-2">
                                     <Button type="submit" disabled={processing}>
-                                        Opslaan
+                                        {t('common.save')}
                                     </Button>
                                     <Transition
                                         show={recentlySuccessful}
@@ -578,40 +620,51 @@ export default function AISettingsPage({ settings, providers, usage, languages }
                                         leave="transition ease-in-out"
                                         leaveTo="opacity-0"
                                     >
-                                        <p className="text-sm text-muted-foreground">Opgeslagen</p>
+                                        <p className="text-sm text-muted-foreground">{t('common.saved')}</p>
                                     </Transition>
                                 </div>
                             </form>
                         </CardContent>
                     </Card>
 
-                    {usage.total_requests > 0 && (
+                    <Deferred data="usage" fallback={
                         <Card>
                             <CardHeader>
-                                <CardTitle className="text-lg">Gebruik deze maand</CardTitle>
+                                <CardTitle className="text-lg">{t('ai.usage.title')}</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <div className="grid gap-4 sm:grid-cols-3">
-                                    <div className="text-center p-4 rounded-lg bg-muted/50">
-                                        <p className="text-2xl font-bold">{usage.total_requests}</p>
-                                        <p className="text-sm text-muted-foreground">Verzoeken</p>
-                                    </div>
-                                    <div className="text-center p-4 rounded-lg bg-muted/50">
-                                        <p className="text-2xl font-bold">
-                                            {(usage.total_tokens / 1000).toFixed(1)}k
-                                        </p>
-                                        <p className="text-sm text-muted-foreground">Tokens</p>
-                                    </div>
-                                    <div className="text-center p-4 rounded-lg bg-muted/50">
-                                        <p className="text-2xl font-bold">
-                                            ${usage.total_cost.toFixed(2)}
-                                        </p>
-                                        <p className="text-sm text-muted-foreground">Geschatte kosten</p>
-                                    </div>
-                                </div>
+                                <UsageStatsSkeleton />
                             </CardContent>
                         </Card>
-                    )}
+                    }>
+                        {usage && usage.total_requests > 0 && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="text-lg">{t('ai.usage.title')}</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="grid gap-4 sm:grid-cols-3">
+                                        <div className="text-center p-4 rounded-lg bg-muted/50">
+                                            <p className="text-2xl font-bold">{usage.total_requests}</p>
+                                            <p className="text-sm text-muted-foreground">{t('ai.usage.requests')}</p>
+                                        </div>
+                                        <div className="text-center p-4 rounded-lg bg-muted/50">
+                                            <p className="text-2xl font-bold">
+                                                {(usage.total_tokens / 1000).toFixed(1)}k
+                                            </p>
+                                            <p className="text-sm text-muted-foreground">{t('ai.usage.tokens')}</p>
+                                        </div>
+                                        <div className="text-center p-4 rounded-lg bg-muted/50">
+                                            <p className="text-2xl font-bold">
+                                                ${usage.total_cost.toFixed(2)}
+                                            </p>
+                                            <p className="text-sm text-muted-foreground">{t('ai.usage.estimated_cost')}</p>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </Deferred>
                 </div>
             </OrganizationLayout>
         </AppLayout>

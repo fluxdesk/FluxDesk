@@ -9,7 +9,9 @@ use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\HandlePortalInertiaRequests;
 use App\Http\Middleware\RedirectIfNotInstalled;
+use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\SetOrganizationContext;
+use App\Http\Middleware\SetPortalLocale;
 use App\Http\Middleware\SetPortalOrganizationContext;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -57,6 +59,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 RedirectIfNotInstalled::class,
                 SetPortalOrganizationContext::class,
                 HandleAppearance::class,
+                SetPortalLocale::class,
                 HandlePortalInertiaRequests::class,
                 AddLinkHeadersForPreloadedAssets::class,
             ])->group(base_path('routes/portal.php'));
@@ -71,6 +74,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(append: [
             HandleAppearance::class,
+            SetLocale::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
             SetOrganizationContext::class,

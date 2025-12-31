@@ -5,12 +5,14 @@ import PortalAuthLayout from '@/layouts/portal/portal-auth-layout';
 import { type PortalSharedData } from '@/types/portal';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { CheckCircle2, Loader2, Mail } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     status?: string;
 }
 
 export default function PortalLogin({ status }: Props) {
+    const { t } = useTranslation('portal');
     const { organization } = usePage<PortalSharedData>().props;
     const orgSlug = organization?.slug ?? '';
 
@@ -29,7 +31,7 @@ export default function PortalLogin({ status }: Props) {
     if (status === 'magic-link-sent') {
         return (
             <PortalAuthLayout>
-                <Head title="Controleer je e-mail" />
+                <Head title={t('login.check_email_title')} />
 
                 <div className="flex flex-col items-center gap-4 py-4">
                     <div
@@ -43,16 +45,15 @@ export default function PortalLogin({ status }: Props) {
                     </div>
 
                     <div className="text-center space-y-2">
-                        <h2 className="text-lg font-semibold">Controleer je e-mail</h2>
+                        <h2 className="text-lg font-semibold">{t('login.check_email_title')}</h2>
                         <p className="text-sm text-muted-foreground max-w-xs">
-                            We hebben een inloglink naar je e-mailadres gestuurd.
-                            Klik op de link om in te loggen.
+                            {t('login.check_email_description')}
                         </p>
                     </div>
 
                     <div className="flex items-center gap-2 rounded-lg bg-muted px-4 py-3 text-sm">
                         <Mail className="size-4 text-muted-foreground" />
-                        <span>De link is 1 uur geldig</span>
+                        <span>{t('login.link_valid_duration')}</span>
                     </div>
 
                     <Button
@@ -60,7 +61,7 @@ export default function PortalLogin({ status }: Props) {
                         className="mt-2"
                         onClick={() => window.location.reload()}
                     >
-                        Opnieuw proberen
+                        {t('login.try_again')}
                     </Button>
                 </div>
             </PortalAuthLayout>
@@ -69,18 +70,18 @@ export default function PortalLogin({ status }: Props) {
 
     return (
         <PortalAuthLayout
-            title="Inloggen"
-            description="Voer je e-mailadres in om een inloglink te ontvangen"
+            title={t('login.title')}
+            description={t('login.description')}
         >
-            <Head title="Inloggen" />
+            <Head title={t('login.title')} />
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 <div className="space-y-2">
-                    <Label htmlFor="email">E-mailadres</Label>
+                    <Label htmlFor="email">{t('login.email')}</Label>
                     <Input
                         id="email"
                         type="email"
-                        placeholder="naam@voorbeeld.nl"
+                        placeholder={t('login.email_placeholder')}
                         value={form.data.email}
                         onChange={(e) => form.setData('email', e.target.value)}
                         disabled={form.processing}
@@ -101,12 +102,12 @@ export default function PortalLogin({ status }: Props) {
                     {form.processing ? (
                         <>
                             <Loader2 className="size-4 mr-2 animate-spin" />
-                            Versturen...
+                            {t('login.submitting')}
                         </>
                     ) : (
                         <>
                             <Mail className="size-4 mr-2" />
-                            Inloglink versturen
+                            {t('login.submit')}
                         </>
                     )}
                 </Button>

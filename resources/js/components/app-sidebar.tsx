@@ -15,35 +15,37 @@ import { index as inboxIndex } from '@/routes/inbox';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { BookOpen, Folder, Inbox, LayoutGrid } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import AppLogo from './app-logo';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Postvak',
-        href: inboxIndex(),
-        icon: Inbox,
-    },
-    {
-        title: 'Statistieken',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-];
-
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
-];
-
 export function AppSidebar() {
+    const { t } = useTranslation('common');
+
+    const mainNavItems: NavItem[] = [
+        {
+            title: t('nav.inbox'),
+            href: inboxIndex(),
+            icon: Inbox,
+        },
+        {
+            title: t('nav.dashboard'),
+            href: dashboard(),
+            icon: LayoutGrid,
+        },
+    ];
+
+    const footerNavItems: NavItem[] = [
+        {
+            title: t('nav.repository'),
+            href: 'https://github.com/laravel/react-starter-kit',
+            icon: Folder,
+        },
+        {
+            title: t('nav.documentation'),
+            href: 'https://laravel.com/docs/starter-kits#react',
+            icon: BookOpen,
+        },
+    ];
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>

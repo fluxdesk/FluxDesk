@@ -13,6 +13,7 @@ import { type Organization, type OrganizationSettings } from '@/types';
 import { Transition } from '@headlessui/react';
 import { Head, useForm } from '@inertiajs/react';
 import { Info, Hash } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
     Tooltip,
     TooltipContent,
@@ -24,17 +25,18 @@ interface Props {
     settings: OrganizationSettings & { preview_ticket_number?: string };
 }
 
-const formatVariables = [
-    { variable: '{prefix}', description: 'Ticket voorvoegsel' },
-    { variable: '{number}', description: 'Volgnummer' },
-    { variable: '{random}', description: 'Willekeurige reeks' },
-    { variable: '{yyyy}', description: 'Volledig jaar' },
-    { variable: '{yy}', description: 'Kort jaar' },
-    { variable: '{mm}', description: 'Maand (01-12)' },
-    { variable: '{dd}', description: 'Dag (01-31)' },
+const formatVariableKeys = [
+    { variable: '{prefix}', key: 'format_prefix' },
+    { variable: '{number}', key: 'format_number' },
+    { variable: '{random}', key: 'format_random' },
+    { variable: '{yyyy}', key: 'format_year_full' },
+    { variable: '{yy}', key: 'format_year_short' },
+    { variable: '{mm}', key: 'format_month' },
+    { variable: '{dd}', key: 'format_day' },
 ];
 
 export default function TicketNumbers({ settings }: Props) {
+    const { t } = useTranslation('organization');
     const { data, setData, patch, processing, errors, recentlySuccessful } = useForm({
         ticket_prefix: settings.ticket_prefix || 'TKT',
         ticket_number_format: settings.ticket_number_format || '{prefix}-{number}',
@@ -69,7 +71,7 @@ export default function TicketNumbers({ settings }: Props) {
 
     return (
         <AppLayout>
-            <Head title="Ticketnummers" />
+            <Head title={t('ticket_numbers.page_title')} />
 
             <OrganizationLayout>
                 <div className="mx-auto max-w-4xl space-y-6">
@@ -80,9 +82,9 @@ export default function TicketNumbers({ settings }: Props) {
                                     <Hash className="h-5 w-5 text-primary" />
                                 </div>
                                 <div>
-                                    <CardTitle className="text-lg">Ticketnummers</CardTitle>
+                                    <CardTitle className="text-lg">{t('ticket_numbers.title')}</CardTitle>
                                     <CardDescription>
-                                        Configureer het formaat van ticketnummers
+                                        {t('ticket_numbers.description')}
                                     </CardDescription>
                                 </div>
                             </div>
@@ -90,13 +92,13 @@ export default function TicketNumbers({ settings }: Props) {
                         <CardContent>
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div className="flex items-center justify-between rounded-lg border bg-muted/30 px-4 py-3">
-                                    <span className="text-sm text-muted-foreground">Voorbeeld</span>
+                                    <span className="text-sm text-muted-foreground">{t('ticket_numbers.preview')}</span>
                                     <span className="font-mono text-sm font-medium">{getPreview()}</span>
                                 </div>
 
                                 <div className="grid gap-4 sm:grid-cols-2">
                                     <div className="space-y-2">
-                                        <Label htmlFor="ticket_prefix">Voorvoegsel</Label>
+                                        <Label htmlFor="ticket_prefix">{t('ticket_numbers.prefix')}</Label>
                                         <Input
                                             id="ticket_prefix"
                                             value={data.ticket_prefix}
@@ -110,17 +112,17 @@ export default function TicketNumbers({ settings }: Props) {
 
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2">
-                                            <Label htmlFor="ticket_number_format">Opmaak</Label>
+                                            <Label htmlFor="ticket_number_format">{t('ticket_numbers.format')}</Label>
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
                                                     <Info className="h-3.5 w-3.5 cursor-help text-muted-foreground" />
                                                 </TooltipTrigger>
                                                 <TooltipContent side="right" className="max-w-xs">
                                                     <div className="space-y-1 text-xs">
-                                                        {formatVariables.map((v) => (
+                                                        {formatVariableKeys.map((v) => (
                                                             <div key={v.variable} className="flex justify-between gap-2">
                                                                 <code className="rounded bg-muted px-1">{v.variable}</code>
-                                                                <span className="text-muted-foreground">{v.description}</span>
+                                                                <span className="text-muted-foreground">{t(`ticket_numbers.${v.key}`)}</span>
                                                             </div>
                                                         ))}
                                                     </div>
@@ -139,7 +141,7 @@ export default function TicketNumbers({ settings }: Props) {
                                 </div>
 
                                 <div className="flex flex-wrap gap-1">
-                                    {formatVariables.map((v) => (
+                                    {formatVariableKeys.map((v) => (
                                         <Badge
                                             key={v.variable}
                                             variant="secondary"
@@ -164,14 +166,14 @@ export default function TicketNumbers({ settings }: Props) {
                                         className="mt-0.5"
                                     />
                                     <div className="space-y-1 flex-1">
-                                        <span className="font-medium">Willekeurige nummers</span>
+                                        <span className="font-medium">{t('ticket_numbers.random_numbers')}</span>
                                         <p className="text-xs text-muted-foreground">
-                                            Gebruik willekeurige ID's in plaats van opeenvolgende nummers
+                                            {t('ticket_numbers.random_numbers_description')}
                                         </p>
                                         {data.use_random_numbers && (
                                             <div className="mt-3 max-w-xs space-y-2">
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-xs text-muted-foreground">Lengte</span>
+                                                    <span className="text-xs text-muted-foreground">{t('ticket_numbers.length')}</span>
                                                     <span className="text-xs font-medium">{data.random_number_length}</span>
                                                 </div>
                                                 <Slider
@@ -188,7 +190,7 @@ export default function TicketNumbers({ settings }: Props) {
 
                                 <div className="flex items-center gap-4 pt-2">
                                     <Button type="submit" disabled={processing}>
-                                        Opslaan
+                                        {t('common.save')}
                                     </Button>
                                     <Transition
                                         show={recentlySuccessful}
@@ -197,7 +199,7 @@ export default function TicketNumbers({ settings }: Props) {
                                         leave="transition ease-in-out"
                                         leaveTo="opacity-0"
                                     >
-                                        <p className="text-sm text-muted-foreground">Opgeslagen</p>
+                                        <p className="text-sm text-muted-foreground">{t('common.saved')}</p>
                                     </Transition>
                                 </div>
                             </form>

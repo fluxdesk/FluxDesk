@@ -30,6 +30,7 @@ import { type Sla, type Priority, type SlaSettings } from '@/types';
 import { Head, useForm, router } from '@inertiajs/react';
 import { Bell, Clock, Pencil, Plus, Settings, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 interface Props {
@@ -39,26 +40,27 @@ interface Props {
 }
 
 const REMINDER_PRESETS = [
-    { value: 15, label: '15 minuten' },
-    { value: 30, label: '30 minuten' },
-    { value: 60, label: '1 uur' },
-    { value: 120, label: '2 uur' },
-    { value: 240, label: '4 uur' },
-    { value: 480, label: '8 uur' },
-    { value: 1440, label: '24 uur' },
+    { value: 15, labelKey: 'slas.reminder_presets.15_minutes' },
+    { value: 30, labelKey: 'slas.reminder_presets.30_minutes' },
+    { value: 60, labelKey: 'slas.reminder_presets.1_hour' },
+    { value: 120, labelKey: 'slas.reminder_presets.2_hours' },
+    { value: 240, labelKey: 'slas.reminder_presets.4_hours' },
+    { value: 480, labelKey: 'slas.reminder_presets.8_hours' },
+    { value: 1440, labelKey: 'slas.reminder_presets.24_hours' },
 ];
 
-function formatMinutes(minutes: number): string {
-    if (minutes < 60) return `${minutes} min`;
-    if (minutes < 1440) return `${Math.floor(minutes / 60)} uur`;
-    return `${Math.floor(minutes / 1440)} dag(en)`;
-}
-
 export default function Slas({ slas, priorities, slaSettings }: Props) {
+    const { t } = useTranslation('organization');
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [editingSla, setEditingSla] = useState<Sla | null>(null);
     const [deletingSla, setDeletingSla] = useState<Sla | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+
+    const formatMinutes = (minutes: number): string => {
+        if (minutes < 60) return t('slas.format_minutes.minutes', { count: minutes });
+        if (minutes < 1440) return t('slas.format_minutes.hours', { count: Math.floor(minutes / 60) });
+        return t('slas.format_minutes.days', { count: Math.floor(minutes / 1440) });
+    };
 
     const settingsForm = useForm({
         share_sla_times_with_contacts: slaSettings.share_sla_times_with_contacts,
@@ -68,8 +70,8 @@ export default function Slas({ slas, priorities, slaSettings }: Props) {
 
     const handleSettingsSubmit = () => {
         settingsForm.patch(updateSettings().url, {
-            onSuccess: () => toast.success('SLA instellingen opgeslagen'),
-            onError: () => toast.error('Instellingen opslaan mislukt'),
+            onSuccess: () => toast.success(t('slas.settings_saved')),
+            onError: () => toast.error(t('slas.settings_save_failed')),
         });
     };
 
@@ -92,17 +94,17 @@ export default function Slas({ slas, priorities, slaSettings }: Props) {
         setIsDeleting(true);
         router.delete(destroy(deletingSla.id).url, {
             onSuccess: () => {
-                toast.success('SLA verwijderd');
+                toast.success(t('slas.deleted'));
                 setDeletingSla(null);
             },
-            onError: () => toast.error('SLA verwijderen mislukt'),
+            onError: () => toast.error(t('slas.delete_failed')),
             onFinish: () => setIsDeleting(false),
         });
     };
 
     return (
         <AppLayout>
-            <Head title="SLA's" />
+            <Head title={t('slas.page_title')} />
 
             <OrganizationLayout>
                 <div className="mx-auto max-w-4xl space-y-6">
@@ -112,9 +114,9 @@ export default function Slas({ slas, priorities, slaSettings }: Props) {
                             <div className="flex items-center gap-2">
                                 <Settings className="h-5 w-5 text-muted-foreground" />
                                 <div>
-                                    <CardTitle className="text-lg">SLA Instellingen</CardTitle>
+                                    <CardTitle className="text-lg">{t('slas.settings_title')}</CardTitle>
                                     <CardDescription>
-                                        Configureer SLA-communicatie naar klanten en herinneringen voor medewerkers
+                                        {t('slas.settings_description')}
                                     </CardDescription>
                                 </div>
                             </div>
@@ -124,9 +126,9 @@ export default function Slas({ slas, priorities, slaSettings }: Props) {
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between">
                                     <div className="space-y-0.5">
-                                        <Label>Deel SLA-tijden met contacten</Label>
+                                        <Label>{t('slas.share_sla_times_label')}</Label>
                                         <p className="text-sm text-muted-foreground">
-                                            Toon verwachte reactie- en oplostijden in bevestigingsmails naar klanten
+                                            {t('slas.share_sla_times_description')}
                                         </p>
                                     </div>
                                     <Switch
@@ -139,9 +141,9 @@ export default function Slas({ slas, priorities, slaSettings }: Props) {
 
                                 <div className="flex items-center justify-between">
                                     <div className="space-y-0.5">
-                                        <Label>Deel gemiddelde reactietijd</Label>
+                                        <Label>{t('slas.share_average_reply_time_label')}</Label>
                                         <p className="text-sm text-muted-foreground">
-                                            Toon de gemiddelde reactietijd (per prioriteit) in bevestigingsmails
+                                            {t('slas.share_average_reply_time_description')}
                                         </p>
                                     </div>
                                     <Switch
@@ -157,10 +159,10 @@ export default function Slas({ slas, priorities, slaSettings }: Props) {
                             <div className="space-y-3 border-t pt-4">
                                 <div className="flex items-center gap-2">
                                     <Bell className="h-4 w-4 text-muted-foreground" />
-                                    <Label>SLA-herinneringen</Label>
+                                    <Label>{t('slas.reminders_label')}</Label>
                                 </div>
                                 <p className="text-sm text-muted-foreground">
-                                    Stuur medewerkers herinneringen wanneer een SLA-deadline nadert
+                                    {t('slas.reminders_description')}
                                 </p>
 
                                 {/* Current intervals */}
@@ -171,7 +173,7 @@ export default function Slas({ slas, priorities, slaSettings }: Props) {
                                                 key={minutes}
                                                 className="flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm"
                                             >
-                                                <span>{formatMinutes(minutes)} voor deadline</span>
+                                                <span>{formatMinutes(minutes)} {t('slas.before_deadline')}</span>
                                                 <button
                                                     type="button"
                                                     onClick={() => removeReminderInterval(minutes)}
@@ -197,14 +199,14 @@ export default function Slas({ slas, priorities, slaSettings }: Props) {
                                             onClick={() => addReminderInterval(preset.value)}
                                         >
                                             <Plus className="mr-1 h-3 w-3" />
-                                            {preset.label}
+                                            {t(preset.labelKey)}
                                         </Button>
                                     ))}
                                 </div>
 
                                 {settingsForm.data.sla_reminder_intervals.length === 0 && (
                                     <p className="text-sm text-muted-foreground italic">
-                                        Geen herinneringen ingesteld. Klik op een interval om herinneringen in te schakelen.
+                                        {t('slas.no_reminders')}
                                     </p>
                                 )}
                             </div>
@@ -214,7 +216,7 @@ export default function Slas({ slas, priorities, slaSettings }: Props) {
                                     onClick={handleSettingsSubmit}
                                     disabled={settingsForm.processing}
                                 >
-                                    Instellingen opslaan
+                                    {t('slas.save_settings')}
                                 </Button>
                             </div>
                         </CardContent>
@@ -225,16 +227,16 @@ export default function Slas({ slas, priorities, slaSettings }: Props) {
                         <CardHeader>
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <CardTitle className="text-lg">Service Level Agreements</CardTitle>
+                                    <CardTitle className="text-lg">{t('slas.title')}</CardTitle>
                                     <CardDescription>
-                                        Configureer reactie- en oplostijddoelen
+                                        {t('slas.description')}
                                     </CardDescription>
                                 </div>
                                 <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                                     <DialogTrigger asChild>
                                         <Button size="sm">
                                             <Plus className="mr-2 h-4 w-4" />
-                                            SLA toevoegen
+                                            {t('slas.add')}
                                         </Button>
                                     </DialogTrigger>
                                     <SlaFormDialog priorities={priorities} onClose={() => setIsCreateOpen(false)} />
@@ -251,12 +253,12 @@ export default function Slas({ slas, priorities, slaSettings }: Props) {
                                                 <span className="font-medium">{sla.name}</span>
                                                 {sla.is_default && (
                                                     <span className="rounded bg-primary/10 px-1.5 py-0.5 text-xs text-primary">
-                                                        Standaard
+                                                        {t('slas.default_badge')}
                                                     </span>
                                                 )}
                                                 {sla.is_system && (
                                                     <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
-                                                        Systeem
+                                                        {t('slas.system_badge')}
                                                     </span>
                                                 )}
                                             </div>
@@ -290,28 +292,28 @@ export default function Slas({ slas, priorities, slaSettings }: Props) {
 
                                         <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
                                             <div>
-                                                <p className="text-muted-foreground">Eerste reactie</p>
+                                                <p className="text-muted-foreground">{t('slas.first_response')}</p>
                                                 <p className="font-medium">
-                                                    {sla.first_response_hours ? `${sla.first_response_hours} uur` : 'Niet ingesteld'}
+                                                    {sla.first_response_hours ? t('slas.hours', { count: sla.first_response_hours }) : t('slas.not_set')}
                                                 </p>
                                             </div>
                                             <div>
-                                                <p className="text-muted-foreground">Oplossing</p>
+                                                <p className="text-muted-foreground">{t('slas.resolution')}</p>
                                                 <p className="font-medium">
-                                                    {sla.resolution_hours ? `${sla.resolution_hours} uur` : 'Niet ingesteld'}
+                                                    {sla.resolution_hours ? t('slas.hours', { count: sla.resolution_hours }) : t('slas.not_set')}
                                                 </p>
                                             </div>
                                         </div>
 
                                         <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
-                                            {sla.business_hours_only && <span>Alleen kantooruren</span>}
+                                            {sla.business_hours_only && <span>{t('slas.business_hours_only')}</span>}
                                             {sla.priority && (
                                                 <span className="flex items-center gap-1">
                                                     <div
                                                         className="h-2 w-2 rounded-full"
                                                         style={{ backgroundColor: sla.priority.color }}
                                                     />
-                                                    {sla.priority.name} prioriteit
+                                                    {t('slas.priority_label', { name: sla.priority.name })}
                                                 </span>
                                             )}
                                         </div>
@@ -325,9 +327,9 @@ export default function Slas({ slas, priorities, slaSettings }: Props) {
                 <ConfirmationDialog
                     open={!!deletingSla}
                     onOpenChange={(open) => !open && setDeletingSla(null)}
-                    title="SLA verwijderen"
-                    description={`Weet je zeker dat je "${deletingSla?.name}" wilt verwijderen? Tickets met deze SLA worden teruggezet naar de standaard SLA.`}
-                    confirmLabel="Verwijderen"
+                    title={t('slas.delete_title')}
+                    description={t('slas.delete_description', { name: deletingSla?.name })}
+                    confirmLabel={t('common.delete')}
                     onConfirm={handleDelete}
                     loading={isDeleting}
                 />
@@ -345,6 +347,7 @@ function SlaFormDialog({
     priorities: Priority[];
     onClose: () => void;
 }) {
+    const { t } = useTranslation('organization');
     const { data, setData, post, patch, processing, errors, reset } = useForm({
         name: sla?.name || '',
         first_response_hours: sla?.first_response_hours?.toString() || '',
@@ -372,21 +375,21 @@ function SlaFormDialog({
             patch(update(sla.id).url, {
                 data: payload,
                 onSuccess: () => {
-                    toast.success('SLA bijgewerkt');
+                    toast.success(t('slas.updated'));
                     reset();
                     onClose();
                 },
-                onError: () => toast.error('SLA bijwerken mislukt'),
+                onError: () => toast.error(t('slas.update_failed')),
             });
         } else {
             post(store().url, {
                 data: payload,
                 onSuccess: () => {
-                    toast.success('SLA aangemaakt');
+                    toast.success(t('slas.created'));
                     reset();
                     onClose();
                 },
-                onError: () => toast.error('SLA aanmaken mislukt'),
+                onError: () => toast.error(t('slas.create_failed')),
             });
         }
     }
@@ -395,27 +398,27 @@ function SlaFormDialog({
         <DialogContent>
             <form onSubmit={handleSubmit}>
                 <DialogHeader>
-                    <DialogTitle>{sla ? 'SLA bewerken' : 'SLA aanmaken'}</DialogTitle>
+                    <DialogTitle>{sla ? t('slas.edit_title') : t('slas.create_title')}</DialogTitle>
                     <DialogDescription>
-                        {sla ? 'Werk de SLA-configuratie bij.' : 'Definieer reactie- en oplostijddoelen.'}
+                        {sla ? t('slas.edit_description') : t('slas.create_description')}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="name">Naam</Label>
+                        <Label htmlFor="name">{t('slas.name_label')}</Label>
                         <Input
                             id="name"
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
-                            placeholder="bijv. Standaard, Premium, Enterprise"
+                            placeholder={t('slas.name_placeholder')}
                         />
                         <InputError message={errors.name} />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="first_response_hours">Eerste reactie (uren)</Label>
+                            <Label htmlFor="first_response_hours">{t('slas.first_response_hours_label')}</Label>
                             <Input
                                 id="first_response_hours"
                                 type="number"
@@ -428,7 +431,7 @@ function SlaFormDialog({
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="resolution_hours">Oplossing (uren)</Label>
+                            <Label htmlFor="resolution_hours">{t('slas.resolution_hours_label')}</Label>
                             <Input
                                 id="resolution_hours"
                                 type="number"
@@ -442,13 +445,13 @@ function SlaFormDialog({
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="priority_id">Toepassen op prioriteit</Label>
+                        <Label htmlFor="priority_id">{t('slas.apply_to_priority_label')}</Label>
                         <Select value={data.priority_id} onValueChange={(value) => setData('priority_id', value)}>
                             <SelectTrigger>
-                                <SelectValue placeholder="Alle prioriteiten" />
+                                <SelectValue placeholder={t('slas.all_priorities')} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">Alle prioriteiten</SelectItem>
+                                <SelectItem value="all">{t('slas.all_priorities')}</SelectItem>
                                 {priorities.map((priority) => (
                                     <SelectItem key={priority.id} value={priority.id.toString()}>
                                         <div className="flex items-center gap-2">
@@ -472,7 +475,7 @@ function SlaFormDialog({
                             onCheckedChange={(checked) => setData('business_hours_only', checked === true)}
                         />
                         <Label htmlFor="business_hours_only" className="font-normal">
-                            Alleen kantooruren tellen
+                            {t('slas.business_hours_only_label')}
                         </Label>
                     </div>
 
@@ -483,17 +486,17 @@ function SlaFormDialog({
                             onCheckedChange={(checked) => setData('is_default', checked === true)}
                         />
                         <Label htmlFor="is_default" className="font-normal">
-                            Instellen als standaard SLA voor nieuwe tickets
+                            {t('slas.is_default_label')}
                         </Label>
                     </div>
                 </div>
 
                 <DialogFooter>
                     <Button type="button" variant="outline" onClick={onClose}>
-                        Annuleren
+                        {t('common.cancel')}
                     </Button>
                     <Button type="submit" disabled={processing}>
-                        {sla ? 'Wijzigingen opslaan' : 'SLA aanmaken'}
+                        {sla ? t('common.save_changes') : t('slas.create_title')}
                     </Button>
                 </DialogFooter>
             </form>

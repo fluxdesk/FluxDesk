@@ -44,6 +44,8 @@ export interface SharedData {
     folders: TicketFolder[];
     inboxCount: number;
     tags: Tag[];
+    locale: string;
+    availableLocales: string[];
     [key: string]: unknown;
 }
 
@@ -52,6 +54,7 @@ export interface User {
     name: string;
     email: string;
     avatar?: string;
+    locale?: string;
     email_verified_at: string | null;
     two_factor_enabled?: boolean;
     created_at: string;
@@ -323,6 +326,7 @@ export interface OrganizationSettings {
     random_number_length: number;
     next_ticket_number: number;
     timezone: string | null;
+    email_locale: string | null;
     business_hours: BusinessHours[] | null;
     system_email_channel_id: number | null;
     share_sla_times_with_contacts: boolean;

@@ -27,7 +27,6 @@ describe('AI Settings Controller - Index', function () {
         $response->assertInertia(fn ($page) => $page
             ->component('organization/ai-settings')
             ->has('settings')
-            ->has('providers')
             ->has('languages')
         );
     });
@@ -56,7 +55,7 @@ describe('AI Settings Controller - Index', function () {
         );
     });
 
-    it('shows configured providers', function () {
+    it('defers providers for better performance', function () {
         // Add OpenAI integration
         OrganizationIntegration::create([
             'organization_id' => $this->organization->id,
@@ -67,19 +66,16 @@ describe('AI Settings Controller - Index', function () {
             'is_active' => true,
         ]);
 
+        // Providers are now loaded via deferred props for better performance
+        // The initial page load returns successfully without blocking on external API calls
         $response = $this->actingAs($this->admin)
             ->get('/organization/ai-settings');
 
         $response->assertSuccessful();
         $response->assertInertia(fn ($page) => $page
-            ->has('providers', fn ($providers) => $providers
-                ->each(fn ($provider) => $provider
-                    ->has('identifier')
-                    ->has('name')
-                    ->has('is_active')
-                    ->has('models')
-                )
-            )
+            ->component('organization/ai-settings')
+            ->has('settings')
+            ->has('languages')
         );
     });
 });

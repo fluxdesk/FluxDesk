@@ -5,6 +5,7 @@ import SettingsLayout from '@/layouts/settings/layout';
 import { Form, Head } from '@inertiajs/react';
 import { useRef } from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,20 +13,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 export default function Password() {
+    const { t } = useTranslation('settings');
     const passwordInput = useRef<HTMLInputElement>(null);
     const currentPasswordInput = useRef<HTMLInputElement>(null);
 
     return (
         <AppLayout>
-            <Head title="Wachtwoordinstellingen" />
+            <Head title={t('password.page_title')} />
 
             <SettingsLayout>
                 <div className="mx-auto max-w-4xl space-y-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="text-lg">Wachtwoord wijzigen</CardTitle>
+                            <CardTitle className="text-lg">{t('password.title')}</CardTitle>
                             <CardDescription>
-                                Gebruik een lang, willekeurig wachtwoord voor extra veiligheid
+                                {t('password.description')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -34,10 +36,10 @@ export default function Password() {
                                 options={{
                                     preserveScroll: true,
                                     onSuccess: () => {
-                                        toast.success('Wachtwoord bijgewerkt');
+                                        toast.success(t('password.saved'));
                                     },
                                     onError: () => {
-                                        toast.error('Wachtwoord bijwerken mislukt');
+                                        toast.error(t('password.error'));
                                     },
                                 }}
                                 resetOnError={['password', 'password_confirmation', 'current_password']}
@@ -55,46 +57,46 @@ export default function Password() {
                                 {({ errors, processing }) => (
                                     <>
                                         <div className="grid gap-2">
-                                            <Label htmlFor="current_password">Huidig wachtwoord</Label>
+                                            <Label htmlFor="current_password">{t('password.current')}</Label>
                                             <Input
                                                 id="current_password"
                                                 ref={currentPasswordInput}
                                                 name="current_password"
                                                 type="password"
                                                 autoComplete="current-password"
-                                                placeholder="Voer huidig wachtwoord in"
+                                                placeholder={t('password.current_placeholder')}
                                             />
                                             <InputError message={errors.current_password} />
                                         </div>
 
                                         <div className="grid gap-2">
-                                            <Label htmlFor="password">Nieuw wachtwoord</Label>
+                                            <Label htmlFor="password">{t('password.new')}</Label>
                                             <Input
                                                 id="password"
                                                 ref={passwordInput}
                                                 name="password"
                                                 type="password"
                                                 autoComplete="new-password"
-                                                placeholder="Voer nieuw wachtwoord in"
+                                                placeholder={t('password.new_placeholder')}
                                             />
                                             <InputError message={errors.password} />
                                         </div>
 
                                         <div className="grid gap-2">
-                                            <Label htmlFor="password_confirmation">Bevestig wachtwoord</Label>
+                                            <Label htmlFor="password_confirmation">{t('password.confirm')}</Label>
                                             <Input
                                                 id="password_confirmation"
                                                 name="password_confirmation"
                                                 type="password"
                                                 autoComplete="new-password"
-                                                placeholder="Bevestig nieuw wachtwoord"
+                                                placeholder={t('password.confirm_placeholder')}
                                             />
                                             <InputError message={errors.password_confirmation} />
                                         </div>
 
                                         <div className="pt-2">
                                             <Button disabled={processing}>
-                                                Wachtwoord wijzigen
+                                                {t('password.submit')}
                                             </Button>
                                         </div>
                                     </>

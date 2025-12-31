@@ -1,0 +1,150 @@
+{
+    "title": "Postvak",
+    "detail": {
+        "no_ticket_selected": "Geen ticket geselecteerd",
+        "select_ticket_hint": "Selecteer een ticket uit de lijst om details te bekijken"
+    },
+    "empty": {
+        "title": "Geen tickets",
+        "description": "Je postvak is leeg",
+        "no_tickets_found": "Geen tickets gevonden"
+    },
+    "filters": {
+        "all": "Alle tickets",
+        "unread": "Ongelezen",
+        "assigned_to_me": "Aan mij toegewezen",
+        "unassigned": "Niet toegewezen",
+        "open": "Open",
+        "closed": "Gesloten"
+    },
+    "tabs": {
+        "all": "Alles",
+        "unread": "Ongelezen"
+    },
+    "view": {
+        "tooltip": "Weergave",
+        "compact": "Klein",
+        "normal": "Normaal",
+        "spacious": "Ruim"
+    },
+    "sort": {
+        "newest": "Nieuwste eerst",
+        "oldest": "Oudste eerst",
+        "recently_updated": "Recent bijgewerkt",
+        "priority": "Prioriteit"
+    },
+    "actions": {
+        "mark_read": "Markeren als gelezen",
+        "mark_unread": "Markeren als ongelezen",
+        "marked_read": "Gemarkeerd als gelezen",
+        "marked_unread": "Gemarkeerd als ongelezen",
+        "assign": "Toewijzen",
+        "assign_to": "Toewijzen aan...",
+        "close": "Ticket sluiten",
+        "reopen": "Ticket heropenen",
+        "delete": "Verwijderen",
+        "delete_permanent": "Definitief verwijderen",
+        "deleted": "Ticket verwijderd",
+        "deleted_permanent": "Ticket definitief verwijderd",
+        "merge": "Samenvoegen",
+        "move_to_folder": "Verplaatsen naar map",
+        "moved": "Ticket verplaatst",
+        "archive": "Archiveren",
+        "mark_spam": "Markeer als spam",
+        "add_label": "Label toevoegen",
+        "change_status": "Status wijzigen",
+        "tags_updated": "Tags bijgewerkt"
+    },
+    "bulk": {
+        "selected": "{{count}} geselecteerd",
+        "select_all": "Alles selecteren",
+        "deselect": "Deselecteren",
+        "tickets_marked_read": "{{count}} tickets gemarkeerd als gelezen",
+        "tickets_resolved": "{{count}} tickets opgelost",
+        "tickets_deleted": "{{count}} tickets verwijderd",
+        "tickets_deleted_permanent": "{{count}} tickets definitief verwijderd"
+    },
+    "ticket": {
+        "number": "Ticket #{{number}}",
+        "from": "Van",
+        "subject": "Onderwerp",
+        "status": "Status",
+        "priority": "Prioriteit",
+        "assigned_to": "Toegewezen aan",
+        "created": "Aangemaakt",
+        "updated": "Bijgewerkt",
+        "unassigned": "Niet toegewezen",
+        "unknown": "Onbekend",
+        "messages": "{{count}} bericht",
+        "messages_plural": "{{count}} berichten",
+        "no_messages": "Geen berichten",
+        "move_ticket": "Ticket verplaatsen",
+        "personal": "persoonlijk"
+    },
+    "folders": {
+        "inbox": "Postvak"
+    },
+    "tags": {
+        "title": "Tags",
+        "create_personal": "Maak persoonlijke tag",
+        "dialog_title": "Persoonlijke tag maken",
+        "dialog_description": "Maak een persoonlijke tag die alleen jij kunt zien en gebruiken.",
+        "name_label": "Tagnaam",
+        "name_placeholder": "Mijn tag",
+        "creating": "Aanmaken...",
+        "create": "Aanmaken"
+    },
+    "delete_dialog": {
+        "title": "Ticket verwijderen?",
+        "title_permanent": "Definitief verwijderen?",
+        "description_single": "Dit ticket wordt verplaatst naar de prullenbak.",
+        "description_single_permanent": "Dit ticket wordt permanent verwijderd en kan niet worden hersteld. Weet je het zeker?",
+        "description_bulk": "{{count}} tickets worden verplaatst naar de prullenbak.",
+        "description_bulk_permanent": "{{count}} tickets worden permanent verwijderd en kunnen niet worden hersteld. Weet je het zeker?",
+        "cancel": "Annuleren",
+        "confirm": "Verwijderen",
+        "confirm_permanent": "Definitief verwijderen"
+    },
+    "tooltips": {
+        "mark_read": "Markeer gelezen",
+        "mark_resolved": "Markeer opgelost",
+        "delete": "Verwijderen",
+        "delete_permanent": "Definitief verwijderen",
+        "deselect": "Deselecteren"
+    },
+    "display": {
+        "archive": "Archiveren",
+        "to_spam": "Naar spam",
+        "to_trash": "Naar prullenbak",
+        "reply": "Beantwoorden",
+        "reply_all": "Allen beantwoorden",
+        "forward": "Doorsturen",
+        "more": "Meer"
+    },
+    "composer": {
+        "reply": "Antwoord",
+        "note": "Notitie",
+        "internal": "Intern",
+        "reply_placeholder": "Antwoord aan {{name}}...",
+        "note_placeholder": "Voeg een interne notitie toe...",
+        "send": "Versturen",
+        "add": "Toevoegen",
+        "preview": "Preview",
+        "edit": "Bewerken",
+        "preview_empty": "Typ iets om de preview te zien...",
+        "drop_files": "Bestanden hier neerzetten",
+        "add_attachments": "Bijlagen toevoegen ({{current}}/{{max}})",
+        "max_attachments": "Maximum bereikt ({{max}})",
+        "upload_failed": "Upload mislukt",
+        "ai_suggestion": "Suggestie",
+        "ai_improve": "Verbeter",
+        "ai_suggestions_title": "AI Suggesties",
+        "ai_suggestions_description": "Kies een suggestie om te gebruiken",
+        "ai_loading": "Laden...",
+        "ai_error": "Kon geen verbinding maken met AI service",
+        "ai_something_wrong": "Er ging iets mis",
+        "ai_generates_suggestions": "AI genereert suggesties",
+        "ai_improves_text": "AI verbetert je tekst"
+    },
+    "color": "Kleur"
+}

@@ -5,6 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useInitials } from '@/hooks/use-initials';
+import { useTranslation } from 'react-i18next';
 import {
     ContextMenu,
     ContextMenuContent,
@@ -115,6 +116,7 @@ interface MailListProps {
 }
 
 export function MailList({ items, selectedTicketId, folders = [], tags = [], filters = {}, density = 'normal' }: MailListProps) {
+    const { t } = useTranslation('inbox');
     const { auth } = usePage<SharedData>().props;
     const currentUserId = auth.user?.id;
     const getInitials = useInitials();
@@ -211,7 +213,7 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
         selectedIds.forEach((id) => {
             router.post(`/inbox/${id}/mark-unread`, {}, { preserveState: true });
         });
-        toast.success(`${selectedIds.size} tickets gemarkeerd als gelezen`);
+        toast.success(t('bulk.tickets_marked_read', { count: selectedIds.size }));
         clearSelection();
     };
 
@@ -225,7 +227,7 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                 router.post(`/inbox/${id}/move`, { folder_id: solvedFolder.id }, { preserveState: true });
             }
         });
-        toast.success(`${selectedIds.size} tickets opgelost`);
+        toast.success(t('bulk.tickets_resolved', { count: selectedIds.size }));
         clearSelection();
     };
 
@@ -246,20 +248,20 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                 router.post(`/inbox/${pendingDeleteId}/move`, { folder_id: deletedFolder.id }, {
                     preserveState: true,
                     preserveScroll: true,
-                    onSuccess: () => toast.success('Ticket verwijderd'),
+                    onSuccess: () => toast.success(t('actions.deleted')),
                 });
             } else {
                 router.delete(`/inbox/${pendingDeleteId}`, {
                     preserveState: true,
                     preserveScroll: true,
-                    onSuccess: () => toast.success('Ticket verwijderd'),
+                    onSuccess: () => toast.success(t('actions.deleted')),
                 });
             }
         } else if (pendingDeleteType === 'permanent' && pendingDeleteId) {
             router.delete(`/inbox/${pendingDeleteId}`, {
                 preserveState: true,
                 preserveScroll: true,
-                onSuccess: () => toast.success('Ticket definitief verwijderd'),
+                onSuccess: () => toast.success(t('actions.deleted_permanent')),
             });
         } else if (pendingDeleteType === 'bulk') {
             const deletedFolder = folders.find((f) => f.system_type === 'deleted');
@@ -270,13 +272,13 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                     router.delete(`/inbox/${id}`, { preserveState: true, preserveScroll: true });
                 }
             });
-            toast.success(`${selectedIds.size} tickets verwijderd`);
+            toast.success(t('bulk.tickets_deleted', { count: selectedIds.size }));
             clearSelection();
         } else if (pendingDeleteType === 'bulk-permanent') {
             selectedIds.forEach((id) => {
                 router.delete(`/inbox/${id}`, { preserveState: true, preserveScroll: true });
             });
-            toast.success(`${selectedIds.size} tickets definitief verwijderd`);
+            toast.success(t('bulk.tickets_deleted_permanent', { count: selectedIds.size }));
             clearSelection();
         }
         setDeleteConfirmOpen(false);
@@ -295,14 +297,14 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
     const handleMoveToFolder = (ticketId: number, folderId: number | null) => {
         router.post(`/inbox/${ticketId}/move`, { folder_id: folderId }, {
             preserveState: true,
-            onSuccess: () => toast.success('Ticket verplaatst'),
+            onSuccess: () => toast.success(t('actions.moved')),
         });
     };
 
     const handleMarkUnread = (ticketId: number) => {
         router.post(`/inbox/${ticketId}/mark-unread`, {}, {
             preserveState: true,
-            onSuccess: () => toast.success('Gemarkeerd als ongelezen'),
+            onSuccess: () => toast.success(t('actions.marked_unread')),
         });
     };
 
@@ -339,7 +341,7 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
             : [...currentTagIds, tagId];
         router.post(`/inbox/${ticket.id}/tags`, { tags: newTagIds }, {
             preserveState: true,
-            onSuccess: () => toast.success('Tags bijgewerkt'),
+            onSuccess: () => toast.success(t('actions.tags_updated')),
         });
     };
 
@@ -353,7 +355,7 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
     if (items.length === 0) {
         return (
             <div className="flex h-full items-center justify-center p-4">
-                <p className="text-sm text-muted-foreground">Geen tickets gevonden</p>
+                <p className="text-sm text-muted-foreground">{t('empty.no_tickets_found')}</p>
             </div>
         );
     }
@@ -378,7 +380,7 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                                     <MailOpen className="h-4 w-4" />
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent side="bottom">Markeer gelezen</TooltipContent>
+                            <TooltipContent side="bottom">{t('tooltips.mark_read')}</TooltipContent>
                         </Tooltip>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -391,7 +393,7 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                                     <CheckCircle2 className="h-4 w-4" />
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent side="bottom">Markeer opgelost</TooltipContent>
+                            <TooltipContent side="bottom">{t('tooltips.mark_resolved')}</TooltipContent>
                         </Tooltip>
                         {isInDeletedFolder ? (
                             <Tooltip>
@@ -405,7 +407,7 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                                         <XCircle className="h-4 w-4" />
                                     </Button>
                                 </TooltipTrigger>
-                                <TooltipContent side="bottom">Definitief verwijderen</TooltipContent>
+                                <TooltipContent side="bottom">{t('tooltips.delete_permanent')}</TooltipContent>
                             </Tooltip>
                         ) : (
                             <Tooltip>
@@ -419,7 +421,7 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
                                 </TooltipTrigger>
-                                <TooltipContent side="bottom">Verwijderen</TooltipContent>
+                                <TooltipContent side="bottom">{t('tooltips.delete')}</TooltipContent>
                             </Tooltip>
                         )}
                         <div className="w-px h-4 bg-primary-foreground/30 mx-1" />
@@ -434,7 +436,7 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                                     <X className="h-4 w-4" />
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent side="bottom">Deselecteren</TooltipContent>
+                            <TooltipContent side="bottom">{t('tooltips.deselect')}</TooltipContent>
                         </Tooltip>
                     </div>
                 </div>
@@ -445,7 +447,7 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                 className="fixed -left-[9999px] flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground shadow-lg"
             >
                 <FolderInput className="h-4 w-4" />
-                Ticket verplaatsen
+                {t('ticket.move_ticket')}
             </div>
             <div className="flex flex-col">
                 {items.map((item) => {
@@ -509,7 +511,7 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                                         </div>
                                         {/* Contact (fixed width) */}
                                         <span className="font-semibold text-sm w-20 shrink-0 truncate">
-                                            {item.contact?.name || item.contact?.email || 'Onbekend'}
+                                            {item.contact?.name || item.contact?.email || t('ticket.unknown')}
                                         </span>
                                         {/* SLA badge */}
                                         {isSlaBreach && (
@@ -591,7 +593,7 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                                                 </div>
                                                 {/* Contact name */}
                                                 <span className="font-semibold text-sm truncate">
-                                                    {item.contact?.name || item.contact?.email || 'Onbekend'}
+                                                    {item.contact?.name || item.contact?.email || t('ticket.unknown')}
                                                 </span>
                                                 {/* Badges */}
                                                 {isSlaBreach && (
@@ -669,7 +671,7 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                                                 </div>
                                                 {/* Contact name */}
                                                 <span className="font-semibold text-sm truncate">
-                                                    {item.contact?.name || item.contact?.email || 'Onbekend'}
+                                                    {item.contact?.name || item.contact?.email || t('ticket.unknown')}
                                                 </span>
                                                 {/* Badges */}
                                                 {isSlaBreach && (
@@ -735,12 +737,12 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                                 {item.is_read ? (
                                     <>
                                         <Mail className="mr-2 h-4 w-4" />
-                                        Markeer als ongelezen
+                                        {t('actions.mark_unread')}
                                     </>
                                 ) : (
                                     <>
                                         <MailOpen className="mr-2 h-4 w-4" />
-                                        Markeer als gelezen
+                                        {t('actions.mark_read')}
                                     </>
                                 )}
                             </ContextMenuItem>
@@ -751,7 +753,7 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                             <ContextMenuSub>
                                 <ContextMenuSubTrigger>
                                     <FolderInput className="mr-2 h-4 w-4" />
-                                    Verplaats naar map
+                                    {t('actions.move_to_folder')}
                                 </ContextMenuSubTrigger>
                                 <ContextMenuSubContent className="w-48">
                                     {/* Inbox (virtual folder - folder_id = null) */}
@@ -759,7 +761,7 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                                         onClick={() => handleMoveToFolder(item.id, null)}
                                     >
                                         <Inbox className="mr-2 h-4 w-4" />
-                                        Postvak
+                                        {t('folders.inbox')}
                                         {item.folder_id === null && (
                                             <Check className="ml-auto h-4 w-4" />
                                         )}
@@ -805,7 +807,7 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                                                 {tag.name}
                                                 {tag.user_id && (
                                                     <span className="ml-1 text-[10px] text-muted-foreground">
-                                                        (persoonlijk)
+                                                        ({t('ticket.personal')})
                                                     </span>
                                                 )}
                                             </ContextMenuCheckboxItem>
@@ -819,7 +821,7 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                                         }}
                                     >
                                         <Plus className="mr-2 h-4 w-4" />
-                                        Maak persoonlijke tag
+                                        {t('tags.create_personal')}
                                     </ContextMenuItem>
                                 </ContextMenuSubContent>
                             </ContextMenuSub>
@@ -829,11 +831,11 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                             {/* Quick Actions */}
                             <ContextMenuItem onClick={() => handleArchive(item.id)}>
                                 <Archive className="mr-2 h-4 w-4" />
-                                Archiveren
+                                {t('actions.archive')}
                             </ContextMenuItem>
                             <ContextMenuItem onClick={() => handleSpam(item.id)}>
                                 <AlertTriangle className="mr-2 h-4 w-4" />
-                                Markeer als spam
+                                {t('actions.mark_spam')}
                             </ContextMenuItem>
 
                             <ContextMenuSeparator />
@@ -844,7 +846,7 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                                     className="text-destructive focus:text-destructive"
                                 >
                                     <XCircle className="mr-2 h-4 w-4" />
-                                    Definitief verwijderen
+                                    {t('actions.delete_permanent')}
                                 </ContextMenuItem>
                             ) : (
                                 <ContextMenuItem
@@ -852,7 +854,7 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                                     className="text-destructive focus:text-destructive"
                                 >
                                     <Trash2 className="mr-2 h-4 w-4" />
-                                    Verwijderen
+                                    {t('actions.delete')}
                                 </ContextMenuItem>
                             )}
                         </ContextMenuContent>
@@ -872,22 +874,14 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                     <DialogHeader>
                         <DialogTitle>
                             {pendingDeleteType === 'permanent' || pendingDeleteType === 'bulk-permanent'
-                                ? 'Definitief verwijderen?'
-                                : 'Ticket verwijderen?'}
+                                ? t('delete_dialog.title_permanent')
+                                : t('delete_dialog.title')}
                         </DialogTitle>
                         <DialogDescription>
-                            {pendingDeleteType === 'permanent' && (
-                                'Dit ticket wordt permanent verwijderd en kan niet worden hersteld. Weet je het zeker?'
-                            )}
-                            {pendingDeleteType === 'bulk-permanent' && (
-                                `${selectedIds.size} tickets worden permanent verwijderd en kunnen niet worden hersteld. Weet je het zeker?`
-                            )}
-                            {pendingDeleteType === 'single' && (
-                                'Dit ticket wordt verplaatst naar de prullenbak.'
-                            )}
-                            {pendingDeleteType === 'bulk' && (
-                                `${selectedIds.size} tickets worden verplaatst naar de prullenbak.`
-                            )}
+                            {pendingDeleteType === 'permanent' && t('delete_dialog.description_single_permanent')}
+                            {pendingDeleteType === 'bulk-permanent' && t('delete_dialog.description_bulk_permanent', { count: selectedIds.size })}
+                            {pendingDeleteType === 'single' && t('delete_dialog.description_single')}
+                            {pendingDeleteType === 'bulk' && t('delete_dialog.description_bulk', { count: selectedIds.size })}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
@@ -896,7 +890,7 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                             variant="outline"
                             onClick={() => setDeleteConfirmOpen(false)}
                         >
-                            Annuleren
+                            {t('delete_dialog.cancel')}
                         </Button>
                         <Button
                             type="button"
@@ -904,8 +898,8 @@ export function MailList({ items, selectedTicketId, folders = [], tags = [], fil
                             onClick={confirmDelete}
                         >
                             {pendingDeleteType === 'permanent' || pendingDeleteType === 'bulk-permanent'
-                                ? 'Definitief verwijderen'
-                                : 'Verwijderen'}
+                                ? t('delete_dialog.confirm_permanent')
+                                : t('delete_dialog.confirm')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -922,6 +916,7 @@ function CreatePersonalTagDialog({
     onOpenChange: (open: boolean) => void;
     ticket: Ticket | null;
 }) {
+    const { t } = useTranslation('inbox');
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         color: '#6b7280',
@@ -942,35 +937,35 @@ function CreatePersonalTagDialog({
             <DialogContent>
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
-                        <DialogTitle>Persoonlijke tag maken</DialogTitle>
+                        <DialogTitle>{t('tags.dialog_title')}</DialogTitle>
                         <DialogDescription>
-                            Maak een persoonlijke tag die alleen jij kunt zien en gebruiken.
+                            {t('tags.dialog_description')}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="tag-name">Tagnaam</Label>
+                            <Label htmlFor="tag-name">{t('tags.name_label')}</Label>
                             <Input
                                 id="tag-name"
                                 value={data.name}
                                 onChange={(e) => setData('name', e.target.value)}
-                                placeholder="Mijn tag"
+                                placeholder={t('tags.name_placeholder')}
                                 autoFocus
                             />
                             <InputError message={errors.name} />
                         </div>
                         <div className="grid gap-2">
-                            <Label>Kleur</Label>
+                            <Label>{t('common:labels.color_label')}</Label>
                             <ColorPicker value={data.color} onChange={(color) => setData('color', color)} />
                             <InputError message={errors.color} />
                         </div>
                     </div>
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                            Annuleren
+                            {t('common:buttons.cancel')}
                         </Button>
                         <Button type="submit" disabled={processing || !data.name.trim()}>
-                            {processing ? 'Aanmaken...' : 'Aanmaken'}
+                            {processing ? t('tags.creating') : t('tags.create')}
                         </Button>
                     </DialogFooter>
                 </form>

@@ -30,19 +30,20 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     departments: Department[];
 }
 
 export default function Departments({ departments: initialDepartments }: Props) {
+    const { t } = useTranslation('organization');
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [editingDepartment, setEditingDepartment] = useState<Department | null>(null);
     const [departments, setDepartments] = useState(initialDepartments);
     const [deletingDepartment, setDeletingDepartment] = useState<Department | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    // Sync local state when Inertia refreshes page data
     useEffect(() => {
         setDepartments(initialDepartments);
     }, [initialDepartments]);
@@ -52,11 +53,11 @@ export default function Departments({ departments: initialDepartments }: Props) 
         setIsDeleting(true);
         router.delete(destroy(deletingDepartment.id).url, {
             onSuccess: () => {
-                toast.success('Afdeling verwijderd');
+                toast.success(t('departments.deleted'));
                 setDepartments((prev) => prev.filter((d) => d.id !== deletingDepartment.id));
                 setDeletingDepartment(null);
             },
-            onError: () => toast.error('Afdeling verwijderen mislukt'),
+            onError: () => toast.error(t('departments.delete_failed')),
             onFinish: () => setIsDeleting(false),
         });
     };
@@ -69,14 +70,14 @@ export default function Departments({ departments: initialDepartments }: Props) 
             {
                 preserveScroll: true,
                 preserveState: true,
-                onSuccess: () => toast.success('Afdelingsvolgorde bijgewerkt'),
+                onSuccess: () => toast.success(t('departments.reordered')),
             },
         );
     };
 
     return (
         <AppLayout>
-            <Head title="Afdelingen" />
+            <Head title={t('departments.page_title')} />
 
             <OrganizationLayout>
                 <div className="mx-auto max-w-4xl space-y-6">
@@ -89,10 +90,10 @@ export default function Departments({ departments: initialDepartments }: Props) 
                                 </div>
                                 <div className="text-sm">
                                     <p className="font-medium text-blue-900 dark:text-blue-100">
-                                        Afdelingen voor ticketrouting
+                                        {t('departments.info_title')}
                                     </p>
                                     <p className="text-blue-700 dark:text-blue-300">
-                                        Elk e-mailkanaal is gekoppeld aan een afdeling. Tickets worden automatisch toegewezen aan de afdeling van het e-mailkanaal.
+                                        {t('departments.info_description')}
                                     </p>
                                 </div>
                             </div>
@@ -108,9 +109,9 @@ export default function Departments({ departments: initialDepartments }: Props) 
                                         <Building2 className="h-5 w-5 text-primary" />
                                     </div>
                                     <div>
-                                        <CardTitle className="text-lg">Afdelingen</CardTitle>
+                                        <CardTitle className="text-lg">{t('departments.title')}</CardTitle>
                                         <CardDescription>
-                                            Sleep om te herschikken
+                                            {t('common.drag_to_reorder')}
                                         </CardDescription>
                                     </div>
                                 </div>
@@ -118,10 +119,10 @@ export default function Departments({ departments: initialDepartments }: Props) 
                                     <DialogTrigger asChild>
                                         <Button size="sm">
                                             <Plus className="mr-2 h-4 w-4" />
-                                            Toevoegen
+                                            {t('departments.add')}
                                         </Button>
                                     </DialogTrigger>
-                                    <DepartmentFormDialog onClose={() => setIsCreateOpen(false)} />
+                                    <DepartmentFormDialog t={t} onClose={() => setIsCreateOpen(false)} />
                                 </Dialog>
                             </div>
                         </CardHeader>
@@ -129,9 +130,9 @@ export default function Departments({ departments: initialDepartments }: Props) 
                             {departments.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-12 text-center">
                                     <Building2 className="h-12 w-12 text-muted-foreground/50" />
-                                    <h3 className="mt-4 text-lg font-semibold">Geen afdelingen</h3>
+                                    <h3 className="mt-4 text-lg font-semibold">{t('departments.empty_title')}</h3>
                                     <p className="mt-2 text-sm text-muted-foreground">
-                                        Voeg een afdeling toe om tickets te organiseren.
+                                        {t('departments.empty_description')}
                                     </p>
                                 </div>
                             ) : (
@@ -140,6 +141,7 @@ export default function Departments({ departments: initialDepartments }: Props) 
                                     onReorder={handleReorder}
                                     renderItem={(department) => (
                                         <DepartmentItem
+                                            t={t}
                                             department={department}
                                             isEditing={editingDepartment?.id === department.id}
                                             onEdit={() => setEditingDepartment(department)}
@@ -156,9 +158,9 @@ export default function Departments({ departments: initialDepartments }: Props) 
                 <ConfirmationDialog
                     open={!!deletingDepartment}
                     onOpenChange={(open) => !open && setDeletingDepartment(null)}
-                    title="Afdeling verwijderen"
-                    description={`Weet je zeker dat je de afdeling "${deletingDepartment?.name}" wilt verwijderen? Afdelingen met tickets of e-mailkanalen kunnen niet worden verwijderd.`}
-                    confirmLabel="Verwijderen"
+                    title={t('departments.delete_title')}
+                    description={t('departments.delete_description', { name: deletingDepartment?.name })}
+                    confirmLabel={t('common.delete')}
                     onConfirm={handleDelete}
                     loading={isDeleting}
                 />
@@ -168,12 +170,14 @@ export default function Departments({ departments: initialDepartments }: Props) 
 }
 
 function DepartmentItem({
+    t,
     department,
     isEditing,
     onEdit,
     onEditClose,
     onDelete,
 }: {
+    t: (key: string, options?: Record<string, unknown>) => string;
     department: Department;
     isEditing: boolean;
     onEdit: () => void;
@@ -195,7 +199,7 @@ function DepartmentItem({
                     <span className="font-medium truncate">{department.name}</span>
                     {department.is_default && (
                         <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                            Standaard
+                            {t('common.default')}
                         </span>
                     )}
                 </div>
@@ -210,7 +214,7 @@ function DepartmentItem({
                                 <span>{department.tickets_count ?? 0}</span>
                             </span>
                         </TooltipTrigger>
-                        <TooltipContent>Tickets in deze afdeling</TooltipContent>
+                        <TooltipContent>{t('departments.tickets_tooltip')}</TooltipContent>
                     </Tooltip>
                     <Tooltip>
                         <TooltipTrigger asChild>
@@ -219,7 +223,7 @@ function DepartmentItem({
                                 <span>{department.email_channels_count ?? 0}</span>
                             </span>
                         </TooltipTrigger>
-                        <TooltipContent>Gekoppelde e-mailkanalen</TooltipContent>
+                        <TooltipContent>{t('departments.email_channels_tooltip')}</TooltipContent>
                     </Tooltip>
                 </div>
             </div>
@@ -230,7 +234,7 @@ function DepartmentItem({
                             <Pencil className="h-4 w-4" />
                         </Button>
                     </DialogTrigger>
-                    <DepartmentFormDialog department={department} onClose={onEditClose} />
+                    <DepartmentFormDialog t={t} department={department} onClose={onEditClose} />
                 </Dialog>
                 <Tooltip>
                     <TooltipTrigger asChild>
@@ -249,8 +253,8 @@ function DepartmentItem({
                     {!canDelete && (
                         <TooltipContent>
                             {department.is_default
-                                ? 'Standaardafdeling kan niet verwijderd worden'
-                                : 'Afdeling is nog in gebruik'}
+                                ? t('departments.cannot_delete_default')
+                                : t('departments.cannot_delete_in_use')}
                         </TooltipContent>
                     )}
                 </Tooltip>
@@ -260,9 +264,11 @@ function DepartmentItem({
 }
 
 function DepartmentFormDialog({
+    t,
     department,
     onClose,
 }: {
+    t: (key: string, options?: Record<string, unknown>) => string;
     department?: Department;
     onClose: () => void;
 }) {
@@ -278,20 +284,20 @@ function DepartmentFormDialog({
         if (department) {
             patch(update(department.id).url, {
                 onSuccess: () => {
-                    toast.success('Afdeling bijgewerkt');
+                    toast.success(t('departments.updated'));
                     reset();
                     onClose();
                 },
-                onError: () => toast.error('Afdeling bijwerken mislukt'),
+                onError: () => toast.error(t('departments.update_failed')),
             });
         } else {
             post(store().url, {
                 onSuccess: () => {
-                    toast.success('Afdeling aangemaakt');
+                    toast.success(t('departments.created'));
                     reset();
                     onClose();
                 },
-                onError: () => toast.error('Afdeling aanmaken mislukt'),
+                onError: () => toast.error(t('departments.create_failed')),
             });
         }
     }
@@ -300,20 +306,20 @@ function DepartmentFormDialog({
         <DialogContent className="sm:max-w-md">
             <form onSubmit={handleSubmit}>
                 <DialogHeader>
-                    <DialogTitle>{department ? 'Afdeling bewerken' : 'Afdeling toevoegen'}</DialogTitle>
+                    <DialogTitle>{department ? t('departments.edit_title') : t('departments.create_title')}</DialogTitle>
                     <DialogDescription>
-                        {department ? 'Werk de afdelingsdetails bij.' : 'Voeg een nieuwe afdeling toe voor ticketrouting.'}
+                        {department ? t('departments.edit_description') : t('departments.create_description')}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="name">Naam</Label>
+                        <Label htmlFor="name">{t('common.name')}</Label>
                         <Input
                             id="name"
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
-                            placeholder="bijv. Support, Verkoop, Facturatie"
+                            placeholder={t('departments.name_placeholder')}
                             autoFocus
                         />
                         <InputError message={errors.name} />
@@ -321,20 +327,20 @@ function DepartmentFormDialog({
 
                     <div className="grid gap-2">
                         <Label htmlFor="description">
-                            Beschrijving <span className="text-muted-foreground font-normal">(optioneel)</span>
+                            {t('common.description_optional')}
                         </Label>
                         <Textarea
                             id="description"
                             value={data.description}
                             onChange={(e) => setData('description', e.target.value)}
-                            placeholder="Korte beschrijving van de afdeling"
+                            placeholder={t('departments.description_placeholder')}
                             rows={2}
                         />
                         <InputError message={errors.description} />
                     </div>
 
                     <div className="grid gap-2">
-                        <Label>Kleur</Label>
+                        <Label>{t('common.color')}</Label>
                         <ColorPicker value={data.color} onChange={(color) => setData('color', color)} />
                         <InputError message={errors.color} />
                     </div>
@@ -350,9 +356,9 @@ function DepartmentFormDialog({
                             className="mt-0.5"
                         />
                         <div className="space-y-1">
-                            <span className="font-medium">Standaardafdeling</span>
+                            <span className="font-medium">{t('departments.is_default')}</span>
                             <p className="text-xs text-muted-foreground">
-                                Nieuwe tickets worden automatisch aan deze afdeling toegewezen
+                                {t('departments.is_default_description')}
                             </p>
                         </div>
                     </label>
@@ -360,10 +366,10 @@ function DepartmentFormDialog({
 
                 <DialogFooter>
                     <Button type="button" variant="outline" onClick={onClose}>
-                        Annuleren
+                        {t('common.cancel')}
                     </Button>
                     <Button type="submit" disabled={processing || !data.name.trim()}>
-                        {department ? 'Opslaan' : 'Toevoegen'}
+                        {department ? t('common.save') : t('common.add')}
                     </Button>
                 </DialogFooter>
             </form>

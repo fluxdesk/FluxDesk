@@ -1,0 +1,95 @@
+{
+    "title": "Customer Portal",
+    "nav": {
+        "my_tickets": "My tickets",
+        "new_ticket": "New ticket",
+        "profile": "Profile",
+        "logout": "Log out"
+    },
+    "login": {
+        "title": "Sign in",
+        "description": "Enter your email address to receive a login link",
+        "email": "Email address",
+        "email_placeholder": "name@example.com",
+        "submit": "Send login link",
+        "submitting": "Sending...",
+        "sent": "We've sent you an email with a login link",
+        "check_email": "Check your email for the login link",
+        "check_email_title": "Check your email",
+        "check_email_description": "We've sent a login link to your email address. Click the link to sign in.",
+        "link_valid_duration": "The link is valid for 1 hour",
+        "try_again": "Try again"
+    },
+    "dashboard": {
+        "page_title": "Dashboard",
+        "title": "My tickets",
+        "welcome": "Welcome back, {{name}}!",
+        "default_customer": "customer",
+        "description": "View and manage all your support tickets in one place.",
+        "ticket_count_one": "{{count}} ticket",
+        "ticket_count_other": "{{count}} tickets",
+        "message_count_one": "{{count}} message",
+        "message_count_other": "{{count}} messages",
+        "empty": {
+            "title": "No tickets found",
+            "description": "You don't have any support tickets yet. Create a new ticket if you need help."
+        },
+        "create_ticket": "Create new ticket"
+    },
+    "tickets": {
+        "view": "View ticket",
+        "status": "Status",
+        "created": "Created",
+        "created_at": "Created on {{date}}",
+        "updated": "Last updated",
+        "reply": "Reply",
+        "reply_placeholder": "Type your message...",
+        "send_reply": "Send reply",
+        "sending": "Sending...",
+        "send": "Send",
+        "reply_sent": "Reply sent",
+        "messages": "Messages",
+        "no_messages": "No messages found.",
+        "closed_message": "This ticket is closed. Create a new ticket if you need further assistance.",
+        "create_new": "Create new ticket",
+        "you": "You",
+        "support": "Support"
+    },
+    "create_ticket": {
+        "page_title": "New ticket",
+        "title": "New support ticket",
+        "description": "Describe your question or issue as clearly as possible. We will respond as soon as possible.",
+        "back_to_overview": "Back to overview",
+        "subject": "Subject",
+        "subject_placeholder": "Brief description of your question",
+        "department": "Department",
+        "department_placeholder": "Select a department",
+        "message": "Message",
+        "message_placeholder": "Describe your question or issue in detail...",
+        "submit": "Create ticket",
+        "submitting": "Creating...",
+        "cancel": "Cancel",
+        "created": "Ticket created successfully"
+    },
+    "profile": {
+        "page_title": "Profile",
+        "title": "My profile",
+        "description": "Manage your contact information. Your email address cannot be changed.",
+        "name": "Name",
+        "name_placeholder": "Your name",
+        "email": "Email address",
+        "email_readonly_hint": "Your email address cannot be changed.",
+        "phone": "Phone number",
+        "phone_placeholder": "+1 234 567 8901",
+        "company": "Company name",
+        "company_placeholder": "Your company",
+        "language": {
+            "title": "Language",
+            "description": "Choose your preferred language",
+            "label": "Display language"
+        },
+        "save": "Save",
+        "saving": "Saving...",
+        "saved": "Profile updated"
+    }
+}

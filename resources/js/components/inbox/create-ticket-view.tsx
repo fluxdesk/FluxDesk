@@ -51,6 +51,7 @@ import { useInitials } from '@/hooks/use-initials';
 import type { Status, Priority, User, Contact, EmailChannel, Department } from '@/types';
 import { toast } from 'sonner';
 import { store } from '@/routes/inbox';
+import { useTranslation } from 'react-i18next';
 
 interface UploadedFile {
     temp_id: string;
@@ -90,6 +91,7 @@ export function CreateTicketView({
     defaults,
     onCancel,
 }: CreateTicketViewProps) {
+    const { t } = useTranslation('ticket');
     const getInitials = useInitials();
     const [isSelectContactOpen, setIsSelectContactOpen] = useState(false);
     const [contactSearch, setContactSearch] = useState('');
@@ -234,15 +236,15 @@ export function CreateTicketView({
 
     const handleSubmit = () => {
         if (!subject.trim()) {
-            toast.error('Vul een onderwerp in');
+            toast.error(t('create.validation.subject_required'));
             return;
         }
         if (!message.trim()) {
-            toast.error('Vul een bericht in');
+            toast.error(t('create.validation.message_required'));
             return;
         }
         if (!selectedContact && !newContactEmail) {
-            toast.error('Selecteer of voer een contact in');
+            toast.error(t('create.validation.contact_required'));
             return;
         }
 
@@ -267,11 +269,11 @@ export function CreateTicketView({
 
         router.post(store().url, payload, {
             onSuccess: () => {
-                toast.success('Ticket aangemaakt');
+                toast.success(t('create.created'));
             },
             onError: (errors) => {
                 const firstError = Object.values(errors)[0];
-                toast.error(typeof firstError === 'string' ? firstError : 'Er is een fout opgetreden');
+                toast.error(typeof firstError === 'string' ? firstError : t('create.error'));
             },
             onFinish: () => {
                 setIsSubmitting(false);
@@ -294,12 +296,12 @@ export function CreateTicketView({
                         <X className="h-4 w-4 hidden md:block" />
                     </Button>
                     <div className="min-w-0 flex-1 mx-2">
-                        <h1 className="text-base md:text-lg font-semibold">Nieuw ticket</h1>
+                        <h1 className="text-base md:text-lg font-semibold">{t('create.title')}</h1>
                         <div className="mt-0.5 flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
                             {contactDisplay ? (
                                 <span className="truncate">{contactDisplay.name || contactDisplay.email}</span>
                             ) : (
-                                <span className="text-muted-foreground/50">Selecteer een contact →</span>
+                                <span className="text-muted-foreground/50">{t('create.select_contact_hint')} →</span>
                             )}
                         </div>
                     </div>
@@ -309,7 +311,7 @@ export function CreateTicketView({
                 <ScrollArea className="flex-1 min-h-0">
                     <div className="p-4">
                         <div className="flex items-center justify-center py-12 text-muted-foreground">
-                            <p className="text-sm">Schrijf hieronder je eerste bericht</p>
+                            <p className="text-sm">{t('create.write_first_message')}</p>
                         </div>
                     </div>
                 </ScrollArea>
@@ -331,7 +333,7 @@ export function CreateTicketView({
                         {/* Subject field */}
                         <div className="border-b border-border/50 px-3 py-2">
                             <Input
-                                placeholder="Onderwerp"
+                                placeholder={t('create.subject_placeholder')}
                                 value={subject}
                                 onChange={(e) => setSubject(e.target.value)}
                                 className="h-9 text-sm"
@@ -344,7 +346,7 @@ export function CreateTicketView({
                                 <div className="text-center">
                                     <Paperclip className="mx-auto h-8 w-8 text-primary" />
                                     <p className="mt-2 text-sm font-medium text-primary">
-                                        Bestanden hier neerzetten
+                                        {t('create.drop_files')}
                                     </p>
                                 </div>
                             </div>
@@ -406,7 +408,7 @@ export function CreateTicketView({
                                     <MarkdownRenderer content={message} className="prose-sm" />
                                 ) : (
                                     <p className="text-sm text-muted-foreground italic">
-                                        Typ iets om de preview te zien...
+                                        {t('create.preview_empty')}
                                     </p>
                                 )}
                             </div>
@@ -417,8 +419,8 @@ export function CreateTicketView({
                                 onKeyDown={handleKeyDown}
                                 users={agents}
                                 placeholder={contactDisplay
-                                    ? `Bericht aan ${contactDisplay.name || contactDisplay.email}...`
-                                    : 'Schrijf je bericht...'
+                                    ? t('create.message_to', { name: contactDisplay.name || contactDisplay.email })
+                                    : t('create.write_message')
                                 }
                                 disabled={isSubmitting}
                                 minRows={2}
@@ -446,8 +448,8 @@ export function CreateTicketView({
                                     </TooltipTrigger>
                                     <TooltipContent side="top" className="text-xs">
                                         {canUploadMore
-                                            ? `Bijlagen toevoegen (${files.length}/10)`
-                                            : 'Maximum bereikt (10)'
+                                            ? t('create.add_attachments', { current: files.length })
+                                            : t('create.max_attachments')
                                         }
                                     </TooltipContent>
                                 </Tooltip>
@@ -473,7 +475,7 @@ export function CreateTicketView({
                                         </Button>
                                     </TooltipTrigger>
                                     <TooltipContent side="top" className="text-xs">
-                                        {showPreview ? 'Bewerken' : 'Preview'}
+                                        {showPreview ? t('create.edit') : t('create.preview')}
                                     </TooltipContent>
                                 </Tooltip>
                             </div>
@@ -494,7 +496,7 @@ export function CreateTicketView({
                                     ) : (
                                         <Send className="h-3 w-3" />
                                     )}
-                                    Aanmaken
+                                    {isSubmitting ? t('create.creating') : t('create.submit')}
                                 </Button>
                             </div>
                         </div>
@@ -526,13 +528,13 @@ export function CreateTicketView({
                                 <div className="min-w-0 flex-1 overflow-hidden">
                                     {contactDisplay ? (
                                         <>
-                                            <p className="truncate font-medium">{(contactDisplay.name || 'Onbekend').slice(0, 15)}{((contactDisplay.name?.length ?? 0) > 15) ? '…' : ''}</p>
+                                            <p className="truncate font-medium">{(contactDisplay.name || t('details.unknown')).slice(0, 15)}{((contactDisplay.name?.length ?? 0) > 15) ? '…' : ''}</p>
                                             <p className="truncate text-sm text-muted-foreground">{contactDisplay.email?.slice(0, 20)}{((contactDisplay.email?.length ?? 0) > 20) ? '…' : ''}</p>
                                         </>
                                     ) : (
                                         <>
-                                            <p className="font-medium text-muted-foreground">Selecteer contact</p>
-                                            <p className="text-sm text-muted-foreground/70">Klik om te kiezen</p>
+                                            <p className="font-medium text-muted-foreground">{t('create.select_contact')}</p>
+                                            <p className="text-sm text-muted-foreground/70">{t('create.click_to_choose')}</p>
                                         </>
                                     )}
                                 </div>
@@ -579,7 +581,7 @@ export function CreateTicketView({
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-xs text-muted-foreground">Prioriteit</Label>
+                                    <Label className="text-xs text-muted-foreground">{t('details.priority')}</Label>
                                     <Select value={priorityId} onValueChange={setPriorityId}>
                                         <SelectTrigger className="h-9">
                                             <SelectValue />
@@ -598,14 +600,14 @@ export function CreateTicketView({
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-xs text-muted-foreground">Toegewezen aan</Label>
+                                    <Label className="text-xs text-muted-foreground">{t('details.assigned_to')}</Label>
                                     <Select value={assignedTo} onValueChange={setAssignedTo}>
                                         <SelectTrigger className="h-9">
-                                            <SelectValue placeholder="Niet toegewezen" />
+                                            <SelectValue placeholder={t('details.unassigned')} />
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="unassigned">
-                                                <span className="text-muted-foreground">Niet toegewezen</span>
+                                                <span className="text-muted-foreground">{t('details.unassigned')}</span>
                                             </SelectItem>
                                             {agents.map((agent) => (
                                                 <SelectItem key={agent.id} value={String(agent.id)}>
@@ -623,10 +625,10 @@ export function CreateTicketView({
 
                                 {departments.length > 0 && (
                                     <div className="space-y-2">
-                                        <Label className="text-xs text-muted-foreground">Afdeling</Label>
+                                        <Label className="text-xs text-muted-foreground">{t('details.department')}</Label>
                                         <Select value={departmentId} onValueChange={setDepartmentId}>
                                             <SelectTrigger className="h-9">
-                                                <SelectValue placeholder="Selecteer afdeling" />
+                                                <SelectValue placeholder={t('create.select_department')} />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {departments.map((dept) => (
@@ -641,10 +643,10 @@ export function CreateTicketView({
 
                                 {emailChannels.length > 0 && (
                                     <div className="space-y-2">
-                                        <Label className="text-xs text-muted-foreground">Verzenden via</Label>
+                                        <Label className="text-xs text-muted-foreground">{t('create.send_via')}</Label>
                                         <Select value={emailChannelId} onValueChange={setEmailChannelId}>
                                             <SelectTrigger className="h-9">
-                                                <SelectValue placeholder="Selecteer kanaal" />
+                                                <SelectValue placeholder={t('create.select_channel')} />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {emailChannels.map((channel) => (
@@ -666,21 +668,21 @@ export function CreateTicketView({
             <Dialog open={isSelectContactOpen} onOpenChange={setIsSelectContactOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Contact selecteren</DialogTitle>
-                        <DialogDescription>Kies een bestaand contact of voer een nieuw e-mailadres in.</DialogDescription>
+                        <DialogTitle>{t('contact_dialog.title')}</DialogTitle>
+                        <DialogDescription>{t('contact_dialog.description')}</DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                         {/* New contact input */}
                         <div className="space-y-3 rounded-lg border bg-muted/30 p-3">
-                            <Label className="text-sm font-medium">Nieuw contact</Label>
+                            <Label className="text-sm font-medium">{t('contact_dialog.new_contact')}</Label>
                             <Input
                                 type="email"
-                                placeholder="E-mailadres"
+                                placeholder={t('contact_dialog.email_placeholder')}
                                 value={newContactEmail}
                                 onChange={(e) => setNewContactEmail(e.target.value)}
                             />
                             <Input
-                                placeholder="Naam (optioneel)"
+                                placeholder={t('contact_dialog.name_placeholder')}
                                 value={newContactName}
                                 onChange={(e) => setNewContactName(e.target.value)}
                             />
@@ -690,7 +692,7 @@ export function CreateTicketView({
                                 disabled={!newContactEmail}
                                 onClick={handleNewContact}
                             >
-                                Gebruik dit contact
+                                {t('contact_dialog.use_contact')}
                             </Button>
                         </div>
 
@@ -699,7 +701,7 @@ export function CreateTicketView({
                                 <span className="w-full border-t" />
                             </div>
                             <div className="relative flex justify-center text-xs uppercase">
-                                <span className="bg-background px-2 text-muted-foreground">of kies bestaand</span>
+                                <span className="bg-background px-2 text-muted-foreground">{t('contact_dialog.or_existing')}</span>
                             </div>
                         </div>
 
@@ -707,7 +709,7 @@ export function CreateTicketView({
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
-                                placeholder="Zoek contacten..."
+                                placeholder={t('contact_dialog.search_placeholder')}
                                 value={contactSearch}
                                 onChange={(e) => setContactSearch(e.target.value)}
                                 className="pl-9"
@@ -741,7 +743,7 @@ export function CreateTicketView({
                                     </button>
                                 ))}
                                 {filteredContacts.length === 0 && (
-                                    <p className="py-4 text-center text-sm text-muted-foreground">Geen contacten gevonden</p>
+                                    <p className="py-4 text-center text-sm text-muted-foreground">{t('contact_dialog.no_contacts')}</p>
                                 )}
                             </div>
                         </ScrollArea>

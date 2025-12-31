@@ -32,6 +32,7 @@ import { CreateTicketView } from '@/components/inbox/create-ticket-view';
 import type { Ticket, Status, Priority, User, Contact, InboxFilters, PaginatedData, SharedData, TicketFolder, Tag, EmailChannel, Department } from '@/types';
 import { router, usePage } from '@inertiajs/react';
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface MailProps {
     tickets: PaginatedData<Ticket>;
@@ -66,6 +67,7 @@ export function Mail({
     defaultCollapsed = false,
     navCollapsedSize = 4,
 }: MailProps) {
+    const { t } = useTranslation('inbox');
     const { unreadCount } = usePage<SharedData>().props;
     const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed);
     const [isCreating, setIsCreating] = useState(false);
@@ -109,10 +111,10 @@ export function Mail({
                 <div className="flex items-center gap-1">
                     <TabsList className="h-8">
                         <TabsTrigger value="all" className="text-xs px-2">
-                            Alles
+                            {t('tabs.all')}
                         </TabsTrigger>
                         <TabsTrigger value="unread" className="text-xs px-2">
-                            Ongelezen {unreadCount > 0 && `(${unreadCount})`}
+                            {t('tabs.unread')} {unreadCount > 0 && `(${unreadCount})`}
                         </TabsTrigger>
                     </TabsList>
                     <DropdownMenu>
@@ -126,21 +128,21 @@ export function Mail({
                                     </Button>
                                 </DropdownMenuTrigger>
                             </TooltipTrigger>
-                            <TooltipContent>Weergave</TooltipContent>
+                            <TooltipContent>{t('view.tooltip')}</TooltipContent>
                         </Tooltip>
                         <DropdownMenuContent align="end">
                             <DropdownMenuRadioGroup value={density} onValueChange={(v) => handleDensityChange(v as ListDensity)}>
                                 <DropdownMenuRadioItem value="compact">
                                     <List className="mr-2 h-4 w-4" />
-                                    Klein
+                                    {t('view.compact')}
                                 </DropdownMenuRadioItem>
                                 <DropdownMenuRadioItem value="normal">
                                     <AlignJustify className="mr-2 h-4 w-4" />
-                                    Normaal
+                                    {t('view.normal')}
                                 </DropdownMenuRadioItem>
                                 <DropdownMenuRadioItem value="spacious">
                                     <LayoutList className="mr-2 h-4 w-4" />
-                                    Ruim
+                                    {t('view.spacious')}
                                 </DropdownMenuRadioItem>
                             </DropdownMenuRadioGroup>
                         </DropdownMenuContent>

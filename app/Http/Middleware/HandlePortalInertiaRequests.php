@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\Organization;
 use App\Services\PortalOrganizationContext;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Middleware;
 
@@ -73,6 +74,8 @@ class HandlePortalInertiaRequests extends Middleware
                     'accent_color' => $organization->settings->accent_color,
                 ] : null,
             ] : null,
+            'locale' => App::getLocale(),
+            'availableLocales' => config('app.available_locales', ['en']),
         ];
     }
 }

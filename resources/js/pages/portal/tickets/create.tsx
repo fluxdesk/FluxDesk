@@ -16,12 +16,14 @@ import { type Department } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, Loader2, Send } from 'lucide-react';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     departments: Department[];
 }
 
 export default function PortalTicketCreate({ departments }: Props) {
+    const { t } = useTranslation('portal');
     const { organization } = usePage<PortalSharedData>().props;
     const primaryColor = organization?.settings?.primary_color ?? '#18181b';
     const orgSlug = organization?.slug ?? '';
@@ -44,7 +46,7 @@ export default function PortalTicketCreate({ departments }: Props) {
 
     return (
         <PortalLayout>
-            <Head title="Nieuw ticket" />
+            <Head title={t('create_ticket.page_title')} />
 
             {/* Back link */}
             <div className="mb-4">
@@ -53,25 +55,25 @@ export default function PortalTicketCreate({ departments }: Props) {
                     className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                     <ArrowLeft className="size-4" />
-                    Terug naar overzicht
+                    {t('create_ticket.back_to_overview')}
                 </Link>
             </div>
 
             <Card className="max-w-2xl mx-auto">
                 <CardHeader>
-                    <CardTitle className="text-xl">Nieuw support ticket</CardTitle>
+                    <CardTitle className="text-xl">{t('create_ticket.title')}</CardTitle>
                     <CardDescription>
-                        Beschrijf je vraag of probleem zo duidelijk mogelijk. We reageren zo snel mogelijk.
+                        {t('create_ticket.description')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="space-y-2">
-                            <Label htmlFor="subject">Onderwerp</Label>
+                            <Label htmlFor="subject">{t('create_ticket.subject')}</Label>
                             <Input
                                 id="subject"
                                 type="text"
-                                placeholder="Korte omschrijving van je vraag"
+                                placeholder={t('create_ticket.subject_placeholder')}
                                 value={form.data.subject}
                                 onChange={(e) => form.setData('subject', e.target.value)}
                                 disabled={form.processing}
@@ -84,14 +86,14 @@ export default function PortalTicketCreate({ departments }: Props) {
 
                         {departments.length > 1 && (
                             <div className="space-y-2">
-                                <Label htmlFor="department_id">Afdeling</Label>
+                                <Label htmlFor="department_id">{t('create_ticket.department')}</Label>
                                 <Select
                                     value={form.data.department_id}
                                     onValueChange={(value) => form.setData('department_id', value)}
                                     disabled={form.processing}
                                 >
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Selecteer een afdeling" />
+                                        <SelectValue placeholder={t('create_ticket.department_placeholder')} />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {departments.map((department) => (
@@ -117,10 +119,10 @@ export default function PortalTicketCreate({ departments }: Props) {
                         )}
 
                         <div className="space-y-2">
-                            <Label htmlFor="message">Bericht</Label>
+                            <Label htmlFor="message">{t('create_ticket.message')}</Label>
                             <Textarea
                                 id="message"
-                                placeholder="Beschrijf je vraag of probleem in detail..."
+                                placeholder={t('create_ticket.message_placeholder')}
                                 value={form.data.message}
                                 onChange={(e) => form.setData('message', e.target.value)}
                                 disabled={form.processing}
@@ -135,7 +137,7 @@ export default function PortalTicketCreate({ departments }: Props) {
                         <div className="flex items-center justify-end gap-3 pt-2">
                             <Link href={`/${orgSlug}/portal`}>
                                 <Button type="button" variant="ghost" disabled={form.processing}>
-                                    Annuleren
+                                    {t('create_ticket.cancel')}
                                 </Button>
                             </Link>
                             <Button
@@ -147,12 +149,12 @@ export default function PortalTicketCreate({ departments }: Props) {
                                 {form.processing ? (
                                     <>
                                         <Loader2 className="size-4 mr-2 animate-spin" />
-                                        Aanmaken...
+                                        {t('create_ticket.submitting')}
                                     </>
                                 ) : (
                                     <>
                                         <Send className="size-4 mr-2" />
-                                        Ticket aanmaken
+                                        {t('create_ticket.submit')}
                                     </>
                                 )}
                             </Button>

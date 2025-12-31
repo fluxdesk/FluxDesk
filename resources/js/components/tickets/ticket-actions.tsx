@@ -34,6 +34,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useInitials } from '@/hooks/use-initials';
 import type { Ticket, Status, Priority, User, Contact } from '@/types';
+import { useTranslation } from 'react-i18next';
 
 interface TicketActionsProps {
     ticket: Ticket;
@@ -44,6 +45,7 @@ interface TicketActionsProps {
 }
 
 export function TicketActions({ ticket, statuses, priorities, agents, contacts = [] }: TicketActionsProps) {
+    const { t } = useTranslation('ticket');
     const getInitials = useInitials();
     const [contactDialogOpen, setContactDialogOpen] = useState(false);
     const [contactSearch, setContactSearch] = useState('');
@@ -114,7 +116,7 @@ export function TicketActions({ ticket, statuses, priorities, agents, contacts =
                             </Avatar>
                             <div className="min-w-0">
                                 <p className="truncate font-medium">
-                                    {ticket.contact?.name || 'Unknown'}
+                                    {ticket.contact?.name || t('details.unknown')}
                                 </p>
                                 <p className="truncate text-sm text-muted-foreground">
                                     {ticket.contact?.email}
@@ -148,7 +150,7 @@ export function TicketActions({ ticket, statuses, priorities, agents, contacts =
                     <div className="space-y-4">
                         <div className="space-y-2">
                             <label className="text-xs font-medium text-muted-foreground">
-                                Status
+                                {t('details.status')}
                             </label>
                             <Select
                                 value={String(ticket.status_id)}
@@ -175,7 +177,7 @@ export function TicketActions({ ticket, statuses, priorities, agents, contacts =
 
                         <div className="space-y-2">
                             <label className="text-xs font-medium text-muted-foreground">
-                                Priority
+                                {t('details.priority')}
                             </label>
                             <Select
                                 value={String(ticket.priority_id)}
@@ -202,7 +204,7 @@ export function TicketActions({ ticket, statuses, priorities, agents, contacts =
 
                         <div className="space-y-2">
                             <label className="text-xs font-medium text-muted-foreground">
-                                Assignee
+                                {t('details.assigned_to')}
                             </label>
                             <Select
                                 value={ticket.assigned_to ? String(ticket.assigned_to) : 'unassigned'}
@@ -211,11 +213,11 @@ export function TicketActions({ ticket, statuses, priorities, agents, contacts =
                                 }
                             >
                                 <SelectTrigger className="h-9">
-                                    <SelectValue placeholder="Unassigned" />
+                                    <SelectValue placeholder={t('details.unassigned')} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="unassigned">
-                                        <span className="text-muted-foreground">Unassigned</span>
+                                        <span className="text-muted-foreground">{t('details.unassigned')}</span>
                                     </SelectItem>
                                     {agents.map((agent) => (
                                         <SelectItem key={agent.id} value={String(agent.id)}>
@@ -252,12 +254,12 @@ export function TicketActions({ ticket, statuses, priorities, agents, contacts =
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between">
                                         <span className="text-xs font-medium text-muted-foreground">
-                                            First Response
+                                            {t('sla.first_response')}
                                         </span>
                                         {ticket.first_response_at ? (
                                             <span className="flex items-center gap-1.5 text-xs font-medium text-green-600">
                                                 <CheckCircle className="h-3.5 w-3.5" />
-                                                Done
+                                                {t('sla.done')}
                                             </span>
                                         ) : (
                                             <span className={`text-xs font-medium ${isOverdue ? 'text-destructive' : ''}`}>
@@ -277,12 +279,12 @@ export function TicketActions({ ticket, statuses, priorities, agents, contacts =
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between">
                                         <span className="text-xs font-medium text-muted-foreground">
-                                            Resolution
+                                            {t('sla.resolution')}
                                         </span>
                                         {ticket.resolved_at ? (
                                             <span className="flex items-center gap-1.5 text-xs font-medium text-green-600">
                                                 <CheckCircle className="h-3.5 w-3.5" />
-                                                Done
+                                                {t('sla.done')}
                                             </span>
                                         ) : (
                                             <span className={`text-xs font-medium ${resolutionOverdue ? 'text-destructive' : ''}`}>
@@ -307,7 +309,7 @@ export function TicketActions({ ticket, statuses, priorities, agents, contacts =
                         <div className="mb-3 flex items-center gap-2">
                             <TagIcon className="h-4 w-4 text-muted-foreground" />
                             <span className="text-xs font-medium text-muted-foreground">
-                                Tags
+                                {t('details.tags')}
                             </span>
                         </div>
                         <div className="flex flex-wrap gap-1.5">
@@ -332,27 +334,27 @@ export function TicketActions({ ticket, statuses, priorities, agents, contacts =
                     <div className="mb-3 flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                         <span className="text-xs font-medium text-muted-foreground">
-                            Timeline
+                            {t('timeline.title')}
                         </span>
                     </div>
                     <div className="space-y-2.5">
                         <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">Created</span>
+                            <span className="text-muted-foreground">{t('timeline.created')}</span>
                             <span>{formatDateTime(ticket.created_at)}</span>
                         </div>
                         <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">Updated</span>
+                            <span className="text-muted-foreground">{t('timeline.updated')}</span>
                             <span>{formatRelative(ticket.updated_at)}</span>
                         </div>
                         {ticket.first_response_at && (
                             <div className="flex items-center justify-between text-sm">
-                                <span className="text-muted-foreground">First response</span>
+                                <span className="text-muted-foreground">{t('timeline.first_response')}</span>
                                 <span>{formatDateTime(ticket.first_response_at)}</span>
                             </div>
                         )}
                         {ticket.resolved_at && (
                             <div className="flex items-center justify-between text-sm">
-                                <span className="text-muted-foreground">Resolved</span>
+                                <span className="text-muted-foreground">{t('timeline.resolved')}</span>
                                 <span>{formatDateTime(ticket.resolved_at)}</span>
                             </div>
                         )}
@@ -364,17 +366,17 @@ export function TicketActions({ ticket, statuses, priorities, agents, contacts =
             <Dialog open={contactDialogOpen} onOpenChange={setContactDialogOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Change Contact</DialogTitle>
+                        <DialogTitle>{t('contact_dialog.change_title')}</DialogTitle>
                         <DialogDescription>
-                            Select a different contact for this ticket.
+                            {t('contact_dialog.change_description')}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="contact-search">Search contacts</Label>
+                            <Label htmlFor="contact-search">{t('contact_dialog.search_label')}</Label>
                             <Input
                                 id="contact-search"
-                                placeholder="Search by name or email..."
+                                placeholder={t('contact_dialog.search_hint')}
                                 value={contactSearch}
                                 onChange={(e) => setContactSearch(e.target.value)}
                             />
@@ -382,7 +384,7 @@ export function TicketActions({ ticket, statuses, priorities, agents, contacts =
                         <div className="max-h-[300px] space-y-1 overflow-y-auto">
                             {filteredContacts.length === 0 ? (
                                 <p className="py-4 text-center text-sm text-muted-foreground">
-                                    No contacts found
+                                    {t('contact_dialog.no_contacts')}
                                 </p>
                             ) : (
                                 filteredContacts.map((contact) => (
@@ -400,7 +402,7 @@ export function TicketActions({ ticket, statuses, priorities, agents, contacts =
                                         </Avatar>
                                         <div className="min-w-0 flex-1">
                                             <p className="truncate text-sm font-medium">
-                                                {contact.name || 'Unknown'}
+                                                {contact.name || t('details.unknown')}
                                             </p>
                                             <p className="truncate text-xs text-muted-foreground">
                                                 {contact.email}
@@ -416,7 +418,7 @@ export function TicketActions({ ticket, statuses, priorities, agents, contacts =
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setContactDialogOpen(false)}>
-                            Cancel
+                            {t('common:buttons.cancel')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
