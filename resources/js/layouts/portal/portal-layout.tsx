@@ -48,7 +48,7 @@ export default function PortalLayout({
             <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                 <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-4">
                     {/* Logo / Name */}
-                    <Link href={`/${orgSlug}/portal`} className="flex items-center gap-3">
+                    <Link href={`/${orgSlug}/portal`} prefetch className="flex items-center gap-3">
                         {organization?.settings?.logo_path ? (
                             <img
                                 src={`/storage/${organization.settings.logo_path}`}
@@ -74,6 +74,7 @@ export default function PortalLayout({
                             <Link
                                 key={item.href}
                                 href={item.href}
+                                prefetch
                                 className="hidden sm:flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-muted"
                             >
                                 <item.icon className="size-4" />
@@ -92,7 +93,7 @@ export default function PortalLayout({
                                 <DropdownMenuContent align="end">
                                     {navItems.map((item) => (
                                         <DropdownMenuItem key={item.href} asChild>
-                                            <Link href={item.href} className="flex items-center gap-2">
+                                            <Link href={item.href} prefetch className="flex items-center gap-2">
                                                 <item.icon className="size-4" />
                                                 {item.label}
                                             </Link>

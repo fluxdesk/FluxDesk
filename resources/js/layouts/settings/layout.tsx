@@ -64,6 +64,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                                 <Link
                                     key={href}
                                     href={href}
+                                    prefetch
                                     className={cn(
                                         'flex items-center gap-2 sm:gap-3 whitespace-nowrap sm:whitespace-normal rounded-md px-3 py-2 text-sm font-medium transition-colors shrink-0 sm:shrink',
                                         active
