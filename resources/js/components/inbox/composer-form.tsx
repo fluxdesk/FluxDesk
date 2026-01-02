@@ -352,7 +352,7 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
                 onDragLeave={handleDragLeave}
                 onDragOver={handleDragOver}
                 className={cn(
-                    'relative rounded-xl border border-border/50 bg-card shadow-sm transition-shadow dark:shadow-lg',
+                    'relative overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm transition-shadow dark:shadow-lg',
                     'hover:shadow-md focus-within:shadow-md dark:hover:shadow-xl dark:focus-within:shadow-xl focus-within:ring-1 focus-within:ring-ring/20',
                     isNote && 'border-amber-300/50 bg-amber-50/50 dark:border-amber-700/50 dark:bg-amber-900/20'
                 )}
@@ -463,11 +463,11 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
 
                 {/* Footer bar */}
                 <div className={cn(
-                    'flex items-center justify-between border-t px-3 py-2',
+                    'flex flex-col gap-2 border-t px-3 py-2 sm:flex-row sm:items-center sm:justify-between',
                     isNote ? 'border-amber-200/50 dark:border-amber-800/50' : 'border-border/50'
                 )}>
-                    <div className="flex items-center gap-2">
-                        {/* Reply/Note tabs */}
+                    {/* Row 1: Tabs + Send button */}
+                    <div className="flex items-center justify-between gap-2 sm:order-1 sm:flex-1">
                         <Tabs value={messageType} onValueChange={(v) => setMessageType(v as 'reply' | 'note')}>
                             <TabsList className="h-7 bg-transparent p-0">
                                 <TabsTrigger
@@ -493,6 +493,22 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
                             </span>
                         )}
 
+                        {/* Send button - visible on mobile in row 1 */}
+                        <div className="flex items-center gap-2 sm:hidden">
+                            <Button
+                                type="submit"
+                                disabled={processing || !data.body.trim()}
+                                size="sm"
+                                className="h-7 gap-1.5 px-3 text-xs"
+                            >
+                                <Send className="h-3 w-3" />
+                                {isNote ? t('composer.add') : t('composer.send')}
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* Row 2: Tools (File, Preview, AI) */}
+                    <div className="flex items-center gap-1 sm:order-2 sm:gap-2">
                         {/* File upload button */}
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -542,7 +558,7 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
 
                         {/* AI Buttons */}
                         {aiAvailable && messageType === 'reply' && (
-                            <>
+                            <div className="flex items-center">
                                 <div className="mx-1 h-4 w-px bg-border/50" />
 
                                 {/* AI Suggest */}
@@ -634,16 +650,16 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
                                         {t('composer.ai_improves_text')}
                                     </TooltipContent>
                                 </Tooltip>
-                            </>
+                            </div>
                         )}
                     </div>
 
-                    <div className="flex items-center gap-2">
-                        {/* Draft status indicator - subtle checkmark only */}
+                    {/* Desktop send button - hidden on mobile */}
+                    <div className="hidden shrink-0 items-center gap-2 sm:order-3 sm:flex">
                         {draftStatus === 'saved' && (
                             <Check className="h-3 w-3 text-muted-foreground/50" />
                         )}
-                        <span className="hidden text-xs text-muted-foreground sm:inline">
+                        <span className="text-xs text-muted-foreground">
                             <kbd className="rounded border bg-muted px-1 py-0.5 text-[10px]">Cmd</kbd> + <kbd className="rounded border bg-muted px-1 py-0.5 text-[10px]">Enter</kbd>
                         </span>
                         <Button
