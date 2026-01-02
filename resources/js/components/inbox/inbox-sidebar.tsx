@@ -50,6 +50,7 @@ function NavItem({ href, icon: Icon, label, isActive, badge }: NavItemProps) {
             <TooltipTrigger asChild>
                 <Link
                     href={href}
+                    prefetch
                     className={cn(
                         'relative flex h-11 w-11 items-center justify-center rounded-xl transition-all duration-200',
                         'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',

@@ -422,7 +422,7 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
 
                 {/* Messages - scrollable area */}
                 <ScrollArea className="flex-1 min-h-0">
-                    <div ref={messagesContainerRef} className="p-4">
+                    <div ref={messagesContainerRef} className="p-4 overflow-hidden">
                         <div className="space-y-4">
                             {ticket.messages && ticket.messages.length > 0 ? (
                                 ticket.messages.map((message) => (
@@ -451,9 +451,9 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
 
             {/* Actions Sidebar */}
             {!sidebarCollapsed && (
-            <div className="hidden md:block w-72 shrink-0 border-l bg-background transition-all duration-200">
+            <div className="hidden md:block w-72 shrink-0 overflow-hidden border-l bg-background transition-all duration-200">
                 <ScrollArea className="h-full">
-                    <div className="space-y-4 p-4 overflow-hidden">
+                    <div className="max-w-full space-y-4 overflow-hidden p-4">
                         {/* Contact */}
                         <div className="rounded-lg border bg-card overflow-hidden">
                             <button
@@ -465,25 +465,43 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                                         {getInitials(ticket.contact?.name || ticket.contact?.email || '')}
                                     </AvatarFallback>
                                 </Avatar>
-                                <div className="min-w-0 flex-1 overflow-hidden">
-                                    <p className="truncate font-medium">{ticket.contact?.name || 'Onbekend'}</p>
-                                    <p className="truncate text-sm text-muted-foreground">{ticket.contact?.email}</p>
-                                </div>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <div className="min-w-0 flex-1 overflow-hidden">
+                                            <p className="truncate font-medium">{(ticket.contact?.name || 'Onbekend').slice(0, 12)}{(ticket.contact?.name?.length ?? 0) > 12 ? '…' : ''}</p>
+                                            <p className="truncate text-sm text-muted-foreground">{ticket.contact?.email?.slice(0, 15)}{(ticket.contact?.email?.length ?? 0) > 15 ? '…' : ''}</p>
+                                        </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="left" align="start">
+                                        <p className="font-medium">{ticket.contact?.name || 'Onbekend'}</p>
+                                        <p className="text-xs text-muted-foreground">{ticket.contact?.email}</p>
+                                    </TooltipContent>
+                                </Tooltip>
                                 <Pencil className="h-4 w-4 shrink-0 text-muted-foreground" />
                             </button>
                             {(ticket.contact?.phone || ticket.contact?.company) && (
                                 <div className="flex flex-col gap-1 border-t px-4 py-3 text-sm text-muted-foreground overflow-hidden">
                                     {ticket.contact?.phone && (
-                                        <span className="flex items-center gap-1.5">
-                                            <Phone className="h-3.5 w-3.5 shrink-0" />
-                                            <span className="truncate">{ticket.contact.phone}</span>
-                                        </span>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <span className="flex items-center gap-1.5 min-w-0">
+                                                    <Phone className="h-3.5 w-3.5 shrink-0" />
+                                                    <span className="truncate">{ticket.contact.phone.slice(0, 12)}{ticket.contact.phone.length > 12 ? '…' : ''}</span>
+                                                </span>
+                                            </TooltipTrigger>
+                                            <TooltipContent side="left">{ticket.contact.phone}</TooltipContent>
+                                        </Tooltip>
                                     )}
                                     {ticket.contact?.company && (
-                                        <span className="flex items-center gap-1.5">
-                                            <Building2 className="h-3.5 w-3.5 shrink-0" />
-                                            <span className="truncate">{ticket.contact.company}</span>
-                                        </span>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <span className="flex items-center gap-1.5 min-w-0">
+                                                    <Building2 className="h-3.5 w-3.5 shrink-0" />
+                                                    <span className="truncate">{ticket.contact.company.slice(0, 12)}{ticket.contact.company.length > 12 ? '…' : ''}</span>
+                                                </span>
+                                            </TooltipTrigger>
+                                            <TooltipContent side="left">{ticket.contact.company}</TooltipContent>
+                                        </Tooltip>
                                     )}
                                 </div>
                             )}
@@ -504,16 +522,24 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                                             key={cc.id}
                                             className="flex items-center justify-between gap-2 rounded-md bg-muted/50 px-2.5 py-1.5"
                                         >
-                                            <div className="min-w-0 flex-1">
-                                                <p className="truncate text-sm">
-                                                    {cc.name || cc.email}
-                                                </p>
-                                                {cc.name && (
-                                                    <p className="truncate text-xs text-muted-foreground">
-                                                        {cc.email}
-                                                    </p>
-                                                )}
-                                            </div>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <div className="min-w-0 flex-1">
+                                                        <p className="truncate text-sm">
+                                                            {(cc.name || cc.email).slice(0, 12)}{(cc.name || cc.email).length > 12 ? '…' : ''}
+                                                        </p>
+                                                        {cc.name && (
+                                                            <p className="truncate text-xs text-muted-foreground">
+                                                                {cc.email.slice(0, 15)}{cc.email.length > 15 ? '…' : ''}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </TooltipTrigger>
+                                                <TooltipContent side="left" align="start">
+                                                    <p>{cc.name || cc.email}</p>
+                                                    {cc.name && <p className="text-xs text-muted-foreground">{cc.email}</p>}
+                                                </TooltipContent>
+                                            </Tooltip>
                                             <button
                                                 onClick={() => removeCcContact(cc.id)}
                                                 disabled={removingCcId === cc.id}
@@ -791,7 +817,7 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                     <SheetHeader className="px-4 py-3 border-b">
                         <SheetTitle>Ticket Details</SheetTitle>
                     </SheetHeader>
-                    <ScrollArea className="h-[calc(100vh-60px)]">
+                    <ScrollArea className="h-[calc(100dvh-60px)]">
                         <div className="space-y-4 p-4 overflow-hidden">
                             {/* Contact */}
                             <div className="rounded-lg border bg-card overflow-hidden">
@@ -808,23 +834,23 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                                         </AvatarFallback>
                                     </Avatar>
                                     <div className="min-w-0 flex-1 overflow-hidden">
-                                        <p className="truncate font-medium">{ticket.contact?.name || 'Onbekend'}</p>
-                                        <p className="truncate text-sm text-muted-foreground">{ticket.contact?.email}</p>
+                                        <p className="truncate font-medium">{(ticket.contact?.name || 'Onbekend').slice(0, 15)}{(ticket.contact?.name?.length ?? 0) > 15 ? '…' : ''}</p>
+                                        <p className="truncate text-sm text-muted-foreground">{ticket.contact?.email?.slice(0, 18)}{(ticket.contact?.email?.length ?? 0) > 18 ? '…' : ''}</p>
                                     </div>
                                     <Pencil className="h-4 w-4 shrink-0 text-muted-foreground" />
                                 </button>
                                 {(ticket.contact?.phone || ticket.contact?.company) && (
                                     <div className="flex flex-col gap-1 border-t px-4 py-3 text-sm text-muted-foreground overflow-hidden">
                                         {ticket.contact?.phone && (
-                                            <span className="flex items-center gap-1.5">
+                                            <span className="flex items-center gap-1.5 min-w-0">
                                                 <Phone className="h-3.5 w-3.5 shrink-0" />
-                                                <span className="truncate">{ticket.contact.phone}</span>
+                                                <span className="truncate">{ticket.contact.phone.slice(0, 14)}{ticket.contact.phone.length > 14 ? '…' : ''}</span>
                                             </span>
                                         )}
                                         {ticket.contact?.company && (
-                                            <span className="flex items-center gap-1.5">
+                                            <span className="flex items-center gap-1.5 min-w-0">
                                                 <Building2 className="h-3.5 w-3.5 shrink-0" />
-                                                <span className="truncate">{ticket.contact.company}</span>
+                                                <span className="truncate">{ticket.contact.company.slice(0, 14)}{ticket.contact.company.length > 14 ? '…' : ''}</span>
                                             </span>
                                         )}
                                     </div>
@@ -848,18 +874,18 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                                             >
                                                 <div className="min-w-0 flex-1">
                                                     <p className="truncate text-sm">
-                                                        {cc.name || cc.email}
+                                                        {(cc.name || cc.email).slice(0, 15)}{(cc.name || cc.email).length > 15 ? '…' : ''}
                                                     </p>
                                                     {cc.name && (
                                                         <p className="truncate text-xs text-muted-foreground">
-                                                            {cc.email}
+                                                            {cc.email.slice(0, 18)}{cc.email.length > 18 ? '…' : ''}
                                                         </p>
                                                     )}
                                                 </div>
                                                 <button
                                                     onClick={() => removeCcContact(cc.id)}
                                                     disabled={removingCcId === cc.id}
-                                                    className="rounded p-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+                                                    className="shrink-0 rounded p-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
                                                 >
                                                     {removingCcId === cc.id ? (
                                                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -1166,7 +1192,7 @@ function MessageBubble({ message }: { message: Message; ticket: Ticket }) {
     };
 
     return (
-        <div className={cn('group flex gap-3', !isCustomer && 'flex-row-reverse')}>
+        <div className={cn('group flex min-w-0 gap-3', !isCustomer && 'flex-row-reverse')}>
             <Avatar className="h-8 w-8 shrink-0">
                 <AvatarFallback className={cn(
                     'text-xs',
@@ -1176,7 +1202,7 @@ function MessageBubble({ message }: { message: Message; ticket: Ticket }) {
                     {getInitials(senderName)}
                 </AvatarFallback>
             </Avatar>
-            <div className={cn('flex max-w-[70%] flex-col', !isCustomer && 'items-end')}>
+            <div className={cn('flex min-w-0 max-w-full flex-col sm:max-w-[85%] md:max-w-[70%]', !isCustomer && 'items-end')}>
                 <div className="mb-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                     <span className="font-medium">{senderName}</span>
                     <span>{formatDateTime(message.created_at)}</span>
@@ -1216,10 +1242,10 @@ function MessageBubble({ message }: { message: Message; ticket: Ticket }) {
                 </div>
                 {/* CC Recipients */}
                 {hasCcRecipients && (
-                    <div className={cn('mb-2 flex items-center gap-1.5 text-xs text-muted-foreground', !isCustomer && 'justify-end')}>
-                        <Users className="h-3 w-3" />
-                        <span>CC:</span>
-                        <span className="truncate">
+                    <div className={cn('mb-2 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground', !isCustomer && 'justify-end')}>
+                        <Users className="h-3 w-3 shrink-0" />
+                        <span className="shrink-0">CC:</span>
+                        <span className="min-w-0 truncate">
                             {message.cc_recipients?.map((r, i) => (
                                 <span key={r.id}>
                                     {i > 0 && ', '}
@@ -1242,11 +1268,11 @@ function MessageBubble({ message }: { message: Message; ticket: Ticket }) {
                             >
                                 {message.body_html ? (
                                     <div
-                                        className="email-content prose prose-sm max-w-none dark:prose-invert"
+                                        className="email-content prose prose-sm max-w-full break-words dark:prose-invert [&_table]:max-w-full [&_table]:overflow-x-auto [&_img]:max-w-full [&_pre]:max-w-full [&_pre]:overflow-x-auto"
                                         dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(message.body_html) }}
                                     />
                                 ) : (
-                                    <p className="whitespace-pre-wrap">{highlightMentions(message.body)}</p>
+                                    <p className="whitespace-pre-wrap break-words">{highlightMentions(message.body)}</p>
                                 )}
                             </div>
                         </TooltipTrigger>
@@ -1284,11 +1310,11 @@ function MessageBubble({ message }: { message: Message; ticket: Ticket }) {
                     >
                         {message.body_html ? (
                             <div
-                                className="email-content prose prose-sm max-w-none dark:prose-invert"
+                                className="email-content prose prose-sm max-w-full break-words dark:prose-invert [&_table]:max-w-full [&_table]:overflow-x-auto [&_img]:max-w-full [&_pre]:max-w-full [&_pre]:overflow-x-auto"
                                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(message.body_html) }}
                             />
                         ) : (
-                            <p className="whitespace-pre-wrap">{highlightMentions(message.body)}</p>
+                            <p className="whitespace-pre-wrap break-words">{highlightMentions(message.body)}</p>
                         )}
                     </div>
                 )}
@@ -1305,7 +1331,7 @@ function MessageBubble({ message }: { message: Message; ticket: Ticket }) {
                             >
                                 {getFileIcon(attachment.mime_type)}
                                 <div className="flex flex-col">
-                                    <span className="max-w-[150px] truncate font-medium">{attachment.original_filename}</span>
+                                    <span className="max-w-[100px] truncate font-medium sm:max-w-[150px]">{attachment.original_filename}</span>
                                     <span className="text-xs text-muted-foreground">{attachment.human_size}</span>
                                 </div>
                                 <Download className="h-3.5 w-3.5 text-muted-foreground" />

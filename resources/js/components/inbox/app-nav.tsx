@@ -466,6 +466,7 @@ export function AppNav({ isCollapsed, folders: propFolders, currentFolder }: App
                                         <TooltipTrigger asChild>
                                             <Link
                                                 href={link.href}
+                                                prefetch
                                                 className={cn(
                                                     buttonVariants({ variant, size: 'icon' }),
                                                     'h-9 w-9',
@@ -484,6 +485,7 @@ export function AppNav({ isCollapsed, folders: propFolders, currentFolder }: App
                                     <Link
                                         key={link.href}
                                         href={link.href}
+                                        prefetch
                                         className={cn(
                                             buttonVariants({ variant, size: 'sm' }),
                                             variant === 'default' && 'dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white',
@@ -511,14 +513,14 @@ export function AppNav({ isCollapsed, folders: propFolders, currentFolder }: App
                                 return isCollapsed ? (
                                     <Tooltip key={link.href} delayDuration={0}>
                                         <TooltipTrigger asChild>
-                                            <Link href={link.href} className={cn(buttonVariants({ variant, size: 'icon' }), 'h-9 w-9')}>
+                                            <Link href={link.href} prefetch className={cn(buttonVariants({ variant, size: 'icon' }), 'h-9 w-9')}>
                                                 <link.icon className="h-4 w-4" />
                                             </Link>
                                         </TooltipTrigger>
                                         <TooltipContent side="right">{link.title}</TooltipContent>
                                     </Tooltip>
                                 ) : (
-                                    <Link key={link.href} href={link.href} className={cn(buttonVariants({ variant, size: 'sm' }), 'justify-start')}>
+                                    <Link key={link.href} href={link.href} prefetch className={cn(buttonVariants({ variant, size: 'sm' }), 'justify-start')}>
                                         <link.icon className="mr-2 h-4 w-4" />
                                         {link.title}
                                     </Link>

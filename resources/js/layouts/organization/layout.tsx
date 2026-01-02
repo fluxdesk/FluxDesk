@@ -122,6 +122,7 @@ export default function OrganizationLayout({ children }: PropsWithChildren) {
                             <Link
                                 key={href}
                                 href={href}
+                                prefetch
                                 className={cn(
                                     'flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors shrink-0',
                                     active
@@ -151,6 +152,7 @@ export default function OrganizationLayout({ children }: PropsWithChildren) {
                             <Link
                                 key={href}
                                 href={href}
+                                prefetch
                                 className={cn(
                                     'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
                                     active
