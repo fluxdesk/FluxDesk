@@ -212,10 +212,11 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
         }
     }, [files, ticket.id]);
 
-    // Transform form data before sending to include files and current messageType
+    // Transform form data before sending to include files, current messageType, and AI flag
     transform((formData) => ({
         ...formData,
         type: messageType,
+        ai_assisted: aiUsed,
         attachments: files
             .filter(f => !f.error && f.path)
             .map(f => ({
@@ -231,12 +232,6 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
     const handleSubmit = (e?: React.FormEvent) => {
         e?.preventDefault();
         if (!data.body.trim() || processing) return;
-
-        // Update ai_assisted before submission
-        transform((formData) => ({
-            ...formData,
-            ai_assisted: aiUsed,
-        }));
 
         post(`/inbox/${ticket.id}/messages`, {
             preserveScroll: true,
