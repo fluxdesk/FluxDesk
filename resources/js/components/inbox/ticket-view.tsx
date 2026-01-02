@@ -453,7 +453,7 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
             {!sidebarCollapsed && (
             <div className="hidden md:block w-72 shrink-0 border-l bg-background transition-all duration-200">
                 <ScrollArea className="h-full">
-                    <div className="space-y-4 p-4 pr-3">
+                    <div className="space-y-4 p-4 overflow-hidden">
                         {/* Contact */}
                         <div className="rounded-lg border bg-card overflow-hidden">
                             <button
@@ -466,8 +466,8 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                                     </AvatarFallback>
                                 </Avatar>
                                 <div className="min-w-0 flex-1 overflow-hidden">
-                                    <p className="truncate font-medium">{(ticket.contact?.name || 'Onbekend').slice(0, 15)}{(ticket.contact?.name?.length ?? 0) > 15 ? '…' : ''}</p>
-                                    <p className="truncate text-sm text-muted-foreground">{ticket.contact?.email?.slice(0, 20)}{(ticket.contact?.email?.length ?? 0) > 20 ? '…' : ''}</p>
+                                    <p className="truncate font-medium">{ticket.contact?.name || 'Onbekend'}</p>
+                                    <p className="truncate text-sm text-muted-foreground">{ticket.contact?.email}</p>
                                 </div>
                                 <Pencil className="h-4 w-4 shrink-0 text-muted-foreground" />
                             </button>
@@ -476,13 +476,13 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                                     {ticket.contact?.phone && (
                                         <span className="flex items-center gap-1.5">
                                             <Phone className="h-3.5 w-3.5 shrink-0" />
-                                            <span className="truncate">{ticket.contact.phone.slice(0, 18)}</span>
+                                            <span className="truncate">{ticket.contact.phone}</span>
                                         </span>
                                     )}
                                     {ticket.contact?.company && (
                                         <span className="flex items-center gap-1.5">
                                             <Building2 className="h-3.5 w-3.5 shrink-0" />
-                                            <span className="truncate">{ticket.contact.company.slice(0, 18)}{ticket.contact.company.length > 18 ? '…' : ''}</span>
+                                            <span className="truncate">{ticket.contact.company}</span>
                                         </span>
                                     )}
                                 </div>
@@ -792,7 +792,7 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                         <SheetTitle>Ticket Details</SheetTitle>
                     </SheetHeader>
                     <ScrollArea className="h-[calc(100vh-60px)]">
-                        <div className="space-y-4 p-4">
+                        <div className="space-y-4 p-4 overflow-hidden">
                             {/* Contact */}
                             <div className="rounded-lg border bg-card overflow-hidden">
                                 <button
@@ -808,8 +808,8 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                                         </AvatarFallback>
                                     </Avatar>
                                     <div className="min-w-0 flex-1 overflow-hidden">
-                                        <p className="truncate font-medium">{(ticket.contact?.name || 'Onbekend').slice(0, 18)}{(ticket.contact?.name?.length ?? 0) > 18 ? '…' : ''}</p>
-                                        <p className="truncate text-sm text-muted-foreground">{ticket.contact?.email?.slice(0, 22)}{(ticket.contact?.email?.length ?? 0) > 22 ? '…' : ''}</p>
+                                        <p className="truncate font-medium">{ticket.contact?.name || 'Onbekend'}</p>
+                                        <p className="truncate text-sm text-muted-foreground">{ticket.contact?.email}</p>
                                     </div>
                                     <Pencil className="h-4 w-4 shrink-0 text-muted-foreground" />
                                 </button>
@@ -818,13 +818,13 @@ export function TicketView({ ticket, statuses, priorities, agents, contacts, fol
                                         {ticket.contact?.phone && (
                                             <span className="flex items-center gap-1.5">
                                                 <Phone className="h-3.5 w-3.5 shrink-0" />
-                                                <span className="truncate">{ticket.contact.phone.slice(0, 18)}</span>
+                                                <span className="truncate">{ticket.contact.phone}</span>
                                             </span>
                                         )}
                                         {ticket.contact?.company && (
                                             <span className="flex items-center gap-1.5">
                                                 <Building2 className="h-3.5 w-3.5 shrink-0" />
-                                                <span className="truncate">{ticket.contact.company.slice(0, 18)}{ticket.contact.company.length > 18 ? '…' : ''}</span>
+                                                <span className="truncate">{ticket.contact.company}</span>
                                             </span>
                                         )}
                                     </div>
