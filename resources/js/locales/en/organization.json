@@ -13,6 +13,7 @@
         "team": "Team",
         "departments": "Departments",
         "email": "Email",
+        "messaging": "Messaging",
         "integrations": "Integrations",
         "ai": "AI",
         "webhooks": "Webhooks"
@@ -546,6 +547,7 @@
         "empty_description": "No integrations have been registered in the system yet.",
         "categories": {
             "email": "Email",
+            "messaging": "Messaging",
             "ai": "AI",
             "general": "Other"
         },
@@ -580,7 +582,23 @@
             "configure_suffix": "configure",
             "description": "Enter the credentials and test the connection to activate the integration.",
             "test_passed": "Connection successful! You can now save.",
-            "test_first": "Test the connection first before you can save the integration."
+            "test_first": "Test the connection first before you can save the integration.",
+            "copy": "Copy to clipboard",
+            "copied": "Copied to clipboard",
+            "show": "Show value",
+            "hide": "Hide value",
+            "generate": "Generate new token"
+        },
+        "meta": {
+            "more_info_title": "More information",
+            "setup_intro": "To use Instagram DM and Facebook Messenger, you need to create a Meta app in the developer console:",
+            "step_1": "Go to developers.facebook.com and create a new app",
+            "step_2": "Choose \"Business\" as the app type",
+            "step_3": "Add the \"Instagram Graph API\" and \"Messenger\" products",
+            "step_4": "Copy the App ID and App Secret to the fields above",
+            "step_5": "Configure the webhook URL and verify token in your Meta app",
+            "permissions_title": "Required permissions:",
+            "open_developer_console": "Open Meta Developer Console"
         }
     },
     "ai": {
@@ -673,6 +691,127 @@
             "requests": "Requests",
             "tokens": "Tokens",
             "estimated_cost": "Estimated cost"
+        }
+    },
+    "messaging_channels": {
+        "page_title": "Messaging Channels",
+        "title": "Messaging Channels",
+        "description": "Connect messaging platforms to receive and respond to messages",
+        "add": "Add",
+        "empty_title": "No messaging channels",
+        "empty_description": "Add a messaging channel to receive messages from social platforms as tickets.",
+        "deleted": "Messaging channel deleted",
+        "delete_failed": "Failed to delete messaging channel",
+        "delete_title": "Delete messaging channel",
+        "delete_description": "Are you sure you want to delete \"{{name}}\"? Existing tickets will be preserved but new messages will no longer be processed.",
+        "not_connected": "Not connected",
+        "connection_tested": "Connection tested successfully",
+        "connection_test_failed": "Connection test failed",
+        "status": {
+            "active": "Active",
+            "needs_configuration": "Needs configuration",
+            "awaiting_connection": "Awaiting connection"
+        },
+        "badges": {
+            "default": "Default",
+            "auto_reply": "Auto-reply"
+        },
+        "actions": {
+            "edit": "Edit",
+            "configure": "Configure",
+            "auto_reply": "Auto-reply settings",
+            "test_connection": "Test connection",
+            "logs": "Logs",
+            "reconnect": "Reconnect",
+            "delete": "Delete"
+        },
+        "form": {
+            "create_title": "Add messaging channel",
+            "create_description": "Add a new messaging channel to receive messages.",
+            "edit_title": "Edit messaging channel",
+            "edit_description": "Update the messaging channel settings.",
+            "name_label": "Name",
+            "name_placeholder": "e.g. Instagram Support, Facebook Messages",
+            "provider_label": "Platform",
+            "provider_placeholder": "Select a platform",
+            "department_label": "Department",
+            "department_placeholder": "Select a department",
+            "department_help": "Messages from this channel will be assigned to this department",
+            "is_default": "Default channel",
+            "is_default_description": "Used as the primary messaging channel",
+            "is_active": "Channel is active",
+            "is_active_description": "Deactivate to temporarily stop receiving messages",
+            "created": "Messaging channel created",
+            "create_failed": "Failed to create messaging channel",
+            "updated": "Messaging channel updated",
+            "update_failed": "Failed to update messaging channel"
+        },
+        "configure": {
+            "page_title": "Configure {{name}}",
+            "title": "Configure {{name}}",
+            "subtitle": "Select your account and configure settings",
+            "account_card": {
+                "title": "Select account",
+                "description": "Choose which account to use for this messaging channel."
+            },
+            "no_accounts_title": "No accounts found",
+            "no_accounts_description": "No accessible accounts were found. Make sure your connected account has access to the pages or accounts you want to use.",
+            "department_card": {
+                "title": "Link department",
+                "description": "Messages from this channel will be assigned to this department."
+            },
+            "department_label": "Department",
+            "department_placeholder": "Select a department",
+            "activate": "Activate"
+        },
+        "auto_reply": {
+            "title": "Auto-reply Settings",
+            "description": "Configure automatic responses for new messages on this channel.",
+            "enable": "Enable auto-reply",
+            "message_label": "Auto-reply message",
+            "message_placeholder": "Thank you for your message! We'll get back to you soon...",
+            "variables_label": "Available variables",
+            "variables_help": "Click a variable to insert it into your message",
+            "delay_label": "Delay (seconds)",
+            "delay_help": "Wait this many seconds before sending the auto-reply",
+            "business_hours_only": "Business hours only",
+            "business_hours_only_description": "Only send auto-replies during business hours",
+            "saved": "Auto-reply settings saved",
+            "save_failed": "Failed to save auto-reply settings"
+        },
+        "logs": {
+            "page_title": "Logs",
+            "title": "Activity Log",
+            "refresh": "Refresh",
+            "filter_all": "All",
+            "filter_webhooks": "Webhooks",
+            "filter_sends": "Sent",
+            "filter_auto_replies": "Auto-replies",
+            "filter_failed": "Failed",
+            "stats_total": "Total logs",
+            "stats_webhooks": "Webhooks",
+            "stats_sends": "Sent",
+            "stats_auto_replies": "Auto-replies",
+            "stats_failed": "Failed",
+            "recent_title": "Recent activity",
+            "recent_description": "Click a row for more details.",
+            "empty_title": "No logs",
+            "empty_description": "No activity has been logged for this messaging channel yet.",
+            "empty_filtered": "No activity found for this filter.",
+            "table_date": "Date",
+            "table_type": "Type",
+            "table_status": "Status",
+            "table_details": "Details",
+            "table_ticket": "Ticket",
+            "status_success": "Success",
+            "status_failed": "Failed",
+            "pagination": "Page {{current}} of {{last}} ({{total}} results)",
+            "prev": "Previous",
+            "next": "Next",
+            "detail_status": "Status",
+            "detail_description": "Description",
+            "detail_error": "Error",
+            "detail_metadata": "Additional info"
         }
     }
 }

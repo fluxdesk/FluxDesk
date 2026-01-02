@@ -108,6 +108,18 @@ class SendTicketReplyJob implements ShouldQueue
             // Generate threading headers
             $threadHeaders = $threadingService->generateHeaders($ticket, $message, $channel);
 
+            // Get CC contacts for this ticket
+            $ccContacts = $ticket->ccContacts()
+                ->get()
+                ->map(fn ($cc) => ['email' => $cc->email, 'name' => $cc->name])
+                ->toArray();
+
+            Log::info('CC contacts for email reply', [
+                'ticket_id' => $ticket->id,
+                'cc_count' => count($ccContacts),
+                'cc_contacts' => $ccContacts,
+            ]);
+
             // Build complete headers for sending
             $headers = [
                 'message_id' => $threadHeaders['message_id'],
@@ -117,6 +129,7 @@ class SendTicketReplyJob implements ShouldQueue
                 'subject' => $threadHeaders['subject'],
                 'to_email' => $contact->email,
                 'to_name' => $contact->name,
+                'cc' => $ccContacts,
             ];
 
             // Send the email

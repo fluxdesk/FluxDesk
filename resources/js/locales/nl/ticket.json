@@ -108,5 +108,10 @@
         "change_description": "Selecteer een ander contact voor dit ticket.",
         "search_label": "Zoek contacten",
         "search_hint": "Zoek op naam of e-mail..."
+    },
+    "cc": {
+        "title": "CC Ontvangers",
+        "add_placeholder": "E-mail toevoegen aan CC...",
+        "error_adding": "Kon CC niet toevoegen"
     }
 }

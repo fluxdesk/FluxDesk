@@ -9,7 +9,12 @@ import {
     Phone,
     Building2,
     Pencil,
+    Users,
+    Plus,
+    X,
+    Loader2,
 } from 'lucide-react';
+import api from '@/lib/axios';
 import { differenceInMinutes } from 'date-fns';
 import { formatDateTime, formatRelative } from '@/lib/date';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -49,6 +54,35 @@ export function TicketActions({ ticket, statuses, priorities, agents, contacts =
     const getInitials = useInitials();
     const [contactDialogOpen, setContactDialogOpen] = useState(false);
     const [contactSearch, setContactSearch] = useState('');
+    const [ccEmail, setCcEmail] = useState('');
+    const [ccLoading, setCcLoading] = useState(false);
+    const [removingCcId, setRemovingCcId] = useState<number | null>(null);
+
+    const addCcContact = async () => {
+        if (!ccEmail.trim()) return;
+        setCcLoading(true);
+        try {
+            await api.post(`/inbox/${ticket.id}/cc`, { email: ccEmail.trim() });
+            setCcEmail('');
+            router.reload({ only: ['ticket'] });
+        } catch {
+            // Error handling - could show toast
+        } finally {
+            setCcLoading(false);
+        }
+    };
+
+    const removeCcContact = async (ccId: number) => {
+        setRemovingCcId(ccId);
+        try {
+            await api.delete(`/inbox/${ticket.id}/cc/${ccId}`);
+            router.reload({ only: ['ticket'] });
+        } catch {
+            // Error handling
+        } finally {
+            setRemovingCcId(null);
+        }
+    };
 
     const updateTicket = (field: string, value: string | null) => {
         router.patch(
@@ -143,6 +177,75 @@ export function TicketActions({ ticket, statuses, priorities, agents, contacts =
                             </div>
                         </div>
                     )}
+                </div>
+
+                {/* CC Contacts Section */}
+                <div className="rounded-lg border bg-card p-4">
+                    <div className="mb-3 flex items-center gap-2">
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-xs font-medium text-muted-foreground">
+                            {t('cc.title')}
+                        </span>
+                    </div>
+
+                    {/* Existing CC contacts */}
+                    {ticket.cc_contacts && ticket.cc_contacts.length > 0 && (
+                        <div className="mb-3 space-y-2">
+                            {ticket.cc_contacts.map((cc) => (
+                                <div
+                                    key={cc.id}
+                                    className="flex items-center justify-between gap-2 rounded-md bg-muted/50 px-2.5 py-1.5"
+                                >
+                                    <div className="min-w-0 flex-1">
+                                        <p className="truncate text-sm">
+                                            {cc.name || cc.email}
+                                        </p>
+                                        {cc.name && (
+                                            <p className="truncate text-xs text-muted-foreground">
+                                                {cc.email}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <button
+                                        onClick={() => removeCcContact(cc.id)}
+                                        disabled={removingCcId === cc.id}
+                                        className="rounded p-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+                                    >
+                                        {removingCcId === cc.id ? (
+                                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                        ) : (
+                                            <X className="h-3.5 w-3.5" />
+                                        )}
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Add CC input */}
+                    <div className="flex gap-2">
+                        <Input
+                            type="email"
+                            placeholder={t('cc.add_placeholder')}
+                            value={ccEmail}
+                            onChange={(e) => setCcEmail(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && addCcContact()}
+                            className="h-8 text-sm"
+                        />
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={addCcContact}
+                            disabled={ccLoading || !ccEmail.trim()}
+                            className="h-8 px-2"
+                        >
+                            {ccLoading ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                                <Plus className="h-4 w-4" />
+                            )}
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Properties Section */}

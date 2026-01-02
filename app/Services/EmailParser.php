@@ -240,6 +240,9 @@ class EmailParser
         // Save recipients
         $this->saveRecipients($message, $emailData, $ticket->organization_id);
 
+        // Add CC contacts to ticket (so they receive future replies)
+        $this->addCcContactsToTicket($ticket, $emailData);
+
         return $message;
     }
 
@@ -362,6 +365,38 @@ class EmailParser
                     'contact_id' => $contact?->id,
                 ]);
             }
+        }
+    }
+
+    /**
+     * Extract CC recipients from incoming email and add them to the ticket.
+     * This ensures CC contacts receive copies of all future replies.
+     * Agents and the primary contact are automatically excluded.
+     */
+    private function addCcContactsToTicket(Ticket $ticket, array $emailData): void
+    {
+        // Add CC recipients to ticket
+        foreach ($emailData['cc_recipients'] ?? [] as $recipient) {
+            if (empty($recipient['email'])) {
+                continue;
+            }
+
+            $ticket->addCcContact($recipient['email'], $recipient['name'] ?? null);
+        }
+
+        // Also add TO recipients (except the channel's email) as they may be additional contacts
+        $channelEmail = strtolower($ticket->emailChannel?->email ?? '');
+        foreach ($emailData['to_recipients'] ?? [] as $recipient) {
+            if (empty($recipient['email'])) {
+                continue;
+            }
+
+            // Skip the channel's own email address
+            if (strtolower($recipient['email']) === $channelEmail) {
+                continue;
+            }
+
+            $ticket->addCcContact($recipient['email'], $recipient['name'] ?? null);
         }
     }
 

@@ -9,13 +9,14 @@ import { index as tagsIndex } from '@/routes/organization/tags';
 import { index as slasIndex } from '@/routes/organization/slas';
 import { index as membersIndex } from '@/routes/organization/members';
 import { index as emailChannelsIndex } from '@/routes/organization/email-channels';
+import { index as messagingChannelsIndex } from '@/routes/organization/messaging-channels';
 import { index as departmentsIndex } from '@/routes/organization/departments';
 import { index as integrationsIndex } from '@/routes/organization/integrations';
 import { index as aiSettingsIndex } from '@/routes/organization/ai-settings';
 import { index as webhooksIndex } from '@/routes/organization/webhooks';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { Settings, CircleDot, Flag, Tags, Clock, Users, Mail, Building2, Plug, Palette, Hash, Globe, Webhook, Bot } from 'lucide-react';
+import { Settings, CircleDot, Flag, Tags, Clock, Users, Mail, MessageCircle, Building2, Plug, Palette, Hash, Globe, Webhook, Bot } from 'lucide-react';
 import { type PropsWithChildren } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -77,6 +78,11 @@ export default function OrganizationLayout({ children }: PropsWithChildren) {
             title: t('nav.email'),
             href: emailChannelsIndex(),
             icon: Mail,
+        },
+        {
+            title: t('nav.messaging'),
+            href: messagingChannelsIndex(),
+            icon: MessageCircle,
         },
         {
             title: t('nav.integrations'),

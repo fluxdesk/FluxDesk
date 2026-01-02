@@ -192,12 +192,9 @@ class NotificationService
         }
 
         try {
-            // Notify main contact
+            // Notify main contact (CC recipients are included via CC header in the notification)
             $notification = new NewAgentReplyNotification($ticket, $message, $this->magicLinkService);
             $contact->notify($notification);
-
-            // Notify CC recipients
-            $this->notifyCcRecipients($ticket, $message);
         } catch (\Exception $e) {
             Log::error('Failed to send agent reply notification', [
                 'ticket_id' => $ticket->id,

@@ -144,7 +144,9 @@
         "ai_error": "Kon geen verbinding maken met AI service",
         "ai_something_wrong": "Er ging iets mis",
         "ai_generates_suggestions": "AI genereert suggesties",
-        "ai_improves_text": "AI verbetert je tekst"
+        "ai_improves_text": "AI verbetert je tekst",
+        "draft_saved": "Concept opgeslagen",
+        "saving": "Opslaan..."
     },
     "color": "Kleur"
 }

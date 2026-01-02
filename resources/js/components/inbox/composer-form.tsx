@@ -1,7 +1,9 @@
 import * as React from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Send, StickyNote, Paperclip, X, FileText, Loader2, AlertCircle, Eye, EyeOff, Sparkles, Wand2 } from 'lucide-react';
+import { Send, StickyNote, Paperclip, X, FileText, Loader2, AlertCircle, Eye, EyeOff, Sparkles, Wand2, Check } from 'lucide-react';
+import { useDraft } from '@/hooks/use-draft';
 import { cn } from '@/lib/utils';
+import api from '@/lib/axios';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -62,6 +64,10 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
     const [aiAvailable, setAiAvailable] = React.useState<boolean | null>(null);
     const [aiUsed, setAiUsed] = React.useState(false);
 
+    // Draft state
+    const { draft, draftStatus, saveDraft, clearDraft } = useDraft({ ticketId: ticket.id });
+    const draftLoaded = React.useRef(false);
+
     const { data, setData, post, processing, reset, transform } = useForm({
         body: '',
         type: 'reply' as 'reply' | 'note',
@@ -102,20 +108,13 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
         filesToUpload.forEach(file => formData.append('files[]', file));
 
         try {
-            const response = await fetch(`/inbox/${ticket.id}/attachments`, {
-                method: 'POST',
-                body: formData,
+            const response = await api.post(`/inbox/${ticket.id}/attachments`, formData, {
                 headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                    'Accept': 'application/json',
+                    'Content-Type': 'multipart/form-data',
                 },
             });
 
-            if (!response.ok) {
-                throw new Error('Upload failed');
-            }
-
-            const { files: uploadedFiles } = await response.json();
+            const { files: uploadedFiles } = response.data;
 
             // Update files with server data
             setFiles(prev => prev.map(f => {
@@ -204,14 +203,8 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
         // Delete from server if it was uploaded
         if (file.path) {
             try {
-                await fetch(`/inbox/${ticket.id}/attachments`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify({ path: file.path }),
+                await api.delete(`/inbox/${ticket.id}/attachments`, {
+                    data: { path: file.path },
                 });
             } catch {
                 // Ignore delete errors
@@ -252,6 +245,8 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
                 setFiles([]);
                 setMessageType('reply');
                 setAiUsed(false);
+                clearDraft();
+                draftLoaded.current = false;
                 onSuccess?.();
             },
         });
@@ -268,22 +263,33 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
     React.useEffect(() => {
         const checkAI = async () => {
             try {
-                const response = await fetch('/ai/status', {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                    },
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    setAiAvailable(data.configured && (data.suggested_replies_enabled || data.reply_refactor_enabled));
-                }
+                const response = await api.get('/ai/status');
+                const data = response.data;
+                setAiAvailable(data.configured && (data.suggested_replies_enabled || data.reply_refactor_enabled));
             } catch {
                 setAiAvailable(false);
             }
         };
         checkAI();
     }, []);
+
+    // Load draft on mount
+    React.useEffect(() => {
+        if (draft && !draftLoaded.current) {
+            draftLoaded.current = true;
+            setData('body', draft.body);
+            setMessageType(draft.type);
+        }
+    }, [draft, setData]);
+
+    // Auto-save draft on body/type change
+    React.useEffect(() => {
+        // Only save if we've already loaded any existing draft
+        if (draftLoaded.current || data.body.trim()) {
+            draftLoaded.current = true;
+            saveDraft(data.body, messageType);
+        }
+    }, [data.body, messageType, saveDraft]);
 
     const handleSuggest = React.useCallback(async () => {
         if (aiSuggesting) return;
@@ -292,30 +298,18 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
         setSuggestions([]);
 
         try {
-            const response = await fetch(suggest.url(ticket.id), {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                },
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                setAiError(data.error || t('composer.ai_something_wrong'));
-                return;
-            }
+            const response = await api.post(suggest.url(ticket.id));
+            const data = response.data;
 
             setSuggestions(data.suggestions || []);
             setSuggestionsOpen(true);
-        } catch {
-            setAiError(t('composer.ai_error'));
+        } catch (error: unknown) {
+            const axiosError = error as { response?: { data?: { error?: string } } };
+            setAiError(axiosError.response?.data?.error || t('composer.ai_something_wrong'));
         } finally {
             setAiSuggesting(false);
         }
-    }, [aiSuggesting, ticket.id]);
+    }, [aiSuggesting, ticket.id, t]);
 
     const handleRefactor = React.useCallback(async () => {
         if (aiRefactoring || !data.body.trim()) return;
@@ -323,34 +317,20 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
         setAiError(null);
 
         try {
-            const response = await fetch(refactor.url(), {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                },
-                body: JSON.stringify({
-                    text: data.body,
-                    ticket_id: ticket.id,
-                }),
+            const response = await api.post(refactor.url(), {
+                text: data.body,
+                ticket_id: ticket.id,
             });
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                setAiError(result.error || t('composer.ai_something_wrong'));
-                return;
-            }
-
-            setData('body', result.text);
+            setData('body', response.data.text);
             setAiUsed(true);
-        } catch {
-            setAiError(t('composer.ai_error'));
+        } catch (error: unknown) {
+            const axiosError = error as { response?: { data?: { error?: string } } };
+            setAiError(axiosError.response?.data?.error || t('composer.ai_something_wrong'));
         } finally {
             setAiRefactoring(false);
         }
-    }, [aiRefactoring, data.body, ticket.id, setData]);
+    }, [aiRefactoring, data.body, ticket.id, setData, t]);
 
     const selectSuggestion = React.useCallback((suggestion: string) => {
         setData('body', suggestion);
@@ -664,6 +644,10 @@ export function ComposerForm({ ticket, agents, onSuccess }: ComposerFormProps) {
                     </div>
 
                     <div className="flex items-center gap-2">
+                        {/* Draft status indicator - subtle checkmark only */}
+                        {draftStatus === 'saved' && (
+                            <Check className="h-3 w-3 text-muted-foreground/50" />
+                        )}
                         <span className="hidden text-xs text-muted-foreground sm:inline">
                             <kbd className="rounded border bg-muted px-1 py-0.5 text-[10px]">Cmd</kbd> + <kbd className="rounded border bg-muted px-1 py-0.5 text-[10px]">Enter</kbd>
                         </span>

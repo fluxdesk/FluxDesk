@@ -37,6 +37,8 @@ class StoreTicketRequest extends FormRequest
             'assigned_to' => ['nullable', 'integer', 'exists:users,id'],
             'email_channel_id' => ['nullable', 'integer', Rule::exists(EmailChannel::class, 'id')],
             'message' => ['required', 'string', 'min:1'],
+            'cc_emails' => ['nullable', 'array'],
+            'cc_emails.*' => ['email', 'max:255'],
         ];
     }
 

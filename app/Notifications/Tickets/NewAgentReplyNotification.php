@@ -40,11 +40,18 @@ class NewAgentReplyNotification extends BaseTicketNotification
         // Generate magic link for the contact
         $magicLink = $this->getMagicLink($notifiable);
 
+        // Get CC contacts for this ticket
+        $ccContacts = $this->ticket->ccContacts()
+            ->get()
+            ->map(fn ($cc) => ['email' => $cc->email, 'name' => $cc->name])
+            ->toArray();
+
         return [
             'view' => 'emails.tickets.agent-reply',
             'subject' => "Re: {$this->ticket->subject}",
             'should_thread' => true, // Thread under customer's original email
             'attachments' => $this->message->fileAttachments ?? collect(),
+            'cc' => $ccContacts,
             'data' => [
                 'contact' => $notifiable,
                 'message' => $this->message,

@@ -257,6 +257,15 @@ class Microsoft365Service implements EmailProviderInterface
                         ],
                     ],
                 ],
+                'ccRecipients' => collect($headers['cc'] ?? [])
+                    ->map(fn ($cc) => [
+                        'emailAddress' => [
+                            'address' => $cc['email'],
+                            'name' => $cc['name'] ?? $cc['email'],
+                        ],
+                    ])
+                    ->values()
+                    ->all(),
                 'internetMessageHeaders' => $this->buildInternetMessageHeaders($headers),
             ],
             'saveToSentItems' => true,

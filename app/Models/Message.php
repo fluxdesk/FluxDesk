@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\EmailStatus;
 use App\Enums\MessageType;
+use App\Enums\MessagingStatus;
 use App\Enums\RecipientType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -33,6 +34,12 @@ class Message extends Model
         'email_status',
         'email_error',
         'email_sent_at',
+        'messaging_provider_id',
+        'messaging_status',
+        'messaging_error',
+        'messaging_sent_at',
+        'messaging_delivered_at',
+        'messaging_read_at',
     ];
 
     /**
@@ -46,6 +53,10 @@ class Message extends Model
             'ai_assisted' => 'boolean',
             'email_status' => EmailStatus::class,
             'email_sent_at' => 'datetime',
+            'messaging_status' => MessagingStatus::class,
+            'messaging_sent_at' => 'datetime',
+            'messaging_delivered_at' => 'datetime',
+            'messaging_read_at' => 'datetime',
         ];
     }
 
@@ -204,6 +215,96 @@ class Message extends Model
         $this->update([
             'email_status' => EmailStatus::Pending,
             'email_error' => null,
+        ]);
+    }
+
+    /**
+     * Check if messaging is pending to be sent.
+     */
+    public function isMessagingPending(): bool
+    {
+        return $this->messaging_status === MessagingStatus::Pending;
+    }
+
+    /**
+     * Check if messaging was sent successfully.
+     */
+    public function isMessagingSent(): bool
+    {
+        return in_array($this->messaging_status, [
+            MessagingStatus::Sent,
+            MessagingStatus::Delivered,
+            MessagingStatus::Read,
+        ]);
+    }
+
+    /**
+     * Check if messaging delivery failed.
+     */
+    public function isMessagingFailed(): bool
+    {
+        return $this->messaging_status === MessagingStatus::Failed;
+    }
+
+    /**
+     * Mark the messaging as sent.
+     */
+    public function markMessagingSent(?string $providerId = null): void
+    {
+        $data = [
+            'messaging_status' => MessagingStatus::Sent,
+            'messaging_sent_at' => now(),
+            'messaging_error' => null,
+        ];
+
+        if ($providerId) {
+            $data['messaging_provider_id'] = $providerId;
+        }
+
+        $this->update($data);
+    }
+
+    /**
+     * Mark the messaging as delivered.
+     */
+    public function markMessagingDelivered(): void
+    {
+        $this->update([
+            'messaging_status' => MessagingStatus::Delivered,
+            'messaging_delivered_at' => now(),
+        ]);
+    }
+
+    /**
+     * Mark the messaging as read.
+     */
+    public function markMessagingRead(): void
+    {
+        $this->update([
+            'messaging_status' => MessagingStatus::Read,
+            'messaging_read_at' => now(),
+        ]);
+    }
+
+    /**
+     * Mark the messaging as failed.
+     */
+    public function markMessagingFailed(string $error): void
+    {
+        $this->update([
+            'messaging_status' => MessagingStatus::Failed,
+            'messaging_error' => $error,
+        ]);
+    }
+
+    /**
+     * Mark the messaging as pending.
+     */
+    public function markMessagingPending(): void
+    {
+        $this->update([
+            'messaging_status' => MessagingStatus::Pending,
+            'messaging_error' => null,
         ]);
     }
 }
