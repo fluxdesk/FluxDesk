@@ -63,6 +63,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 HandlePortalInertiaRequests::class,
                 AddLinkHeadersForPreloadedAssets::class,
             ])->group(base_path('routes/portal.php'));
+
+            // Webhook routes - minimal middleware (no CSRF, no session, no auth)
+            Route::middleware([
+                SubstituteBindings::class,
+            ])->group(base_path('routes/webhooks.php'));
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {

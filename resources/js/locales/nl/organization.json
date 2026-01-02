@@ -13,6 +13,7 @@
         "team": "Team",
         "departments": "Afdelingen",
         "email": "E-mail",
+        "messaging": "Berichten",
         "integrations": "Integraties",
         "ai": "AI",
         "webhooks": "Webhooks"
@@ -546,6 +547,7 @@
         "empty_description": "Er zijn nog geen integraties geregistreerd in het systeem.",
         "categories": {
             "email": "E-mail",
+            "messaging": "Messaging",
             "ai": "AI",
             "general": "Overig"
         },
@@ -580,7 +582,23 @@
             "configure_suffix": "configureren",
             "description": "Vul de credentials in en test de verbinding om de integratie te activeren.",
             "test_passed": "Verbinding succesvol! Je kunt nu opslaan.",
-            "test_first": "Test eerst de verbinding voordat je de integratie kunt opslaan."
+            "test_first": "Test eerst de verbinding voordat je de integratie kunt opslaan.",
+            "copy": "Kopieer naar klembord",
+            "copied": "Gekopieerd naar klembord",
+            "show": "Toon waarde",
+            "hide": "Verberg waarde",
+            "generate": "Genereer nieuwe token"
+        },
+        "meta": {
+            "more_info_title": "Meer informatie",
+            "setup_intro": "Om Instagram DM en Facebook Messenger te gebruiken, moet je een Meta app aanmaken in de developer console:",
+            "step_1": "Ga naar developers.facebook.com en maak een nieuwe app aan",
+            "step_2": "Kies \"Business\" als app type",
+            "step_3": "Voeg de \"Instagram Graph API\" en \"Messenger\" producten toe",
+            "step_4": "Kopieer de App ID en App Secret naar de velden hierboven",
+            "step_5": "Configureer de webhook URL en verify token in je Meta app",
+            "permissions_title": "Vereiste permissies:",
+            "open_developer_console": "Open Meta Developer Console"
         }
     },
     "ai": {
@@ -673,6 +691,127 @@
             "requests": "Verzoeken",
             "tokens": "Tokens",
             "estimated_cost": "Geschatte kosten"
+        }
+    },
+    "messaging_channels": {
+        "page_title": "Berichtenkanalen",
+        "title": "Berichtenkanalen",
+        "description": "Verbind messaging-platforms om berichten te ontvangen en beantwoorden",
+        "add": "Toevoegen",
+        "empty_title": "Geen berichtenkanalen",
+        "empty_description": "Voeg een berichtenkanaal toe om berichten van sociale platforms als tickets te ontvangen.",
+        "deleted": "Berichtenkanaal verwijderd",
+        "delete_failed": "Verwijderen van berichtenkanaal mislukt",
+        "delete_title": "Berichtenkanaal verwijderen",
+        "delete_description": "Weet je zeker dat je \"{{name}}\" wilt verwijderen? Bestaande tickets blijven behouden, maar nieuwe berichten worden niet meer verwerkt.",
+        "not_connected": "Niet verbonden",
+        "connection_tested": "Verbinding getest",
+        "connection_test_failed": "Verbindingstest mislukt",
+        "status": {
+            "active": "Actief",
+            "needs_configuration": "Configuratie nodig",
+            "awaiting_connection": "Wacht op verbinding"
+        },
+        "badges": {
+            "default": "Standaard",
+            "auto_reply": "Auto-antwoord"
+        },
+        "actions": {
+            "edit": "Bewerken",
+            "configure": "Configureren",
+            "auto_reply": "Auto-antwoord instellingen",
+            "test_connection": "Test verbinding",
+            "logs": "Logs",
+            "reconnect": "Opnieuw verbinden",
+            "delete": "Verwijderen"
+        },
+        "form": {
+            "create_title": "Berichtenkanaal toevoegen",
+            "create_description": "Voeg een nieuw berichtenkanaal toe om berichten te ontvangen.",
+            "edit_title": "Berichtenkanaal bewerken",
+            "edit_description": "Pas de instellingen van het berichtenkanaal aan.",
+            "name_label": "Naam",
+            "name_placeholder": "bijv. Instagram Support, Facebook Berichten",
+            "provider_label": "Platform",
+            "provider_placeholder": "Selecteer een platform",
+            "department_label": "Afdeling",
+            "department_placeholder": "Selecteer een afdeling",
+            "department_help": "Berichten van dit kanaal worden aan deze afdeling toegewezen",
+            "is_default": "Standaardkanaal",
+            "is_default_description": "Gebruikt als primair berichtenkanaal",
+            "is_active": "Kanaal is actief",
+            "is_active_description": "Deactiveer om tijdelijk geen berichten te ontvangen",
+            "created": "Berichtenkanaal aangemaakt",
+            "create_failed": "Aanmaken van berichtenkanaal mislukt",
+            "updated": "Berichtenkanaal bijgewerkt",
+            "update_failed": "Bijwerken van berichtenkanaal mislukt"
+        },
+        "configure": {
+            "page_title": "Configureer {{name}}",
+            "title": "Configureer {{name}}",
+            "subtitle": "Selecteer je account en configureer instellingen",
+            "account_card": {
+                "title": "Selecteer account",
+                "description": "Kies welk account je wilt gebruiken voor dit berichtenkanaal."
+            },
+            "no_accounts_title": "Geen accounts gevonden",
+            "no_accounts_description": "Er zijn geen toegankelijke accounts gevonden. Zorg ervoor dat je verbonden account toegang heeft tot de pagina's of accounts die je wilt gebruiken.",
+            "department_card": {
+                "title": "Koppel afdeling",
+                "description": "Berichten van dit kanaal worden aan deze afdeling toegewezen."
+            },
+            "department_label": "Afdeling",
+            "department_placeholder": "Selecteer een afdeling",
+            "activate": "Activeren"
+        },
+        "auto_reply": {
+            "title": "Auto-antwoord instellingen",
+            "description": "Configureer automatische antwoorden voor nieuwe berichten op dit kanaal.",
+            "enable": "Auto-antwoord inschakelen",
+            "message_label": "Auto-antwoord bericht",
+            "message_placeholder": "Bedankt voor je bericht! We nemen zo snel mogelijk contact met je op...",
+            "variables_label": "Beschikbare variabelen",
+            "variables_help": "Klik op een variabele om deze in je bericht in te voegen",
+            "delay_label": "Vertraging (seconden)",
+            "delay_help": "Wacht dit aantal seconden voordat het auto-antwoord wordt verzonden",
+            "business_hours_only": "Alleen tijdens kantooruren",
+            "business_hours_only_description": "Stuur alleen auto-antwoorden tijdens kantooruren",
+            "saved": "Auto-antwoord instellingen opgeslagen",
+            "save_failed": "Opslaan van auto-antwoord instellingen mislukt"
+        },
+        "logs": {
+            "page_title": "Logs",
+            "title": "Activiteitenlog",
+            "refresh": "Vernieuwen",
+            "filter_all": "Alles",
+            "filter_webhooks": "Webhooks",
+            "filter_sends": "Verzonden",
+            "filter_auto_replies": "Auto-antwoorden",
+            "filter_failed": "Mislukt",
+            "stats_total": "Totaal logs",
+            "stats_webhooks": "Webhooks",
+            "stats_sends": "Verzonden",
+            "stats_auto_replies": "Auto-antwoorden",
+            "stats_failed": "Mislukt",
+            "recent_title": "Recente activiteiten",
+            "recent_description": "Klik op een regel voor meer details.",
+            "empty_title": "Geen logs",
+            "empty_description": "Er zijn nog geen activiteiten gelogd voor dit berichtenkanaal.",
+            "empty_filtered": "Geen activiteiten gevonden voor dit filter.",
+            "table_date": "Datum",
+            "table_type": "Type",
+            "table_status": "Status",
+            "table_details": "Details",
+            "table_ticket": "Ticket",
+            "status_success": "Geslaagd",
+            "status_failed": "Mislukt",
+            "pagination": "Pagina {{current}} van {{last}} ({{total}} resultaten)",
+            "prev": "Vorige",
+            "next": "Volgende",
+            "detail_status": "Status",
+            "detail_description": "Beschrijving",
+            "detail_error": "Foutmelding",
+            "detail_metadata": "Extra informatie"
         }
     }
 }

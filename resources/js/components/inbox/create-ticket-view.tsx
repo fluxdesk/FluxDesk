@@ -18,6 +18,8 @@ import {
     AlertCircle,
     Eye,
     EyeOff,
+    Users,
+    Plus,
 } from 'lucide-react';
 import { router } from '@inertiajs/react';
 import { cn } from '@/lib/utils';
@@ -112,6 +114,8 @@ export function CreateTicketView({
     const [departmentId, setDepartmentId] = useState(String(defaults?.department_id || departments[0]?.id || ''));
     const [assignedTo, setAssignedTo] = useState<string>('unassigned');
     const [emailChannelId, setEmailChannelId] = useState(String(emailChannels[0]?.id || ''));
+    const [ccEmails, setCcEmails] = useState<string[]>([]);
+    const [ccInput, setCcInput] = useState('');
 
     const filteredContacts = contacts.filter((c) =>
         c.name?.toLowerCase().includes(contactSearch.toLowerCase()) ||
@@ -131,6 +135,24 @@ export function CreateTicketView({
         setSelectedContact(null);
         setIsSelectContactOpen(false);
         setContactSearch('');
+    };
+
+    const addCcEmail = () => {
+        const email = ccInput.trim().toLowerCase();
+        if (!email) return;
+        // Basic email validation
+        if (!email.includes('@')) return;
+        // Don't add duplicates
+        if (ccEmails.includes(email)) {
+            setCcInput('');
+            return;
+        }
+        setCcEmails([...ccEmails, email]);
+        setCcInput('');
+    };
+
+    const removeCcEmail = (email: string) => {
+        setCcEmails(ccEmails.filter(e => e !== email));
     };
 
     // File upload handling
@@ -258,6 +280,7 @@ export function CreateTicketView({
             department_id: departmentId ? parseInt(departmentId) : null,
             assigned_to: assignedTo !== 'unassigned' ? parseInt(assignedTo) : null,
             email_channel_id: emailChannelId ? parseInt(emailChannelId) : null,
+            cc_emails: ccEmails.length > 0 ? ccEmails : undefined,
         };
 
         if (selectedContact) {
@@ -556,6 +579,55 @@ export function CreateTicketView({
                                     )}
                                 </div>
                             )}
+                        </div>
+
+                        {/* CC Contacts */}
+                        <div className="rounded-lg border bg-card p-4">
+                            <div className="mb-3 flex items-center gap-2">
+                                <Users className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-xs font-medium text-muted-foreground">{t('cc.title')}</span>
+                            </div>
+
+                            {/* Existing CC emails */}
+                            {ccEmails.length > 0 && (
+                                <div className="mb-3 space-y-2">
+                                    {ccEmails.map((email) => (
+                                        <div
+                                            key={email}
+                                            className="flex items-center justify-between gap-2 rounded-md bg-muted/50 px-2.5 py-1.5"
+                                        >
+                                            <p className="min-w-0 flex-1 truncate text-sm">{email}</p>
+                                            <button
+                                                onClick={() => removeCcEmail(email)}
+                                                className="rounded p-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                                            >
+                                                <X className="h-3.5 w-3.5" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Add CC input */}
+                            <div className="flex gap-2">
+                                <Input
+                                    type="email"
+                                    placeholder={t('cc.add_placeholder')}
+                                    value={ccInput}
+                                    onChange={(e) => setCcInput(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCcEmail())}
+                                    className="h-8 text-sm"
+                                />
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={addCcEmail}
+                                    disabled={!ccInput.trim()}
+                                    className="h-8 px-2"
+                                >
+                                    <Plus className="h-4 w-4" />
+                                </Button>
+                            </div>
                         </div>
 
                         {/* Properties - matches TicketView properties card */}

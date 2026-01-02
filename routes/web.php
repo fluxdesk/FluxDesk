@@ -17,6 +17,8 @@ use App\Http\Controllers\Organization\EmailChannelOAuthController;
 use App\Http\Controllers\Organization\IntegrationController;
 use App\Http\Controllers\Organization\InvitationController;
 use App\Http\Controllers\Organization\MemberController;
+use App\Http\Controllers\Organization\MessagingChannelController;
+use App\Http\Controllers\Organization\MessagingChannelOAuthController;
 use App\Http\Controllers\Organization\PriorityController;
 use App\Http\Controllers\Organization\SettingsController;
 use App\Http\Controllers\Organization\SlaController;
@@ -26,6 +28,8 @@ use App\Http\Controllers\Organization\WebhookController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\PersonalTagController;
 use App\Http\Controllers\Tickets\AttachmentController;
+use App\Http\Controllers\Tickets\CcContactController;
+use App\Http\Controllers\Tickets\DraftController;
 use App\Http\Controllers\Tickets\MessageController;
 use App\Http\Controllers\Tickets\TicketController;
 use Illuminate\Support\Facades\Route;
@@ -68,6 +72,15 @@ Route::middleware(['auth', 'verified', 'org.required'])->group(function () {
         Route::post('inbox/{ticket}/attachments', [AttachmentController::class, 'upload'])->name('inbox.attachments.upload');
         Route::delete('inbox/{ticket}/attachments', [AttachmentController::class, 'deleteTemp'])->name('inbox.attachments.delete-temp');
         Route::get('attachments/{attachment}/download', [AttachmentController::class, 'download'])->name('attachments.download');
+
+        // Draft routes
+        Route::get('inbox/{ticket}/draft', [DraftController::class, 'show'])->name('inbox.draft.show');
+        Route::post('inbox/{ticket}/draft', [DraftController::class, 'store'])->name('inbox.draft.store');
+        Route::delete('inbox/{ticket}/draft', [DraftController::class, 'destroy'])->name('inbox.draft.destroy');
+
+        // CC contacts routes
+        Route::post('inbox/{ticket}/cc', [CcContactController::class, 'store'])->name('inbox.cc.store');
+        Route::delete('inbox/{ticket}/cc/{ccContact}', [CcContactController::class, 'destroy'])->name('inbox.cc.destroy');
 
         // Folders routes
         Route::post('folders', [FolderController::class, 'store'])->name('folders.store');
@@ -186,6 +199,22 @@ Route::middleware(['auth', 'verified', 'org.required'])->group(function () {
         // Email Channel OAuth
         Route::get('email-channels/{emailChannel}/oauth/redirect', [EmailChannelOAuthController::class, 'redirect'])->name('email-channels.oauth.redirect');
         Route::get('email-channels/oauth/callback/{provider}', [EmailChannelOAuthController::class, 'callback'])->name('email-channels.oauth.callback');
+
+        // Messaging Channels
+        Route::get('messaging-channels', [MessagingChannelController::class, 'index'])->name('messaging-channels.index');
+        Route::post('messaging-channels', [MessagingChannelController::class, 'store'])->name('messaging-channels.store');
+        Route::patch('messaging-channels/{messagingChannel}', [MessagingChannelController::class, 'update'])->name('messaging-channels.update');
+        Route::delete('messaging-channels/{messagingChannel}', [MessagingChannelController::class, 'destroy'])->name('messaging-channels.destroy');
+        Route::post('messaging-channels/{messagingChannel}/test', [MessagingChannelController::class, 'testConnection'])->name('messaging-channels.test');
+        Route::get('messaging-channels/{messagingChannel}/logs', [MessagingChannelController::class, 'logs'])->name('messaging-channels.logs');
+        Route::patch('messaging-channels/{messagingChannel}/auto-reply', [MessagingChannelController::class, 'updateAutoReply'])->name('messaging-channels.auto-reply');
+        Route::get('messaging-channels/{messagingChannel}/configure', [MessagingChannelController::class, 'configure'])->name('messaging-channels.configure');
+        Route::patch('messaging-channels/{messagingChannel}/configure', [MessagingChannelController::class, 'updateConfiguration'])->name('messaging-channels.configure.update');
+        Route::post('messaging-channels/preview-auto-reply', [MessagingChannelController::class, 'previewAutoReply'])->name('messaging-channels.preview-auto-reply');
+
+        // Messaging Channel OAuth
+        Route::get('messaging-channels/{messagingChannel}/oauth/redirect', [MessagingChannelOAuthController::class, 'redirect'])->name('messaging-channels.oauth.redirect');
+        Route::get('messaging-channels/oauth/callback/{provider}', [MessagingChannelOAuthController::class, 'callback'])->name('messaging-channels.oauth.callback');
 
         // Integrations
         Route::get('integrations', [IntegrationController::class, 'index'])->name('integrations.index');

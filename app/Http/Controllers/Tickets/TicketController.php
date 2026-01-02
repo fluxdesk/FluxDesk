@@ -139,6 +139,7 @@ class TicketController extends Controller
             'tags',
             'readers',
             'folder',
+            'ccContacts',
             'messages' => function ($query) {
                 $query->with(['user', 'contact', 'fileAttachments', 'ccRecipients'])->orderBy('created_at', 'asc');
             },
@@ -298,6 +299,13 @@ class TicketController extends Controller
             'body' => $request->message,
             'is_from_contact' => false,
         ]);
+
+        // Add CC contacts if provided
+        if ($request->cc_emails) {
+            foreach ($request->cc_emails as $ccEmail) {
+                $ticket->addCcContact($ccEmail);
+            }
+        }
 
         return redirect()->route('inbox.show', $ticket)
             ->with('success', 'Ticket created successfully.');

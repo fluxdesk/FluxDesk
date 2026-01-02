@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Tickets;
 
 use App\Enums\MessageType;
+use App\Enums\MessagingStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Tickets\StoreMessageRequest;
+use App\Jobs\SendMessagingReplyJob;
 use App\Models\Attachment;
 use App\Models\Message;
 use App\Models\Ticket;
@@ -18,6 +20,9 @@ class MessageController extends Controller
     {
         $type = $request->input('type', MessageType::Reply->value);
 
+        // Determine if this is a messaging channel reply
+        $isMessagingReply = $type === MessageType::Reply->value && $ticket->isFromMessaging();
+
         $message = Message::create([
             'ticket_id' => $ticket->id,
             'user_id' => auth()->id(),
@@ -26,6 +31,8 @@ class MessageController extends Controller
             'body_html' => $this->renderMarkdown($request->body),
             'is_from_contact' => false,
             'ai_assisted' => $request->boolean('ai_assisted'),
+            // Set pending status for messaging replies
+            'messaging_status' => $isMessagingReply ? MessagingStatus::Pending : null,
         ]);
 
         // Process attachments if provided
@@ -34,10 +41,16 @@ class MessageController extends Controller
         }
 
         // Auto-assign ticket to the first person who replies (if not already assigned)
-        if ($type === MessageType::Reply->value && $ticket->assigned_to_id === null) {
+        if ($type === MessageType::Reply->value && $ticket->assigned_to === null) {
             $ticket->update([
-                'assigned_to_id' => auth()->id(),
+                'assigned_to' => auth()->id(),
             ]);
+        }
+
+        // Dispatch reply job for messaging channels only
+        // Email replies are handled by NewAgentReplyNotification via MessageObserver
+        if ($type === MessageType::Reply->value && $ticket->isFromMessaging()) {
+            SendMessagingReplyJob::dispatch($message, $ticket);
         }
 
         return back()->with('success', 'Message sent successfully.');

@@ -31,6 +31,9 @@ class Ticket extends Model
         'email_thread_index',
         'email_original_message_id',
         'email_sent_message_id',
+        'messaging_channel_id',
+        'messaging_conversation_id',
+        'messaging_participant_id',
         'folder_id',
         'first_response_at',
         'sla_first_response_due_at',
@@ -99,6 +102,14 @@ class Ticket extends Model
         return $this->belongsTo(EmailChannel::class);
     }
 
+    /**
+     * Get the messaging channel this ticket originated from.
+     */
+    public function messagingChannel(): BelongsTo
+    {
+        return $this->belongsTo(MessagingChannel::class);
+    }
+
     public function messages(): HasMany
     {
         return $this->hasMany(Message::class)->orderBy('created_at');
@@ -122,6 +133,54 @@ class Ticket extends Model
     public function slaRemindersSent(): HasMany
     {
         return $this->hasMany(SlaReminderSent::class);
+    }
+
+    /**
+     * CC contacts who should receive copies of replies.
+     */
+    public function ccContacts(): HasMany
+    {
+        return $this->hasMany(TicketCcContact::class);
+    }
+
+    /**
+     * Add a CC contact to this ticket if not already present.
+     * Ignores agents (users) and the primary contact.
+     */
+    public function addCcContact(string $email, ?string $name = null): ?TicketCcContact
+    {
+        $email = strtolower(trim($email));
+
+        // Skip if it's the primary contact's email
+        if ($this->contact && strtolower($this->contact->email) === $email) {
+            return null;
+        }
+
+        // Skip if it's an agent's email (any user in the organization)
+        $isAgent = User::whereHas('organizations', function ($q) {
+            $q->where('organizations.id', $this->organization_id);
+        })->whereRaw('LOWER(email) = ?', [$email])->exists();
+
+        if ($isAgent) {
+            return null;
+        }
+
+        // Check if contact already exists in the organization
+        $contact = Contact::where('organization_id', $this->organization_id)
+            ->whereRaw('LOWER(email) = ?', [$email])
+            ->first();
+
+        // Add or update CC contact
+        return TicketCcContact::updateOrCreate(
+            [
+                'ticket_id' => $this->id,
+                'email' => $email,
+            ],
+            [
+                'name' => $name,
+                'contact_id' => $contact?->id,
+            ]
+        );
     }
 
     /**
@@ -207,11 +266,27 @@ class Ticket extends Model
     }
 
     /**
+     * Scope to get tickets that originated from messaging channels.
+     */
+    public function scopeFromMessaging($query)
+    {
+        return $query->whereNotNull('messaging_channel_id');
+    }
+
+    /**
      * Check if this ticket originated from an email.
      */
     public function isFromEmail(): bool
     {
         return $this->email_channel_id !== null;
+    }
+
+    /**
+     * Check if this ticket originated from a messaging channel.
+     */
+    public function isFromMessaging(): bool
+    {
+        return $this->messaging_channel_id !== null;
     }
 
     public function markAsRead(): void

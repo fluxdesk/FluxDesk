@@ -761,6 +761,15 @@ class GoogleService implements EmailProviderInterface
         $raw = "MIME-Version: 1.0\r\n";
         $raw .= 'From: '.($channel->name ? $channel->name.' <'.$channel->email_address.'>' : $channel->email_address)."\r\n";
         $raw .= 'To: '.($headers['to_name'] ? $headers['to_name'].' <'.$headers['to_email'].'>' : $headers['to_email'])."\r\n";
+
+        // Add CC recipients
+        if (! empty($headers['cc'])) {
+            $ccList = array_map(function ($cc) {
+                return $cc['name'] ? $cc['name'].' <'.$cc['email'].'>' : $cc['email'];
+            }, $headers['cc']);
+            $raw .= 'Cc: '.implode(', ', $ccList)."\r\n";
+        }
+
         $raw .= 'Subject: '.$this->encodeHeader($headers['subject'])."\r\n";
         $raw .= 'Message-ID: <'.$headers['message_id'].">\r\n";
 

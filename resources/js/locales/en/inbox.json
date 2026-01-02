@@ -144,7 +144,9 @@
         "ai_error": "Could not connect to AI service",
         "ai_something_wrong": "Something went wrong",
         "ai_generates_suggestions": "AI generates suggestions",
-        "ai_improves_text": "AI improves your text"
+        "ai_improves_text": "AI improves your text",
+        "draft_saved": "Draft saved",
+        "saving": "Saving..."
     },
     "color": "Color"
 }

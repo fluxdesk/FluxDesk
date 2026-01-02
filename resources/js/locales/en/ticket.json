@@ -108,5 +108,10 @@
         "change_description": "Select a different contact for this ticket.",
         "search_label": "Search contacts",
         "search_hint": "Search by name or email..."
+    },
+    "cc": {
+        "title": "CC Recipients",
+        "add_placeholder": "Add email to CC...",
+        "error_adding": "Could not add CC contact"
     }
 }

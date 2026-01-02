@@ -217,6 +217,17 @@ export interface TicketActivity {
     created_at: string;
 }
 
+export interface TicketCcContact {
+    id: number;
+    ticket_id: number;
+    email: string;
+    name: string | null;
+    contact_id: number | null;
+    contact?: Contact;
+    created_at: string;
+    updated_at: string;
+}
+
 export type TicketChannel = 'web' | 'email' | 'api';
 
 export interface Ticket {
@@ -249,6 +260,7 @@ export interface Ticket {
     messages?: Message[];
     activities?: TicketActivity[];
     latest_message?: Message[];
+    cc_contacts?: TicketCcContact[];
 }
 
 export interface PaginatedData<T> {
@@ -450,6 +462,55 @@ export interface WebhookFormatOption {
     value: WebhookFormatType;
     label: string;
     description: string;
+}
+
+// Messaging Channel Types
+export type MessagingProvider = 'instagram' | 'facebook_messenger' | 'whatsapp' | 'wechat' | 'livechat';
+
+export interface MessagingChannel {
+    id: number;
+    organization_id: number;
+    name: string;
+    provider: MessagingProvider;
+    department_id: number | null;
+    external_id: string | null;
+    external_name: string | null;
+    external_username: string | null;
+    is_active: boolean;
+    is_default: boolean;
+    auto_reply_enabled: boolean;
+    auto_reply_message: string | null;
+    auto_reply_business_hours_only: boolean;
+    auto_reply_delay_seconds: number;
+    last_sync_at: string | null;
+    last_sync_error: string | null;
+    created_at: string;
+    updated_at: string;
+    department?: Department;
+}
+
+export interface MessagingProviderOption {
+    value: MessagingProvider;
+    label: string;
+    description: string;
+    icon: string;
+    color: string;
+    available: boolean;
+    hint: string | null;
+    requires_oauth: boolean;
+}
+
+export interface MessagingAccount {
+    id: string;
+    name: string;
+    username: string | null;
+    page_access_token?: string;
+}
+
+export interface AutoReplyVariable {
+    variable: string;
+    label: string;
+    example: string;
 }
 
 // Notification Types
