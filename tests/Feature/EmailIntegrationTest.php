@@ -453,6 +453,45 @@ describe('EmailThreadingService', function () {
         expect($foundTicket->id)->toBe($ticket->id);
     });
 
+    it('finds ticket by subject with alphanumeric ticket number', function () {
+        $ticket = Ticket::factory()->create([
+            'organization_id' => $this->organization->id,
+            'ticket_number' => 'TKT-26G9GFQX',
+        ]);
+
+        $threadingService = app(EmailThreadingService::class);
+        $foundTicket = $threadingService->findTicketBySubject(
+            'RE: [TKT-26G9GFQX] Help with Pearl Webshop',
+            $this->organization->id
+        );
+
+        expect($foundTicket)->not->toBeNull();
+        expect($foundTicket->id)->toBe($ticket->id);
+    });
+
+    it('finds ticket by subject as fallback when headers do not match', function () {
+        // This simulates the Microsoft 365 issue where Message-ID cannot be set
+        // and In-Reply-To/References won't match
+        $ticket = Ticket::factory()->create([
+            'organization_id' => $this->organization->id,
+            'ticket_number' => 'TKT-26G9GFQX',
+        ]);
+
+        $threadingService = app(EmailThreadingService::class);
+
+        // No header-based matching will work, only subject
+        $foundTicket = $threadingService->findTicketByHeaders([
+            'conversation_id' => null,
+            'ticket_id' => null,
+            'in_reply_to' => '<some-random-id@outlook.com>', // Won't match anything
+            'references' => ['<some-random-id@outlook.com>'],
+            'subject' => 'RE: [TKT-26G9GFQX] Help with Pearl Webshop',
+        ], $this->organization->id);
+
+        expect($foundTicket)->not->toBeNull();
+        expect($foundTicket->id)->toBe($ticket->id);
+    });
+
     it('returns latest message for In-Reply-To header', function () {
         $channel = EmailChannel::factory()->create([
             'organization_id' => $this->organization->id,
