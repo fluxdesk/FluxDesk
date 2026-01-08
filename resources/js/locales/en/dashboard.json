@@ -11,6 +11,14 @@
     "metrics": {
         "open_tickets": "Open tickets",
         "total_tickets": "{{count}} tickets total",
+        "total_tickets_title": "Total Tickets",
+        "all_time": "All time",
+        "tickets_today": "Tickets Today",
+        "created_today": "Created today",
+        "tickets_this_week": "Tickets This Week",
+        "created_this_week": "Created this week",
+        "total_contacts": "Total Contacts",
+        "in_system": "In your system",
         "unassigned": "Unassigned",
         "awaiting_assignment": "Awaiting assignment",
         "sla_breached": "SLA breached",
@@ -67,5 +75,15 @@
         "minutes": "{{count}}m",
         "hours": "{{count}}h",
         "days": "{{count}}d"
+    },
+    "customize": {
+        "button": "Customize",
+        "done": "Done",
+        "reset": "Reset",
+        "add_widget": "Add Widget",
+        "save_template": "Save Template",
+        "templates": "Templates",
+        "hint": "Drag widgets to rearrange. Click the menu to resize or remove.",
+        "saving": "Saving..."
     }
 }

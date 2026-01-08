@@ -225,14 +225,16 @@ class EmailThreadingService
     /**
      * Find an existing ticket by email headers.
      *
-     * IMPORTANT: Matching is done ONLY via headers, never by subject.
-     * Subject matching is dangerous as it could match wrong tickets.
-     *
-     * Searches in this order:
+     * Searches in this order (highest to lowest reliability):
      * 1. X-Ticket-ID custom header (most reliable - our own header)
      * 2. Conversation ID / Thread ID (Microsoft 365 thread tracking)
      * 3. In-Reply-To header
      * 4. References header
+     * 5. Subject line ticket number pattern [TKT-XXXXXXXX]
+     *
+     * Subject matching is used as a safe fallback because Microsoft 365/Graph API
+     * doesn't allow setting custom Message-ID headers, so In-Reply-To matching
+     * often fails when using Office 365 email channels.
      */
     public function findTicketByHeaders(array $headers, int $organizationId): ?Ticket
     {
@@ -289,7 +291,20 @@ class EmailThreadingService
             }
         }
 
-        // NO subject matching - it's dangerous and could match wrong tickets
+        // 5. Check subject line for ticket number pattern [TKT-XXXXXXXX]
+        // This is a safe fallback because it only matches our specific ticket number format
+        // which is unique per organization. This is necessary because Microsoft 365/Graph API
+        // doesn't allow setting custom Message-ID headers, so In-Reply-To matching fails.
+        if (! empty($headers['subject'])) {
+            $ticket = $this->findTicketBySubject($headers['subject'], $organizationId);
+
+            if ($ticket) {
+                Log::debug('Thread match: Subject', ['ticket' => $ticket->id, 'subject' => $headers['subject']]);
+
+                return $ticket;
+            }
+        }
+
         return null;
     }
 
@@ -308,13 +323,14 @@ class EmailThreadingService
     /**
      * Find a ticket by subject line containing a ticket number.
      *
-     * Looks for patterns like [TKT-001234] or TKT-001234 in the subject.
+     * Looks for patterns like [TKT-26G9GFQX] or TKT-26G9GFQX in the subject.
+     * Supports alphanumeric ticket numbers (not just digits).
      */
     public function findTicketBySubject(string $subject, int $organizationId): ?Ticket
     {
-        // Match common ticket number patterns: [PREFIX-NUMBER] or PREFIX-NUMBER
-        // The prefix can be letters, the number can have any format
-        if (preg_match('/\[?([A-Z]{2,10}[-_]?\d{4,10})\]?/i', $subject, $matches)) {
+        // Match ticket number patterns: [PREFIX-ALPHANUMERIC] or PREFIX-ALPHANUMERIC
+        // Examples: [TKT-26G9GFQX], TKT-001234, TICKET-ABC123
+        if (preg_match('/\[?([A-Z]{2,10}[-_][A-Z0-9]{4,12})\]?/i', $subject, $matches)) {
             $ticketNumber = strtoupper($matches[1]);
 
             return Ticket::where('organization_id', $organizationId)

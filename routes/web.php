@@ -3,7 +3,9 @@
 use App\Http\Controllers\AIController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\CustomWidgetController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DashboardTemplateController;
 use App\Http\Controllers\FolderController;
 use App\Http\Controllers\InvitationAcceptController;
 use App\Http\Controllers\LandingController;
@@ -45,6 +47,20 @@ Route::middleware(['auth', 'verified'])->prefix('onboarding')->name('onboarding.
 
 Route::middleware(['auth', 'verified', 'org.required'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::patch('dashboard/layout', [DashboardController::class, 'updateLayout'])->name('dashboard.layout.update');
+    Route::post('dashboard/layout/reset', [DashboardController::class, 'resetLayout'])->name('dashboard.layout.reset');
+
+    // Custom widgets
+    Route::post('custom-widgets', [CustomWidgetController::class, 'store'])->name('custom-widgets.store');
+    Route::patch('custom-widgets/{customWidget}', [CustomWidgetController::class, 'update'])->name('custom-widgets.update');
+    Route::delete('custom-widgets/{customWidget}', [CustomWidgetController::class, 'destroy'])->name('custom-widgets.destroy');
+    Route::post('custom-widgets/preview', [CustomWidgetController::class, 'preview'])->name('custom-widgets.preview');
+
+    // Dashboard templates
+    Route::get('dashboard/templates', [DashboardTemplateController::class, 'index'])->name('dashboard.templates.index');
+    Route::post('dashboard/templates', [DashboardTemplateController::class, 'store'])->name('dashboard.templates.store');
+    Route::post('dashboard/templates/{template}/apply', [DashboardTemplateController::class, 'apply'])->name('dashboard.templates.apply');
+    Route::delete('dashboard/templates/{template}', [DashboardTemplateController::class, 'destroy'])->name('dashboard.templates.destroy');
 
     // Organization switching and creation
     Route::post('organizations', [OrganizationController::class, 'store'])->name('organizations.store');

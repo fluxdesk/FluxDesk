@@ -1,0 +1,10 @@
+export { AgentPerformanceWidget } from './agent-performance-widget';
+export { ChannelBreakdownWidget } from './channel-breakdown-widget';
+export { CustomQueryWidget } from './custom-query-widget';
+export { MetricCard } from './metric-card';
+export { RecentTicketsWidget } from './recent-tickets-widget';
+export { ResponseTimesWidget } from './response-times-widget';
+export { SlaAlertsWidget } from './sla-alerts-widget';
+export { TicketsByStatusWidget } from './tickets-by-status-widget';
+export { TicketsOverTimeWidget } from './tickets-over-time-widget';
+export { TrendsWidget } from './trends-widget';
